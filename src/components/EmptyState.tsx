@@ -18,9 +18,11 @@ export default function EmptyState({ message, ctaLabel, ctaHref }: EmptyStatePro
         </svg>
       </div>
       <p className="text-text-secondary">{message}</p>
-      <Button as={Link} href={ctaHref} variant="primary" size="md">
-        {ctaLabel}
-      </Button>
+      <Link href={ctaHref}>
+        <Button variant="primary" size="md">
+          {ctaLabel}
+        </Button>
+      </Link>
     </div>
   )
 }

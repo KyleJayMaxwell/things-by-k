@@ -57,9 +57,11 @@ export default function CartPage() {
         </div>
         <h1 className="text-xl font-semibold text-text-primary mb-2">Your cart is empty</h1>
         <p className="text-text-secondary mb-8">Looks like you haven't added anything yet.</p>
-        <Button as={Link} href="/shop" variant="primary" size="lg">
-          Shop Now
-        </Button>
+        <Link href="/shop">
+          <Button variant="primary" size="lg">
+            Shop Now
+          </Button>
+        </Link>
       </div>
     )
   }

@@ -118,12 +118,16 @@ export default function SuccessPage() {
 
       {/* CTAs */}
       <div className="mt-10 flex flex-col sm:flex-row gap-3 justify-center">
-        <Button as={Link} href="/account/orders" variant="secondary" size="lg">
-          View Orders
-        </Button>
-        <Button as={Link} href="/shop" variant="primary" size="lg">
-          Continue Shopping
-        </Button>
+        <Link href="/account/orders">
+          <Button variant="secondary" size="lg">
+            View Orders
+          </Button>
+        </Link>
+        <Link href="/shop">
+          <Button variant="primary" size="lg">
+            Continue Shopping
+          </Button>
+        </Link>
       </div>
     </div>
   )
