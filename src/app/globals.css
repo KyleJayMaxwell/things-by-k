@@ -8,13 +8,14 @@
   :root {
     /* Things by K — CSS custom properties (mirrors PRD Section 2) */
     --color-primary: #360F5A;
-    --color-primary-light: #E8DFF0;
+    --color-primary-light: #EDE6F5;
     --color-primary-hover: #4A1A7A;
-    --color-background: #FAFAFA;
+    --color-accent: #8B6914;
+    --color-background: #FAF9FC;
     --color-surface: #FFFFFF;
     --color-text-primary: #1A1A2E;
-    --color-text-secondary: #6B7280;
-    --color-border: #E5E7EB;
+    --color-text-secondary: #6B6A80;
+    --color-border: #E4E0EF;
     --color-success: #059669;
     --color-error: #DC2626;
     --color-warning: #D97706;

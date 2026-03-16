@@ -1,7 +1,7 @@
 // src/app/layout.tsx
 
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Inter, Amatic_SC } from 'next/font/google'
 import './globals.css'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
@@ -10,6 +10,13 @@ import { CartProvider } from '@/context/CartContext'
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
+  display: 'swap',
+})
+
+const amaticSC = Amatic_SC({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  variable: '--font-amatic',
   display: 'swap',
 })
 
@@ -28,7 +35,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en" className={`${inter.variable} ${amaticSC.variable}`}>
       <body className="bg-background text-text-primary antialiased min-h-screen flex flex-col">
         <CartProvider>
           <a
