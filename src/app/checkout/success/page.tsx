@@ -2,7 +2,7 @@
 
 // src/app/checkout/success/page.tsx
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useCart } from '@/context/CartContext'
