@@ -4,23 +4,23 @@
 
 ## Overview
 
-Things by K is a personal online shop built as both a portfolio piece and a real revenue-generating store. It supports guest and authenticated checkout, order history, and a product catalog backed by a Postgres database. Payments are handled entirely through Stripe Hosted Checkout — no card data ever touches the app.
+Things by K is a personal online shop and a real revenue-generating store. It supports guest and authenticated checkout, order history, and a product catalog backed by a Postgres database. Payments are handled entirely through Stripe Hosted Checkout — no card data ever touches the app.
 
-The codebase is an MVP built to a spec ([PRD](./things-by-k-prd.docx)), with a clear phase-by-phase structure that makes it easy to extend with new product categories, an admin dashboard, or email notifications down the road.
+The codebase is built to a spec with a clear structure that makes it easy to extend with new product categories, an admin dashboard, or email notifications down the road.
 
 ## Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
-| Frontend + API | Next.js 15 (App Router) |
+| Frontend + API | Next.js 16 (App Router, TypeScript) |
 | Database + Auth | Supabase (Postgres + Auth + Storage) |
 | Payments | Stripe Hosted Checkout + Webhooks |
 | Hosting | Vercel |
-| Styling | Tailwind CSS |
+| Styling | Tailwind CSS v3 |
 
 ## Prerequisites
 
-- Node.js 18+
+- Node.js 20.9+
 - A [Supabase](https://supabase.com) project
 - A [Stripe](https://stripe.com) account
 - The [Stripe CLI](https://stripe.com/docs/stripe-cli) for local webhook testing
@@ -30,7 +30,7 @@ The codebase is an MVP built to a spec ([PRD](./things-by-k-prd.docx)), with a c
 **1. Clone the repo and install dependencies:**
 
 ```bash
-git clone https://github.com/your-username/things-by-k.git
+git clone https://github.com/KyleJayMaxwell/things-by-k.git
 cd things-by-k
 npm install
 ```
@@ -45,8 +45,8 @@ Fill in your `.env.local`:
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_...
-SUPABASE_SERVICE_ROLE_KEY=sb_secret_...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key-here
 
 STRIPE_SECRET_KEY=sk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
@@ -84,7 +84,8 @@ The CLI will print a `whsec_...` key — paste that into `STRIPE_WEBHOOK_SECRET`
 ```
 src/
 ├── app/
-│   ├── page.tsx                    # Landing page
+│   ├── page.tsx                    # Landing page (hero, featured products, about teaser)
+│   ├── about/page.tsx              # About page
 │   ├── shop/
 │   │   ├── page.tsx                # Product catalog
 │   │   └── [slug]/                 # Product detail page
@@ -94,12 +95,16 @@ src/
 │   │   ├── login/page.tsx          # Sign in / register
 │   │   ├── page.tsx                # Account dashboard
 │   │   └── orders/                 # Order history + detail
-│   ├── about/page.tsx              # About page
 │   └── api/
-│       ├── checkout/route.ts       # Creates Stripe Checkout Session
-│       ├── webhooks/stripe/        # Handles payment confirmation
+│       ├── checkout/route.ts       # Creates Stripe Checkout Session (rate-limited)
+│       ├── webhooks/stripe/        # Handles payment confirmation → writes to Supabase
 │       └── orders/[id]/            # Fetches order for success page
-├── components/                     # Shared UI components
+├── components/
+│   ├── FadeIn.tsx                  # Scroll-triggered fade-in (IntersectionObserver)
+│   ├── Navbar.tsx                  # Sticky nav with cart badge pop animation
+│   ├── ProductCard.tsx             # Product grid card with hover lift
+│   ├── CartItem.tsx                # Cart row with slide-out remove animation
+│   └── ...                        # Button, Badge, Toast, QuantitySelector, etc.
 ├── context/CartContext.tsx         # Global cart state (localStorage)
 ├── lib/
 │   ├── supabase/                   # Supabase client + server helpers
@@ -143,20 +148,23 @@ Connect your GitHub repo at [vercel.com/new](https://vercel.com/new). Vercel aut
 
 **2. Add environment variables in Vercel:**
 
-Copy all variables from your `.env.local` into Vercel's Environment Variables settings. Update `NEXT_PUBLIC_BASE_URL` to your production domain.
+Copy all variables from your `.env.local` into Vercel's Environment Variables settings. Update `NEXT_PUBLIC_BASE_URL` to your production domain (e.g. `https://things-by-k.com`).
 
 **3. Add your production Stripe webhook:**
 
-In the Stripe Dashboard → Developers → Webhooks, add:
-```
-https://yourdomain.com/api/webhooks/stripe
-```
-Copy the signing secret into `STRIPE_WEBHOOK_SECRET` in Vercel.
+In the Stripe Dashboard → Developers → Event Destinations → Add destination → Webhook endpoint:
 
-**4. Point your Namecheap domain to Vercel:**
+```
+https://things-by-k.com/api/webhooks/stripe
+```
+
+Select the `checkout.session.completed` event. Copy the signing secret into `STRIPE_WEBHOOK_SECRET` in Vercel, then redeploy.
+
+**4. Point your domain to Vercel:**
 
 In Vercel: Project Settings → Domains → add your domain.
-In Namecheap: Domain → Nameservers → Custom DNS → enter Vercel's nameservers:
+In your registrar (e.g. Namecheap): switch to Custom DNS and enter:
+
 ```
 ns1.vercel-dns.com
 ns2.vercel-dns.com
@@ -164,12 +172,26 @@ ns2.vercel-dns.com
 
 DNS propagation takes up to 48 hours. Vercel provisions SSL automatically.
 
+**5. Switch to live Stripe keys:**
+
+When ready to accept real payments, replace your test keys (`sk_test_...`, `pk_test_...`) with live keys (`sk_live_...`, `pk_live_...`) in Vercel's environment variables. Add a second webhook in Stripe live mode pointing at your domain. Redeploy.
+
+> **Note:** Stripe requires business verification before live keys process real payments. Complete this in the Stripe Dashboard before switching keys.
+
+## Security
+
+- All tables have Row Level Security (RLS) enabled in Supabase
+- The checkout API route is rate-limited to 5 requests per IP per minute
+- Stripe webhook signature verification is enforced on every webhook request
+- The Supabase service role key is server-side only — never prefixed with `NEXT_PUBLIC_`
+- `.env.local` is gitignored — never committed
+
 ## What's Not in the MVP
 
-These are scoped out but straightforward to add:
+These are straightforward to add:
 
 - Admin dashboard for managing products and orders
-- Email notifications (order confirmation, shipping updates)
+- Order confirmation emails to customers
 - Product filtering and search
 - Digital downloads (for zines)
 - OAuth sign-in (Google)
