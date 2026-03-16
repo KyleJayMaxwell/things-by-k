@@ -1,0 +1,48 @@
+/* src/app/globals.css */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Things by K — CSS custom properties (mirrors PRD Section 2) */
+    --color-primary: #360F5A;
+    --color-primary-light: #E8DFF0;
+    --color-primary-hover: #4A1A7A;
+    --color-background: #FAFAFA;
+    --color-surface: #FFFFFF;
+    --color-text-primary: #1A1A2E;
+    --color-text-secondary: #6B7280;
+    --color-border: #E5E7EB;
+    --color-success: #059669;
+    --color-error: #DC2626;
+    --color-warning: #D97706;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
+    font-family: var(--font-inter), system-ui, sans-serif;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+@layer components {
+  /* Reusable focus ring for accessibility */
+  .focus-ring {
+    @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2;
+  }
+}
