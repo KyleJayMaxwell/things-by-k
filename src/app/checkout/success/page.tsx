@@ -28,7 +28,7 @@ function formatPrice(cents: number) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(cents / 100)
 }
 
-export default function SuccessPage() {
+function SuccessContent() {
   const searchParams = useSearchParams()
   const sessionId = searchParams.get('session_id')
   const { clearCart } = useCart()
@@ -47,7 +47,6 @@ export default function SuccessPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 py-16 text-center">
-      {/* Success icon */}
       <div className="w-16 h-16 rounded-full bg-emerald-50 flex items-center justify-center mx-auto mb-6">
         <svg className="w-8 h-8 text-success" viewBox="0 0 20 20" fill="currentColor">
           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -55,17 +54,12 @@ export default function SuccessPage() {
       </div>
 
       <h1 className="text-3xl font-semibold text-text-primary mb-2">Thank you for your order!</h1>
-      <p className="text-text-secondary mb-10">
-        We'll get it packed up and on its way soon.
-      </p>
+      <p className="text-text-secondary mb-10">We'll get it packed up and on its way soon.</p>
 
-      {/* Order details */}
       {loading ? (
         <div className="text-text-secondary">Loading order details...</div>
       ) : order && !('error' in order) ? (
         <div className="bg-surface border border-border rounded-xl p-6 text-left space-y-6">
-
-          {/* Items */}
           {order.lineItems && order.lineItems.length > 0 && (
             <div>
               <h2 className="text-sm font-semibold text-text-primary uppercase tracking-wider mb-3">Items</h2>
@@ -80,7 +74,6 @@ export default function SuccessPage() {
             </div>
           )}
 
-          {/* Totals */}
           {order.amountTotal && (
             <div className="border-t border-border pt-4 space-y-2 text-sm">
               {order.amountSubtotal && (
@@ -102,7 +95,6 @@ export default function SuccessPage() {
             </div>
           )}
 
-          {/* Shipping address */}
           {order.shippingAddress && (
             <div className="border-t border-border pt-4">
               <h2 className="text-sm font-semibold text-text-primary uppercase tracking-wider mb-2">Shipping to</h2>
@@ -116,19 +108,22 @@ export default function SuccessPage() {
         </div>
       ) : null}
 
-      {/* CTAs */}
       <div className="mt-10 flex flex-col sm:flex-row gap-3 justify-center">
         <Link href="/account/orders">
-          <Button variant="secondary" size="lg">
-            View Orders
-          </Button>
+          <Button variant="secondary" size="lg">View Orders</Button>
         </Link>
         <Link href="/shop">
-          <Button variant="primary" size="lg">
-            Continue Shopping
-          </Button>
+          <Button variant="primary" size="lg">Continue Shopping</Button>
         </Link>
       </div>
     </div>
+  )
+}
+
+export default function SuccessPage() {
+  return (
+    <Suspense>
+      <SuccessContent />
+    </Suspense>
   )
 }
