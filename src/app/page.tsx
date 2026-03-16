@@ -78,7 +78,7 @@ export default async function HomePage() {
       <section className="bg-surface border-t border-border">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-20 flex flex-col sm:flex-row items-center gap-10">
           <div className="flex-1">
-            <h2 className="text-2xl font-semibold text-text-primary mb-3">Made by Kial</h2>
+            <h2 className="text-2xl font-semibold text-text-primary mb-3">Made by K</h2>
             <p className="text-text-secondary leading-relaxed max-w-lg">
               Things by K is a small shop for handmade goods and original photography.
               Every item is made with intention — from the photo framed just right to the

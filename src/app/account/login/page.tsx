@@ -190,7 +190,7 @@ function LoginForm() {
                 value={firstName}
                 onChange={e => setFirstName(e.target.value)}
                 className="w-full px-3 py-2.5 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors"
-                placeholder="Kial"
+                placeholder="K"
               />
             </div>
             <div>

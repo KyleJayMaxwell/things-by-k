@@ -7,7 +7,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'About',
-  description: 'Learn about Kial and the story behind Things by K.',
+  description: 'Learn about K and the story behind Things by K.',
 }
 
 export default function AboutPage() {
@@ -23,7 +23,7 @@ export default function AboutPage() {
 
       <div className="prose prose-neutral max-w-none space-y-5 text-text-secondary leading-relaxed">
         <p className="text-lg text-text-primary">
-          Hi, I'm Kial — the maker behind Things by K.
+          Hi, I'm K — the maker behind Things by K.
         </p>
 
         <p>

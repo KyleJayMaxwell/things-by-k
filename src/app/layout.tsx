@@ -18,10 +18,10 @@ export const metadata: Metadata = {
     default: 'Things by K',
     template: '%s | Things by K',
   },
-  description: 'Handmade goods & original photography by Kial.',
+  description: 'Handmade goods & original photography by K.',
   openGraph: {
     title: 'Things by K',
-    description: 'Handmade goods & original photography by Kial.',
+    description: 'Handmade goods & original photography by K.',
     type: 'website',
   },
 }
