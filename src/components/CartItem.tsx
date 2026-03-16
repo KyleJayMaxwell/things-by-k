@@ -4,6 +4,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
+import { useState } from 'react'
 import { CartItem as CartItemType } from '@/types'
 import { useCart } from '@/context/CartContext'
 import QuantitySelector from './QuantitySelector'
@@ -17,9 +18,19 @@ export default function CartItem({ item }: CartItemProps) {
   const { updateQuantity, removeItem } = useCart()
   const { product, quantity } = item
   const lineTotal = product.price * quantity
+  const [removing, setRemoving] = useState(false)
+
+  const handleRemove = () => {
+    setRemoving(true)
+    setTimeout(() => removeItem(product.id), 280)
+  }
 
   return (
-    <div className="flex gap-4 py-6 border-b border-border last:border-0">
+    <div
+      className={`flex gap-4 py-6 border-b border-border last:border-0 transition-[opacity,transform] duration-300 ${
+        removing ? 'opacity-0 -translate-x-2' : 'opacity-100 translate-x-0'
+      }`}
+    >
       {/* Thumbnail */}
       <Link href={`/shop/${product.slug}`} className="flex-shrink-0">
         <div className="w-20 h-20 sm:w-24 sm:h-24 relative rounded-lg overflow-hidden bg-gray-50 border border-border">
@@ -60,7 +71,7 @@ export default function CartItem({ item }: CartItemProps) {
             onChange={(val) => updateQuantity(product.id, val)}
           />
           <button
-            onClick={() => removeItem(product.id)}
+            onClick={handleRemove}
             className="min-h-[44px] px-2 text-sm text-text-secondary hover:text-error transition-colors focus-ring rounded"
             aria-label={`Remove ${product.name} from cart`}
           >

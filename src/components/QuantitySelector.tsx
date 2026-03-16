@@ -28,7 +28,7 @@ export default function QuantitySelector({
         </svg>
       </button>
 
-      <span className="px-4 py-2 text-sm font-medium text-text-primary min-w-[3rem] text-center select-none">
+      <span key={value} className="px-4 py-2 text-sm font-medium text-text-primary min-w-[3rem] text-center select-none animate-fade-in">
         {value}
       </span>
 

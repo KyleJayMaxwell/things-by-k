@@ -19,6 +19,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
   const [selectedImage, setSelectedImage] = useState(0)
   const [quantity, setQuantity] = useState(1)
   const [showToast, setShowToast] = useState(false)
+  const [added, setAdded] = useState(false)
   const { addItem } = useCart()
 
   const isSoldOut = product.stock === 0
@@ -26,6 +27,8 @@ export default function ProductDetail({ product }: ProductDetailProps) {
   const handleAddToCart = useCallback(() => {
     addItem(product, quantity)
     setShowToast(true)
+    setAdded(true)
+    setTimeout(() => setAdded(false), 1800)
   }, [addItem, product, quantity])
 
   return (
@@ -34,24 +37,26 @@ export default function ProductDetail({ product }: ProductDetailProps) {
 
         {/* Image Gallery */}
         <div className="space-y-4">
-          {/* Main image */}
+          {/* Main image — key causes remount for crossfade on image switch */}
           <div className="aspect-square relative rounded-xl overflow-hidden bg-gray-50 border border-border">
-            {product.images[selectedImage] ? (
-              <Image
-                src={product.images[selectedImage]}
-                alt={product.name}
-                fill
-                className="object-cover"
-                priority
-                sizes="(max-width: 1024px) 100vw, 50vw"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-text-secondary">
-                No image
-              </div>
-            )}
+            <div key={selectedImage} className="animate-fade-in absolute inset-0">
+              {product.images[selectedImage] ? (
+                <Image
+                  src={product.images[selectedImage]}
+                  alt={product.name}
+                  fill
+                  className="object-cover"
+                  priority
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-text-secondary">
+                  No image
+                </div>
+              )}
+            </div>
             {isSoldOut && (
-              <div className="absolute top-4 left-4 bg-white text-text-secondary text-sm font-medium px-3 py-1 rounded-full border border-border">
+              <div className="absolute top-4 left-4 bg-white text-text-secondary text-sm font-medium px-3 py-1 rounded-full border border-border z-10">
                 Sold Out
               </div>
             )}
@@ -64,8 +69,10 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                 <button
                   key={i}
                   onClick={() => setSelectedImage(i)}
-                  className={`relative w-20 h-20 rounded-lg overflow-hidden border-2 transition-colors ${
-                    selectedImage === i ? 'border-primary' : 'border-border hover:border-primary/40'
+                  className={`relative w-20 h-20 rounded-lg overflow-hidden border-2 transition-[border-color,opacity] duration-150 ${
+                    selectedImage === i
+                      ? 'border-primary'
+                      : 'border-border hover:border-primary/40 opacity-70 hover:opacity-100'
                   }`}
                 >
                   <Image src={img} alt={`${product.name} ${i + 1}`} fill className="object-cover" sizes="80px" />
@@ -117,7 +124,14 @@ export default function ProductDetail({ product }: ProductDetailProps) {
               disabled={isSoldOut}
               onClick={handleAddToCart}
             >
-              {isSoldOut ? 'Sold Out' : 'Add to Cart'}
+              {added ? (
+                <>
+                  <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                  Added to Cart
+                </>
+              ) : isSoldOut ? 'Sold Out' : 'Add to Cart'}
             </Button>
           </div>
 

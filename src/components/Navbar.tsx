@@ -4,7 +4,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import CartIcon from './icons/CartIcon'
 import AccountIcon from './icons/AccountIcon'
 import { useCart } from '@/context/CartContext'
@@ -14,6 +14,17 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const { itemCount } = useCart()
+
+  // Badge pop: replay animation each time itemCount increases
+  const prevCountRef = useRef(itemCount)
+  const [badgeKey, setBadgeKey] = useState(0)
+
+  useEffect(() => {
+    if (itemCount > prevCountRef.current) {
+      setBadgeKey(k => k + 1)
+    }
+    prevCountRef.current = itemCount
+  }, [itemCount])
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8)
@@ -66,7 +77,8 @@ export default function Navbar() {
             <CartIcon className="w-5 h-5" />
             {itemCount > 0 && (
               <span
-                className="absolute top-1 right-1 min-w-[18px] h-[18px] bg-primary text-white text-xs font-semibold rounded-full flex items-center justify-center px-1"
+                key={badgeKey}
+                className="absolute top-1 right-1 min-w-[18px] h-[18px] bg-primary text-white text-xs font-semibold rounded-full flex items-center justify-center px-1 animate-badge-pop"
                 aria-hidden="true"
               >
                 {itemCount > 99 ? '99+' : itemCount}

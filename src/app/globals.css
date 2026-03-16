@@ -51,19 +51,50 @@
   html {
     scroll-behavior: auto;
   }
+  .animate-slide-in,
+  .animate-fade-up,
+  .animate-fade-in,
+  .animate-badge-pop {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }
 
+/* Toast slide-in */
 @keyframes slide-in-from-top {
-  from {
-    transform: translateY(-0.5rem);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
+  from { transform: translateY(-0.5rem); opacity: 0; }
+  to   { transform: translateY(0);       opacity: 1; }
 }
-
 .animate-slide-in {
   animation: slide-in-from-top 0.2s ease-out forwards;
+}
+
+/* Section & hero entrance */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+.animate-fade-up {
+  animation: fade-up 0.5s ease-out both;
+}
+
+/* Image crossfade */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.animate-fade-in {
+  animation: fade-in 0.2s ease-out;
+}
+
+/* Cart badge pop */
+@keyframes badge-pop {
+  0%   { transform: scale(1);    }
+  45%  { transform: scale(1.55); }
+  70%  { transform: scale(0.9);  }
+  100% { transform: scale(1);    }
+}
+.animate-badge-pop {
+  animation: badge-pop 0.35s cubic-bezier(0.36, 0.07, 0.19, 0.97);
 }
