@@ -20,7 +20,7 @@ export default function QuantitySelector({
       <button
         onClick={() => onChange(Math.max(min, value - 1))}
         disabled={value <= min}
-        className="px-3 py-2 text-text-secondary hover:text-text-primary hover:bg-gray-50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+        className="min-h-[44px] min-w-[44px] flex items-center justify-center px-3 text-text-secondary hover:text-text-primary hover:bg-gray-50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
         aria-label="Decrease quantity"
       >
         <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
@@ -35,7 +35,7 @@ export default function QuantitySelector({
       <button
         onClick={() => onChange(Math.min(max, value + 1))}
         disabled={value >= max}
-        className="px-3 py-2 text-text-secondary hover:text-text-primary hover:bg-gray-50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+        className="min-h-[44px] min-w-[44px] flex items-center justify-center px-3 text-text-secondary hover:text-text-primary hover:bg-gray-50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
         aria-label="Increase quantity"
       >
         <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">

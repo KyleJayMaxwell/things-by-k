@@ -7,20 +7,19 @@ import { useCart } from '@/context/CartContext'
 import CartItem from '@/components/CartItem'
 import Button from '@/components/Button'
 import Link from 'next/link'
+import { formatPrice } from '@/lib/format'
 
 const SHIPPING_COST = 300 // $3.00 flat rate in cents
 
-function formatPrice(cents: number) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(cents / 100)
-}
-
 export default function CartPage() {
-  const { items, subtotal, clearCart } = useCart()
+  const { items, subtotal } = useCart()
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const total = subtotal + SHIPPING_COST
 
   const handleCheckout = async () => {
     setLoading(true)
+    setError(null)
     try {
       const res = await fetch('/api/checkout', {
         method: 'POST',
@@ -37,11 +36,11 @@ export default function CartPage() {
       if (data.url) {
         window.location.href = data.url
       } else {
-        alert('Something went wrong. Please try again.')
+        setError('Something went wrong. Please try again.')
         setLoading(false)
       }
     } catch {
-      alert('Something went wrong. Please try again.')
+      setError('Something went wrong. Please try again.')
       setLoading(false)
     }
   }
@@ -51,7 +50,7 @@ export default function CartPage() {
     return (
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-20 text-center">
         <div className="w-16 h-16 rounded-full bg-primary-light flex items-center justify-center mx-auto mb-4">
-          <svg className="w-8 h-8 text-primary opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <svg className="w-8 h-8 text-primary opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
           </svg>
         </div>
@@ -109,9 +108,13 @@ export default function CartPage() {
               Proceed to Checkout
             </Button>
 
+            {error && (
+              <p role="alert" className="mt-3 text-sm text-error text-center">{error}</p>
+            )}
+
             <Link
               href="/shop"
-              className="block text-center mt-4 text-sm text-text-secondary hover:text-primary transition-colors"
+              className="block text-center mt-4 text-sm text-text-secondary hover:text-primary transition-colors focus-ring rounded"
             >
               Continue Shopping
             </Link>

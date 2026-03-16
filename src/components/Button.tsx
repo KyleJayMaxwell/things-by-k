@@ -2,7 +2,7 @@
 
 import { forwardRef } from 'react'
 
-type ButtonVariant = 'primary' | 'secondary'
+type ButtonVariant = 'primary' | 'secondary' | 'white'
 type ButtonSize = 'sm' | 'md' | 'lg'
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -31,6 +31,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
   const variants: Record<ButtonVariant, string> = {
     primary: 'bg-primary text-white hover:bg-primary-hover active:bg-primary-hover',
     secondary: 'bg-transparent text-primary border border-primary hover:bg-primary-light active:bg-primary-light',
+    white: 'bg-white text-primary hover:bg-primary-light active:bg-primary-light',
   }
 
   const sizes: Record<ButtonSize, string> = {

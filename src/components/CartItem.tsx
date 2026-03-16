@@ -7,13 +7,10 @@ import Link from 'next/link'
 import { CartItem as CartItemType } from '@/types'
 import { useCart } from '@/context/CartContext'
 import QuantitySelector from './QuantitySelector'
+import { formatPrice } from '@/lib/format'
 
 interface CartItemProps {
   item: CartItemType
-}
-
-function formatPrice(cents: number) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(cents / 100)
 }
 
 export default function CartItem({ item }: CartItemProps) {
@@ -64,8 +61,8 @@ export default function CartItem({ item }: CartItemProps) {
           />
           <button
             onClick={() => removeItem(product.id)}
-            className="text-sm text-text-secondary hover:text-error transition-colors"
-            aria-label="Remove item"
+            className="min-h-[44px] px-2 text-sm text-text-secondary hover:text-error transition-colors focus-ring rounded"
+            aria-label={`Remove ${product.name} from cart`}
           >
             Remove
           </button>

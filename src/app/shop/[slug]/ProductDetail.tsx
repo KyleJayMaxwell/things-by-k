@@ -9,13 +9,10 @@ import { useCart } from '@/context/CartContext'
 import Button from '@/components/Button'
 import QuantitySelector from '@/components/QuantitySelector'
 import Toast from '@/components/Toast'
+import { formatPrice } from '@/lib/format'
 
 interface ProductDetailProps {
   product: Product
-}
-
-function formatPrice(cents: number) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(cents / 100)
 }
 
 export default function ProductDetail({ product }: ProductDetailProps) {

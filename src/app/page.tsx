@@ -40,11 +40,8 @@ export default async function HomePage() {
           <p className="text-primary-light text-lg sm:text-xl max-w-xl">
             Small-batch, made with care. Each piece is created by hand or captured through a lens.
           </p>
-          <Link
-            href="/shop"
-            className="mt-2 inline-flex items-center px-8 py-3.5 bg-white text-primary font-semibold rounded-lg hover:bg-primary-light transition-colors text-base"
-          >
-            Shop Now
+          <Link href="/shop" className="mt-2 inline-block">
+            <Button variant="white" size="lg">Shop Now</Button>
           </Link>
         </div>
       </section>
