@@ -8,9 +8,6 @@ import { createServiceClient } from '@/lib/supabase/server'
 import { sendOrderConfirmation } from '@/lib/email'
 import Stripe from 'stripe'
 
-// Required: tell Next.js not to parse the body (Stripe needs raw bytes to verify signature)
-export const config = { api: { bodyParser: false } }
-
 export async function POST(request: NextRequest) {
   const body = await request.text()
   const signature = request.headers.get('stripe-signature')
