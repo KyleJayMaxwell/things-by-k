@@ -160,7 +160,7 @@ export default function AdminPage() {
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#6B7280' }} tickLine={false} axisLine={false} />
                 <YAxis tick={{ fontSize: 11, fill: '#6B7280' }} tickLine={false} axisLine={false} tickFormatter={v => `$${v}`} />
-                <Tooltip formatter={(v: number) => [`$${v.toFixed(2)}`, 'Revenue']} contentStyle={tooltipStyle} />
+                <Tooltip formatter={(v) => [`$${(Number(v) || 0).toFixed(2)}`, 'Revenue']} contentStyle={tooltipStyle} />
                 <Line type="monotone" dataKey="revenue" stroke="#360F5A" strokeWidth={2} dot={false} />
               </LineChart>
             </ResponsiveContainer>
@@ -188,7 +188,7 @@ export default function AdminPage() {
                     <Cell key={entry.name} fill={DONUT_COLORS[i % DONUT_COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(v: number, name: string) => [v, name]} contentStyle={tooltipStyle} />
+                <Tooltip formatter={(v, name) => [(Number(v) || 0).toFixed(2), name]} contentStyle={tooltipStyle} />
                 <Legend
                   iconType="circle"
                   iconSize={8}
@@ -214,7 +214,7 @@ export default function AdminPage() {
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
                 <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#6B7280' }} tickLine={false} axisLine={false} />
                 <YAxis tick={{ fontSize: 11, fill: '#6B7280' }} tickLine={false} axisLine={false} allowDecimals={false} />
-                <Tooltip formatter={(v: number) => [v, 'Orders']} contentStyle={tooltipStyle} />
+                <Tooltip formatter={(v) => [(Number(v) || 0).toFixed(2), 'Orders']} contentStyle={tooltipStyle} />
                 <Bar dataKey="orders" fill="#360F5A" radius={[3, 3, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
@@ -232,7 +232,7 @@ export default function AdminPage() {
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" horizontal={false} />
                 <XAxis type="number" tick={{ fontSize: 11, fill: '#6B7280' }} tickLine={false} axisLine={false} allowDecimals={false} />
                 <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: '#6B7280' }} tickLine={false} axisLine={false} width={90} />
-                <Tooltip formatter={(v: number) => [v, 'Units sold']} contentStyle={tooltipStyle} />
+                <Tooltip formatter={(v) => [(Number(v) || 0).toFixed(2), 'Units sold']} contentStyle={tooltipStyle} />
                 <Bar dataKey="units" fill="#E8DFF0" radius={[0, 3, 3, 0]}>
                   {salesByProduct.map((_, i) => (
                     <Cell key={i} fill={i === 0 ? '#360F5A' : '#E8DFF0'} />
