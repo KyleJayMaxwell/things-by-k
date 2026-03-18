@@ -60,8 +60,12 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
     .rpc('generate_order_number')
   const orderNumber = orderNumberData as string
 
+  // AFTER — re-fetch the session to get fully expanded shipping data
+  const fullSession = await stripe.checkout.sessions.retrieve(session.id, {
+    expand: ['shipping_details'],
+  })
   const userId = session.metadata?.user_id || null
-  const shippingDetails = session.shipping_details
+  const shippingDetails = fullSession.shipping_details
   const address = shippingDetails?.address
   const customerEmail = session.customer_details?.email ?? ''
 
