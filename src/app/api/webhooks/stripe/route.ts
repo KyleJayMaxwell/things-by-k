@@ -60,16 +60,16 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
     .rpc('generate_order_number')
   const orderNumber = orderNumberData as string
 
-  // AFTER — re-fetch the session to get fully expanded shipping data
-  const fullSession = await stripe.checkout.sessions.retrieve(session.id, {
-    expand: ['shipping_details'],
-  })
+  // Re-fetch the session so shipping_details is fully populated
+  // (the webhook payload can arrive before Stripe has settled all fields)
+  const fullSession = await stripe.checkout.sessions.retrieve(session.id)
   const userId = session.metadata?.user_id || null
   const shippingDetails = fullSession.shipping_details
   const address = shippingDetails?.address
-  const customerEmail = session.customer_details?.email ?? ''
+  const customerEmail = fullSession.customer_details?.email ?? ''
 
   const shippingAddress = {
+    name: shippingDetails?.name ?? '',
     line1: address?.line1 ?? '',
     line2: address?.line2 ?? null,
     city: address?.city ?? '',
@@ -88,9 +88,9 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
       stripe_session_id: session.id,
       stripe_payment_intent: session.payment_intent as string,
       status: 'processing',
-      subtotal: session.amount_subtotal ?? 0,
-      shipping_cost: session.shipping_cost?.amount_total ?? 0,
-      total: session.amount_total ?? 0,
+      subtotal: fullSession.amount_subtotal ?? 0,
+      shipping_cost: fullSession.shipping_cost?.amount_total ?? 0,
+      total: fullSession.amount_total ?? 0,
       shipping_address: shippingAddress,
     })
     .select()
@@ -138,9 +138,9 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
         to: customerEmail,
         orderNumber,
         items: emailItems,
-        subtotal: session.amount_subtotal ?? 0,
-        shippingCost: session.shipping_cost?.amount_total ?? 0,
-        total: session.amount_total ?? 0,
+        subtotal: fullSession.amount_subtotal ?? 0,
+        shippingCost: fullSession.shipping_cost?.amount_total ?? 0,
+        total: fullSession.amount_total ?? 0,
         shippingAddress,
       })
     } catch (emailErr) {

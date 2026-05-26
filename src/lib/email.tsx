@@ -21,6 +21,7 @@ interface OrderItem {
 }
 
 interface ShippingAddress {
+  name?: string
   line1: string
   line2?: string | null
   city: string
@@ -63,6 +64,7 @@ export async function sendOrderConfirmation(params: SendOrderConfirmationParams)
 
   const addr = shippingAddress
   const addressLines = [
+    addr.name,
     addr.line1,
     addr.line2,
     `${addr.city}, ${addr.state} ${addr.postal_code}`,
