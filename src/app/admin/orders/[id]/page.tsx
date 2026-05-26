@@ -156,6 +156,7 @@ export default function AdminOrderDetailPage() {
           <h2 className="font-medium text-text-primary mb-4">Ship To</h2>
           {address ? (
             <address className="text-sm text-text-secondary not-italic leading-relaxed">
+              {address.name && <>{address.name}<br /></>}
               {address.line1}<br />
               {address.line2 && <>{address.line2}<br /></>}
               {address.city}, {address.state} {address.postal_code}<br />
