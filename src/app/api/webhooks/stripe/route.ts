@@ -60,10 +60,9 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
     .rpc('generate_order_number')
   const orderNumber = orderNumberData as string
 
-  // AFTER — re-fetch the session to get fully expanded shipping data
-  const fullSession = await stripe.checkout.sessions.retrieve(session.id, {
-    expand: ['shipping_details'],
-  })
+  // Re-fetch the session so shipping_details is fully populated
+  // (the webhook payload can arrive before Stripe has settled all fields)
+  const fullSession = await stripe.checkout.sessions.retrieve(session.id)
   const userId = session.metadata?.user_id || null
   const shippingDetails = fullSession.shipping_details
   const address = shippingDetails?.address
