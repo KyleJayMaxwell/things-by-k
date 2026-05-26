@@ -46,11 +46,13 @@ create table public.orders (
   stripe_session_id      text not null unique,
   stripe_payment_intent  text not null,
   status                 text not null default 'processing'
-                           check (status in ('processing', 'shipped', 'delivered')),
+                           check (status in ('processing', 'shipped', 'shipped_without_tracking', 'delivered')),
   subtotal               integer not null,   -- in cents
   shipping_cost          integer not null,   -- in cents
   total                  integer not null,   -- in cents
   shipping_address       jsonb not null,
+  carrier                text,               -- set when status = 'shipped'
+  tracking_number        text,               -- set when status = 'shipped'
   created_at             timestamptz not null default now()
 );
 

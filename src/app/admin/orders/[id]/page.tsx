@@ -3,9 +3,8 @@
 // src/app/admin/orders/[id]/page.tsx
 
 import { useEffect, useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/client'
 
 function formatPrice(cents: number) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(cents / 100)
@@ -17,50 +16,82 @@ function formatDate(dateStr: string) {
   })
 }
 
-const STATUS_OPTIONS = ['processing', 'shipped', 'delivered'] as const
+const STATUS_OPTIONS = ['processing', 'shipped', 'shipped_without_tracking', 'delivered'] as const
 type OrderStatus = typeof STATUS_OPTIONS[number]
 
-const statusStyles: Record<OrderStatus, string> = {
-  processing: 'bg-primary-light text-primary',
-  shipped: 'bg-blue-50 text-blue-700',
-  delivered: 'bg-emerald-50 text-emerald-700',
+const STATUS_LABELS: Record<OrderStatus, string> = {
+  processing:               'Processing',
+  shipped:                  'Shipped',
+  shipped_without_tracking: 'Shipped without Tracking',
+  delivered:                'Delivered',
 }
+
+const statusStyles: Record<OrderStatus, string> = {
+  processing:               'bg-primary-light text-primary',
+  shipped:                  'bg-blue-50 text-blue-700',
+  shipped_without_tracking: 'bg-blue-50 text-blue-700',
+  delivered:                'bg-emerald-50 text-emerald-700',
+}
+
+const CARRIERS = ['USPS', 'UPS', 'FedEx', 'DHL', 'Canada Post', 'Other']
 
 export default function AdminOrderDetailPage() {
   const { id } = useParams<{ id: string }>()
-  const router = useRouter()
-  const supabase = createClient()
 
-  const [order, setOrder] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [status, setStatus] = useState<OrderStatus>('processing')
-  const [saved, setSaved] = useState(false)
+  const [order, setOrder]               = useState<any>(null)
+  const [loading, setLoading]           = useState(true)
+  const [saving, setSaving]             = useState(false)
+  const [saved, setSaved]               = useState(false)
+  const [status, setStatus]             = useState<OrderStatus>('processing')
+  const [carrier, setCarrier]           = useState('')
+  const [trackingNumber, setTrackingNumber] = useState('')
 
   useEffect(() => {
     async function load() {
-      const { data } = await supabase
-        .from('orders')
-        .select(`*, order_items(id, product_name, price, quantity)`)
-        .eq('id', id)
-        .single()
-
-      if (data) {
+      const res = await fetch(`/api/admin/orders/${id}`)
+      if (res.ok) {
+        const data = await res.json()
         setOrder(data)
         setStatus(data.status)
+        setCarrier(data.carrier ?? '')
+        setTrackingNumber(data.tracking_number ?? '')
       }
       setLoading(false)
     }
     load()
   }, [id])
 
+  const hasChanges = (() => {
+    if (!order) return false
+    if (status !== order.status) return true
+    if (status === 'shipped') {
+      if (carrier !== (order.carrier ?? '')) return true
+      if (trackingNumber !== (order.tracking_number ?? '')) return true
+    }
+    return false
+  })()
+
   const handleSave = async () => {
     setSaving(true)
-    await supabase.from('orders').update({ status }).eq('id', id)
+
+    const updates: Record<string, any> = { status }
+    if (status === 'shipped') {
+      updates.carrier = carrier || null
+      updates.tracking_number = trackingNumber || null
+    } else {
+      updates.carrier = null
+      updates.tracking_number = null
+    }
+
+    await fetch(`/api/admin/orders/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updates),
+    })
     setSaving(false)
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
-    setOrder((prev: any) => ({ ...prev, status }))
+    setOrder((prev: any) => ({ ...prev, ...updates }))
   }
 
   if (loading) return <div className="text-text-secondary text-sm">Loading...</div>
@@ -82,14 +113,14 @@ export default function AdminOrderDetailPage() {
           <p className="text-text-secondary text-sm mt-1">{formatDate(order.created_at)} · {order.email}</p>
         </div>
         <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${statusStyles[status as OrderStatus]}`}>
-          {status}
+          {STATUS_LABELS[status as OrderStatus]}
         </span>
       </div>
 
       {/* Status update */}
       <div className="bg-white border border-border rounded-xl p-5 mb-6">
         <h2 className="font-medium text-text-primary mb-4">Update Status</h2>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           {STATUS_OPTIONS.map(s => (
             <button
               key={s}
@@ -100,17 +131,46 @@ export default function AdminOrderDetailPage() {
                   : 'bg-white text-text-secondary border-border hover:border-primary/40 hover:text-text-primary'
               }`}
             >
-              {s.charAt(0).toUpperCase() + s.slice(1)}
+              {STATUS_LABELS[s]}
             </button>
           ))}
           <button
             onClick={handleSave}
-            disabled={saving || status === order.status}
+            disabled={saving || !hasChanges}
             className="ml-auto px-4 py-2 rounded-lg text-sm font-medium bg-primary text-white hover:bg-primary-hover transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {saving ? 'Saving...' : saved ? 'Saved ✓' : 'Save'}
           </button>
         </div>
+
+        {/* Tracking fields — only shown when Shipped is selected */}
+        {status === 'shipped' && (
+          <div className="mt-4 pt-4 border-t border-border flex flex-col sm:flex-row gap-3">
+            <div className="sm:w-48">
+              <label className="block text-xs text-text-secondary mb-1.5">Carrier</label>
+              <select
+                value={carrier}
+                onChange={e => setCarrier(e.target.value)}
+                className="w-full text-sm border border-border rounded-lg px-3 py-2 text-text-primary bg-white focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+              >
+                <option value="">Select carrier</option>
+                {CARRIERS.map(c => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </div>
+            <div className="flex-1">
+              <label className="block text-xs text-text-secondary mb-1.5">Tracking number</label>
+              <input
+                type="text"
+                value={trackingNumber}
+                onChange={e => setTrackingNumber(e.target.value)}
+                placeholder="Paste tracking number here"
+                className="w-full text-sm border border-border rounded-lg px-3 py-2 text-text-primary placeholder:text-text-secondary/50 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Items */}
@@ -164,6 +224,14 @@ export default function AdminOrderDetailPage() {
             </address>
           ) : (
             <p className="text-sm text-text-secondary">No address recorded.</p>
+          )}
+
+          {/* Tracking info — shown when order has been shipped with tracking */}
+          {order.carrier && order.tracking_number && (
+            <div className="mt-4 pt-4 border-t border-border">
+              <p className="text-xs text-text-secondary mb-1">{order.carrier}</p>
+              <p className="text-sm font-medium text-text-primary font-mono">{order.tracking_number}</p>
+            </div>
           )}
         </div>
       </div>
