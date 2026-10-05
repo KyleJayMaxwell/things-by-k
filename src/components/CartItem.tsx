@@ -66,8 +66,10 @@ export default function CartItem({ item }: CartItemProps) {
           {item.handwritten ? 'Handwritten · ' : offersHandwritten(product) ? 'Blank · ' : ''}
           {formatPrice(price)} each
         </p>
-        {item.handwritten && item.message && (
-          <p className="mt-1 text-sm text-text-secondary italic break-words">“{item.message}”</p>
+        {item.handwritten && (
+          <p className="mt-1 text-sm text-text-secondary italic break-words">
+            {item.message ? `“${item.message}”` : 'No note: K will freestyle it'}
+          </p>
         )}
 
         <div className="mt-3 flex items-center gap-4">

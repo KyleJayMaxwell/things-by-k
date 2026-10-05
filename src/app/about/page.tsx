@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import Button from '@/components/Button'
 import type { Metadata } from 'next'
+import { CONTACT_EMAIL } from '@/lib/site'
 
 export const metadata: Metadata = {
   title: 'About',
@@ -55,10 +56,10 @@ export default function AboutPage() {
           <div className="pt-4 border-t border-border">
             <p className="text-xs text-text-secondary tracking-widest uppercase mb-2">Get in touch</p>
             <a
-              href="mailto:kylejaymaxwell@gmail.com"
+              href={`mailto:${CONTACT_EMAIL}`}
               className="text-sm text-text-primary underline underline-offset-4 hover:text-primary transition-colors"
             >
-              kylejaymaxwell@gmail.com
+              {CONTACT_EMAIL}
             </a>
           </div>
         </div>

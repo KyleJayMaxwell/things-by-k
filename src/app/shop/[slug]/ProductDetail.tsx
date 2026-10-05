@@ -31,7 +31,6 @@ export default function ProductDetail({ product }: ProductDetailProps) {
   const isSoldOut = product.stock === 0
   const canHandwrite = offersHandwritten(product)
   const price = product.price + (handwritten ? product.handwritten_price ?? 0 : 0)
-  const needsMessage = handwritten && message.trim().length === 0
 
   const handleAddToCart = useCallback(() => {
     addItem(product, quantity, { handwritten, message })
@@ -174,8 +173,8 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                     id="handwritten-message"
                     value={message}
                     onChange={e => setMessage(e.target.value.slice(0, HANDWRITTEN_MESSAGE_MAX))}
-                    rows={5}
-                    placeholder={'Sending it to someone? Write your message, like "Dear Sam, wish you were here for the fog..."\n\nSending it to yourself? Give me a little inspiration (a favorite place, a memory, something you need to hear) and I\'ll write you a surprise.'}
+                    rows={6}
+                    placeholder={'Sending it to someone? Write your message, like "Dear Sam, wish you were here for the fog..."\n\nSending it to yourself? Give me a little inspiration (a favorite place, a memory, something you need to hear) and I\'ll write you a surprise.\n\nOr leave it blank and I\'ll freestyle it.'}
                     className="w-full px-3 py-2.5 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors bg-white"
                   />
                   <p className="mt-1.5 flex justify-between text-xs text-text-secondary">
@@ -205,7 +204,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
               variant="primary"
               size="lg"
               fullWidth
-              disabled={isSoldOut || needsMessage}
+              disabled={isSoldOut}
               onClick={handleAddToCart}
             >
               {added ? (

@@ -121,6 +121,7 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
     // Save the note for a handwritten card. Kept separate from the insert so a
     // missing column (handwritten-option.sql not run yet) can't drop the item.
     const message = stripeProduct.metadata?.message
+      || (stripeProduct.metadata?.handwritten === 'true' ? 'No note given: freestyle it' : null)
     if (orderItem && message) {
       const { error: messageError } = await supabase
         .from('order_items')
