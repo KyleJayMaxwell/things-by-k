@@ -7,6 +7,7 @@ import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { CARRIER_NAMES, type Carrier } from '@/lib/tracking'
+import { DELIVERY_WEEKS, destinationForCountry } from '@/lib/shipping'
 
 function formatPrice(cents: number) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(cents / 100)
@@ -181,6 +182,16 @@ export default function AdminOrderDetailPage() {
                 />
                 Email the customer that their order shipped
               </label>
+            )}
+            {isNewlyShipped && notify && (
+              <p className="text-xs text-text-secondary">
+                {trackingNumber.trim()
+                  ? 'The email will include this tracking number and a link to track it.'
+                  : (() => {
+                      const destination = destinationForCountry(order.shipping_address?.country)
+                      return `No tracking number, so the email will say it went by regular mail and to reply if it hasn't arrived in ${DELIVERY_WEEKS[destination]} weeks (${destination === 'domestic' ? 'US' : 'international'} order).`
+                    })()}
+              </p>
             )}
           </div>
         )}

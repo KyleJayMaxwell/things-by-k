@@ -4,6 +4,7 @@
 
 import { Resend } from 'resend'
 import { CARRIER_NAMES, trackingUrl, type Carrier } from '@/lib/tracking'
+import { untrackedMailNote, type Destination } from '@/lib/shipping'
 
 if (!process.env.RESEND_API_KEY) {
   throw new Error('Missing RESEND_API_KEY environment variable')
@@ -290,6 +291,7 @@ interface SendShippingUpdateParams {
   items: OrderItem[]
   carrier?: Carrier | null
   trackingNumber?: string | null
+  destination: Destination
 }
 
 function escapeHtml(s: string): string {
@@ -297,7 +299,7 @@ function escapeHtml(s: string): string {
 }
 
 export async function sendShippingUpdate(params: SendShippingUpdateParams) {
-  const { to, orderNumber, recipientName, items, carrier, trackingNumber } = params
+  const { to, orderNumber, recipientName, items, carrier, trackingNumber, destination } = params
 
   const tracking = carrier && trackingNumber
     ? {
@@ -307,6 +309,9 @@ export async function sendShippingUpdate(params: SendShippingUpdateParams) {
       }
     : null
 
+  // No tracking number: explain how it was sent and when to reach out
+  const untrackedNote = tracking ? null : untrackedMailNote(destination)
+
   const firstName = recipientName?.trim().split(/\s+/)[0] ?? ''
   const greeting = firstName ? `Good news, ${firstName}!` : 'Good news!'
 
@@ -314,8 +319,8 @@ export async function sendShippingUpdate(params: SendShippingUpdateParams) {
     from: FROM,
     to,
     subject: `Your order has shipped — ${orderNumber}`,
-    html: shippingUpdateHtml({ orderNumber, greeting, items, tracking }),
-    text: shippingUpdateText({ orderNumber, greeting, items, tracking }),
+    html: shippingUpdateHtml({ orderNumber, greeting, items, tracking, untrackedNote }),
+    text: shippingUpdateText({ orderNumber, greeting, items, tracking, untrackedNote }),
   })
 
   if (error) {
@@ -331,6 +336,7 @@ interface ShippingTemplateParams {
   greeting: string
   items: OrderItem[]
   tracking: { carrierName: string; number: string; url: string | null } | null
+  untrackedNote: string | null
 }
 
 function shippingUpdateHtml(p: ShippingTemplateParams): string {
@@ -369,6 +375,15 @@ function shippingUpdateHtml(p: ShippingTemplateParams): string {
                   </td>
                 </tr>
               </table>` : ''}`
+    : p.untrackedNote
+    ? `
+              <table width="100%" cellpadding="0" cellspacing="0" style="background:#EDE6F5;border-radius:8px;margin-bottom:28px;">
+                <tr>
+                  <td style="padding:14px 16px;font-size:14px;line-height:1.6;color:#360F5A;">
+                    ${escapeHtml(p.untrackedNote)}
+                  </td>
+                </tr>
+              </table>`
     : ''
 
   return `<!DOCTYPE html>
@@ -450,6 +465,8 @@ function shippingUpdateText(p: ShippingTemplateParams): string {
   const itemLines = p.items.map((item) => `  ${item.name} x${item.quantity}`).join('\n')
   const trackingLines = p.tracking
     ? `\nTRACKING (${p.tracking.carrierName})\n${p.tracking.number}${p.tracking.url ? `\n${p.tracking.url}` : ''}\n`
+    : p.untrackedNote
+    ? `\n${p.untrackedNote}\n`
     : ''
 
   return `Things by K — Your order has shipped
