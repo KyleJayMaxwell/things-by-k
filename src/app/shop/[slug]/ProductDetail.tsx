@@ -9,6 +9,7 @@ import { useCart } from '@/context/CartContext'
 import Button from '@/components/Button'
 import QuantitySelector from '@/components/QuantitySelector'
 import Toast from '@/components/Toast'
+import ImageLightbox from '@/components/ImageLightbox'
 import { formatPrice } from '@/lib/format'
 
 interface ProductDetailProps {
@@ -20,6 +21,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
   const [quantity, setQuantity] = useState(1)
   const [showToast, setShowToast] = useState(false)
   const [added, setAdded] = useState(false)
+  const [lightboxOpen, setLightboxOpen] = useState(false)
   const { addItem } = useCart()
 
   const isSoldOut = product.stock === 0
@@ -41,14 +43,28 @@ export default function ProductDetail({ product }: ProductDetailProps) {
           <div className="aspect-square relative rounded-xl overflow-hidden bg-gray-50 border border-border">
             <div key={selectedImage} className="animate-fade-in absolute inset-0">
               {product.images[selectedImage] ? (
-                <Image
-                  src={product.images[selectedImage]}
-                  alt={product.name}
-                  fill
-                  className="object-cover"
-                  priority
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                />
+                <button
+                  type="button"
+                  onClick={() => setLightboxOpen(true)}
+                  aria-label="View full size image"
+                  className="group absolute inset-0 cursor-zoom-in"
+                >
+                  {/* object-contain so tall or wide photos show in full instead of being cropped */}
+                  <Image
+                    src={product.images[selectedImage]}
+                    alt={product.name}
+                    fill
+                    className="object-contain"
+                    priority
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                  />
+                  <span className="absolute bottom-3 right-3 w-9 h-9 rounded-full bg-white/90 border border-border text-text-primary flex items-center justify-center shadow-sm opacity-80 group-hover:opacity-100 transition-opacity">
+                    <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                      <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+                      <path d="M8 5.5a.75.75 0 01.75.75v1h1a.75.75 0 010 1.5h-1v1a.75.75 0 01-1.5 0v-1h-1a.75.75 0 010-1.5h1v-1A.75.75 0 018 5.5z" />
+                    </svg>
+                  </span>
+                </button>
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-text-secondary">
                   No image
@@ -148,6 +164,17 @@ export default function ProductDetail({ product }: ProductDetailProps) {
           )}
         </div>
       </div>
+
+      {/* Full screen image viewer */}
+      {lightboxOpen && product.images.length > 0 && (
+        <ImageLightbox
+          images={product.images}
+          alt={product.name}
+          index={selectedImage}
+          onIndexChange={setSelectedImage}
+          onClose={() => setLightboxOpen(false)}
+        />
+      )}
 
       {/* Toast */}
       {showToast && (
