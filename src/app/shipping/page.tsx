@@ -1,8 +1,6 @@
 // src/app/shipping/page.tsx
 
-import Link from 'next/link'
 import type { Metadata } from 'next'
-import { CONTACT_EMAIL } from '@/lib/site'
 import { DELIVERY_WEEKS, HANDWRITTEN_POSTCARD_RATES } from '@/lib/shipping'
 import { formatPrice } from '@/lib/format'
 
@@ -127,39 +125,34 @@ export default function ShippingPage() {
         Shipping &amp; Returns
       </h1>
 
+      {/* Each question opens on click so the page stays short */}
       <div className="divide-y divide-border border-y border-border">
         {SECTIONS.map(section => (
-          <section key={section.question} className="py-8">
-            <h2 className="font-medium text-text-primary mb-3">{section.question}</h2>
-            <div className="space-y-3 text-text-secondary text-sm leading-relaxed">
+          <details key={section.question} className="group">
+            <summary className="flex items-center justify-between gap-4 py-5 cursor-pointer list-none [&::-webkit-details-marker]:hidden font-medium text-text-primary hover:text-primary transition-colors focus-ring rounded">
+              {section.question}
+              <svg
+                className="w-4 h-4 flex-shrink-0 text-text-secondary transition-transform duration-200 group-open:rotate-180"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </summary>
+            <div className="pb-6 space-y-3 text-text-secondary text-sm leading-relaxed">
               {section.answer}
             </div>
-          </section>
+          </details>
         ))}
       </div>
 
-      <div className="mt-12 space-y-4 text-text-secondary text-sm leading-relaxed">
+      <div className="mt-12 space-y-4 text-text-primary leading-relaxed">
         <p>
-          Questions about an order? Email{' '}
-          <a
-            href={`mailto:${CONTACT_EMAIL}`}
-            className="text-text-primary underline underline-offset-4 hover:text-primary transition-colors"
-          >
-            {CONTACT_EMAIL}
-          </a>
-          .
-        </p>
-        <p className="text-text-primary">
           I appreciate your support and the time you spent looking. Even if you aren&apos;t buying
           anything, it means a lot that you thought of me.
         </p>
-        <p className="text-text-primary">– K</p>
-      </div>
-
-      <div className="mt-12 pt-8 border-t border-border">
-        <Link href="/privacy" className="text-sm text-text-secondary hover:text-primary transition-colors">
-          Privacy
-        </Link>
+        <p>– K</p>
       </div>
     </div>
   )
