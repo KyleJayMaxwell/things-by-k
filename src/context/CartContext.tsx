@@ -5,15 +5,21 @@
 
 import { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import { CartItem, Product } from '@/types'
+import { cartLineKey, unitPrice } from '@/lib/cart'
 
 interface CartContextValue {
   items: CartItem[]
   itemCount: number
   subtotal: number
-  addItem: (product: Product, quantity?: number) => void
-  removeItem: (productId: string) => void
-  updateQuantity: (productId: string, quantity: number) => void
+  addItem: (product: Product, quantity?: number, options?: AddItemOptions) => void
+  removeItem: (lineKey: string) => void
+  updateQuantity: (lineKey: string, quantity: number) => void
   clearCart: () => void
+}
+
+interface AddItemOptions {
+  handwritten?: boolean
+  message?: string
 }
 
 const CartContext = createContext<CartContextValue | null>(null)
@@ -38,30 +44,42 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem(CART_KEY, JSON.stringify(items))
   }, [items])
 
-  const addItem = useCallback((product: Product, quantity = 1) => {
+  const addItem = useCallback((product: Product, quantity = 1, options: AddItemOptions = {}) => {
+    const line: CartItem = options.handwritten
+      ? { product, quantity, handwritten: true, message: options.message?.trim() ?? '' }
+      : { product, quantity }
+    const key = cartLineKey(line)
+
     setItems(prev => {
-      const existing = prev.find(i => i.product.id === product.id)
+      // Blank and handwritten lines share the product's stock
+      const inOtherLines = prev
+        .filter(i => i.product.id === product.id && cartLineKey(i) !== key)
+        .reduce((sum, i) => sum + i.quantity, 0)
+      const available = Math.max(product.stock - inOtherLines, 0)
+
+      const existing = prev.find(i => cartLineKey(i) === key)
       if (existing) {
         return prev.map(i =>
-          i.product.id === product.id
-            ? { ...i, quantity: Math.min(i.quantity + quantity, product.stock) }
+          cartLineKey(i) === key
+            ? { ...i, quantity: Math.min(i.quantity + quantity, available) }
             : i
         )
       }
-      return [...prev, { product, quantity: Math.min(quantity, product.stock) }]
+      if (available === 0) return prev
+      return [...prev, { ...line, quantity: Math.min(quantity, available) }]
     })
   }, [])
 
-  const removeItem = useCallback((productId: string) => {
-    setItems(prev => prev.filter(i => i.product.id !== productId))
+  const removeItem = useCallback((lineKey: string) => {
+    setItems(prev => prev.filter(i => cartLineKey(i) !== lineKey))
   }, [])
 
-  const updateQuantity = useCallback((productId: string, quantity: number) => {
+  const updateQuantity = useCallback((lineKey: string, quantity: number) => {
     if (quantity <= 0) {
-      setItems(prev => prev.filter(i => i.product.id !== productId))
+      setItems(prev => prev.filter(i => cartLineKey(i) !== lineKey))
     } else {
       setItems(prev =>
-        prev.map(i => i.product.id === productId ? { ...i, quantity } : i)
+        prev.map(i => cartLineKey(i) === lineKey ? { ...i, quantity } : i)
       )
     }
   }, [])
@@ -72,7 +90,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const itemCount = items.reduce((sum, i) => sum + i.quantity, 0)
-  const subtotal = items.reduce((sum, i) => sum + i.product.price * i.quantity, 0)
+  const subtotal = items.reduce((sum, i) => sum + unitPrice(i) * i.quantity, 0)
 
   return (
     <CartContext.Provider value={{ items, itemCount, subtotal, addItem, removeItem, updateQuantity, clearCart }}>

@@ -49,7 +49,7 @@ export default function AdminOrderDetailPage() {
     async function load() {
       const { data } = await supabase
         .from('orders')
-        .select(`*, order_items(id, product_name, price, quantity)`)
+        .select(`*, order_items(*)`)
         .eq('id', id)
         .single()
 
@@ -214,6 +214,12 @@ export default function AdminOrderDetailPage() {
               <div>
                 <p className="text-sm font-medium text-text-primary">{item.product_name}</p>
                 <p className="text-xs text-text-secondary mt-0.5">Qty: {item.quantity}</p>
+                {item.handwritten_message && (
+                  <p className="text-sm text-text-primary mt-2 px-3 py-2 bg-primary-light rounded-lg whitespace-pre-line">
+                    <span className="block text-xs text-text-secondary mb-0.5">Write on the card:</span>
+                    {item.handwritten_message}
+                  </p>
+                )}
               </div>
               <p className="text-sm font-medium text-text-primary">{formatPrice(item.price * item.quantity)}</p>
             </div>

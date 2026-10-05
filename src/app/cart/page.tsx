@@ -8,14 +8,19 @@ import CartItem from '@/components/CartItem'
 import Button from '@/components/Button'
 import Link from 'next/link'
 import { formatPrice } from '@/lib/format'
-
-const SHIPPING_COST = 300 // $3.00 flat rate in cents
+import { cartLineKey } from '@/lib/cart'
+import { shippingQuote, type Destination } from '@/lib/shipping'
 
 export default function CartPage() {
   const { items, subtotal } = useCart()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const total = subtotal + SHIPPING_COST
+  const [destination, setDestination] = useState<Destination>('domestic')
+
+  const handwrittenCards = items.filter(i => i.handwritten).reduce((sum, i) => sum + i.quantity, 0)
+  const packagedItems = items.filter(i => !i.handwritten).reduce((sum, i) => sum + i.quantity, 0)
+  const shipping = shippingQuote(destination, handwrittenCards, packagedItems)
+  const total = subtotal + shipping.amount
 
   const handleCheckout = async () => {
     setLoading(true)
@@ -28,7 +33,10 @@ export default function CartPage() {
           items: items.map(i => ({
             productId: i.product.id,
             quantity: i.quantity,
+            handwritten: !!i.handwritten,
+            message: i.handwritten ? i.message ?? '' : undefined,
           })),
+          destination,
         }),
       })
 
@@ -36,7 +44,7 @@ export default function CartPage() {
       if (data.url) {
         window.location.href = data.url
       } else {
-        setError('Something went wrong. Please try again.')
+        setError(data.error ?? 'Something went wrong. Please try again.')
         setLoading(false)
       }
     } catch {
@@ -73,7 +81,7 @@ export default function CartPage() {
         {/* Cart items */}
         <div className="lg:col-span-2">
           {items.map(item => (
-            <CartItem key={item.product.id} item={item} />
+            <CartItem key={cartLineKey(item)} item={item} />
           ))}
         </div>
 
@@ -82,6 +90,27 @@ export default function CartPage() {
           <div className="bg-surface border border-border rounded-xl p-6 sticky top-24">
             <h2 className="font-semibold text-text-primary mb-4">Order Summary</h2>
 
+            <fieldset className="mb-5">
+              <legend className="text-sm text-text-secondary mb-2">Shipping to</legend>
+              <div className="grid grid-cols-2 gap-2">
+                {(['domestic', 'international'] as const).map(d => (
+                  <button
+                    key={d}
+                    type="button"
+                    aria-pressed={destination === d}
+                    onClick={() => setDestination(d)}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium border transition-colors focus-ring ${
+                      destination === d
+                        ? 'bg-primary text-white border-primary'
+                        : 'bg-white text-text-secondary border-border hover:border-primary/40 hover:text-text-primary'
+                    }`}
+                  >
+                    {d === 'domestic' ? 'United States' : 'International'}
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+
             <div className="space-y-3 text-sm">
               <div className="flex justify-between">
                 <span className="text-text-secondary">Subtotal</span>
@@ -89,8 +118,12 @@ export default function CartPage() {
               </div>
               <div className="flex justify-between">
                 <span className="text-text-secondary">Shipping</span>
-                <span className="text-text-primary">{formatPrice(SHIPPING_COST)}</span>
+                <span className="text-text-primary">{formatPrice(shipping.amount)}</span>
               </div>
+              <p className="text-xs text-text-secondary">
+                {shipping.label}
+                {handwrittenCards > 0 && '. Handwritten cards are stamped and mailed on their own, like a real postcard.'}
+              </p>
               <div className="border-t border-border pt-3 flex justify-between font-semibold text-base">
                 <span className="text-text-primary">Total</span>
                 <span className="text-text-primary">{formatPrice(total)}</span>

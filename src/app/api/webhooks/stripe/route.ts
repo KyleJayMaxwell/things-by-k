@@ -110,13 +110,24 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
     if (!productId) continue
 
     // Insert order item
-    await supabase.from('order_items').insert({
+    const { data: orderItem } = await supabase.from('order_items').insert({
       order_id: order.id,
       product_id: productId,
       product_name: stripeProduct.name,
       price: item.price?.unit_amount ?? 0,
       quantity: item.quantity ?? 1,
-    })
+    }).select('id').single()
+
+    // Save the note for a handwritten card. Kept separate from the insert so a
+    // missing column (handwritten-option.sql not run yet) can't drop the item.
+    const message = stripeProduct.metadata?.message
+    if (orderItem && message) {
+      const { error: messageError } = await supabase
+        .from('order_items')
+        .update({ handwritten_message: message })
+        .eq('id', orderItem.id)
+      if (messageError) console.error('Failed to save handwritten message:', messageError.message)
+    }
 
     // Decrement stock
     await supabase.rpc('decrement_stock', {

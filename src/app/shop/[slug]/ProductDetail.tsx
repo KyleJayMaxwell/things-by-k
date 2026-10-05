@@ -11,6 +11,8 @@ import QuantitySelector from '@/components/QuantitySelector'
 import Toast from '@/components/Toast'
 import ImageLightbox from '@/components/ImageLightbox'
 import { formatPrice } from '@/lib/format'
+import { HANDWRITTEN_MESSAGE_MAX } from '@/lib/cart'
+import { HANDWRITTEN_POSTCARD_RATES } from '@/lib/shipping'
 
 interface ProductDetailProps {
   product: Product
@@ -22,16 +24,21 @@ export default function ProductDetail({ product }: ProductDetailProps) {
   const [showToast, setShowToast] = useState(false)
   const [added, setAdded] = useState(false)
   const [lightboxOpen, setLightboxOpen] = useState(false)
+  const [handwritten, setHandwritten] = useState(false)
+  const [message, setMessage] = useState('')
   const { addItem } = useCart()
 
   const isSoldOut = product.stock === 0
+  const offersHandwritten = product.handwritten_price != null
+  const price = product.price + (handwritten ? product.handwritten_price ?? 0 : 0)
+  const needsMessage = handwritten && message.trim().length === 0
 
   const handleAddToCart = useCallback(() => {
-    addItem(product, quantity)
+    addItem(product, quantity, { handwritten, message })
     setShowToast(true)
     setAdded(true)
     setTimeout(() => setAdded(false), 1800)
-  }, [addItem, product, quantity])
+  }, [addItem, product, quantity, handwritten, message])
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
@@ -105,7 +112,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
           </h1>
 
           <p className="mt-3 text-2xl font-medium text-primary">
-            {formatPrice(product.price)}
+            {formatPrice(price)}
           </p>
 
           <p className="mt-4 text-text-secondary leading-relaxed">
@@ -117,6 +124,67 @@ export default function ProductDetail({ product }: ProductDetailProps) {
             <p className="mt-3 text-sm text-warning font-medium">
               Only {product.stock} left in stock
             </p>
+          )}
+
+          {/* Blank or handwritten */}
+          {offersHandwritten && !isSoldOut && (
+            <fieldset className="mt-8">
+              <legend className="text-sm text-text-secondary mb-3">Choose</legend>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {[
+                  {
+                    value: false,
+                    title: 'Blank',
+                    price: product.price,
+                    detail: 'Ships to you in a protective envelope or box.',
+                  },
+                  {
+                    value: true,
+                    title: 'Handwritten',
+                    price: product.price + (product.handwritten_price ?? 0),
+                    detail: `I write your note and mail it as a real postcard. Postage from ${formatPrice(HANDWRITTEN_POSTCARD_RATES.domestic)}.`,
+                  },
+                ].map(option => (
+                  <button
+                    key={option.title}
+                    type="button"
+                    aria-pressed={handwritten === option.value}
+                    onClick={() => setHandwritten(option.value)}
+                    className={`text-left p-4 rounded-xl border transition-colors focus-ring ${
+                      handwritten === option.value
+                        ? 'border-primary bg-primary-light'
+                        : 'border-border bg-white hover:border-primary/40'
+                    }`}
+                  >
+                    <span className="flex items-baseline justify-between gap-2">
+                      <span className="font-medium text-text-primary">{option.title}</span>
+                      <span className="text-sm text-text-primary">{formatPrice(option.price)}</span>
+                    </span>
+                    <span className="block mt-1 text-xs text-text-secondary leading-relaxed">{option.detail}</span>
+                  </button>
+                ))}
+              </div>
+
+              {handwritten && (
+                <div className="mt-4">
+                  <label htmlFor="handwritten-message" className="block text-sm font-medium text-text-primary mb-1.5">
+                    What should I write?
+                  </label>
+                  <textarea
+                    id="handwritten-message"
+                    value={message}
+                    onChange={e => setMessage(e.target.value.slice(0, HANDWRITTEN_MESSAGE_MAX))}
+                    rows={4}
+                    placeholder="Dear Sam, wish you were here for the fog..."
+                    className="w-full px-3 py-2.5 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors bg-white"
+                  />
+                  <p className="mt-1.5 flex justify-between text-xs text-text-secondary">
+                    <span>It goes to the shipping address you enter at checkout, so you can send it to a friend.</span>
+                    <span className="flex-shrink-0 ml-3">{message.length}/{HANDWRITTEN_MESSAGE_MAX}</span>
+                  </p>
+                </div>
+              )}
+            </fieldset>
           )}
 
           {/* Quantity + Add to Cart */}
@@ -137,7 +205,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
               variant="primary"
               size="lg"
               fullWidth
-              disabled={isSoldOut}
+              disabled={isSoldOut || needsMessage}
               onClick={handleAddToCart}
             >
               {added ? (
