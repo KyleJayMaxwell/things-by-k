@@ -26,6 +26,7 @@ export interface Product {
 export type OrderStatus = 'processing' | 'shipped' | 'delivered'
 
 export interface ShippingAddress {
+  name?: string
   line1: string
   line2?: string | null
   city: string
@@ -46,6 +47,9 @@ export interface Order {
   shipping_cost: number  // in cents
   total: number          // in cents
   shipping_address: ShippingAddress
+  carrier: 'usps' | 'ups' | 'fedex' | 'other' | null
+  tracking_number: string | null
+  shipped_at: string | null
   created_at: string
 }
 

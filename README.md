@@ -66,8 +66,12 @@ Run these SQL files in order in your Supabase project's SQL Editor:
 supabase/schema.sql          # tables, triggers, RLS policies
 supabase/storage.sql         # product-images storage bucket
 supabase/decrement-stock.sql # stock decrement function
+supabase/order-tracking.sql  # carrier + tracking number columns on orders
+supabase/admin-policies.sql  # lets the admin account manage products, images and orders
 supabase/seed.sql            # MVP postcard product
 ```
+
+The admin email lives in two places: `src/lib/admin.ts` and `public.is_admin()` in `supabase/admin-policies.sql`. Change both together.
 
 **4. Start the dev server:**
 

@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+import { CARRIER_NAMES, type Carrier } from '@/lib/tracking'
 
 function formatPrice(cents: number) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(cents / 100)
@@ -19,6 +20,8 @@ function formatDate(dateStr: string) {
 
 const STATUS_OPTIONS = ['processing', 'shipped', 'delivered'] as const
 type OrderStatus = typeof STATUS_OPTIONS[number]
+
+const CARRIER_OPTIONS = Object.entries(CARRIER_NAMES) as [Carrier, string][]
 
 const statusStyles: Record<OrderStatus, string> = {
   processing: 'bg-primary-light text-primary',
@@ -36,6 +39,10 @@ export default function AdminOrderDetailPage() {
   const [saving, setSaving] = useState(false)
   const [status, setStatus] = useState<OrderStatus>('processing')
   const [saved, setSaved] = useState(false)
+  const [carrier, setCarrier] = useState<Carrier>('usps')
+  const [trackingNumber, setTrackingNumber] = useState('')
+  const [notify, setNotify] = useState(true)
+  const [message, setMessage] = useState<{ tone: 'ok' | 'error'; text: string } | null>(null)
 
   useEffect(() => {
     async function load() {
@@ -48,6 +55,8 @@ export default function AdminOrderDetailPage() {
       if (data) {
         setOrder(data)
         setStatus(data.status)
+        if (data.carrier) setCarrier(data.carrier)
+        setTrackingNumber(data.tracking_number ?? '')
       }
       setLoading(false)
     }
@@ -56,12 +65,36 @@ export default function AdminOrderDetailPage() {
 
   const handleSave = async () => {
     setSaving(true)
-    await supabase.from('orders').update({ status }).eq('id', id)
-    setSaving(false)
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2000)
-    setOrder((prev: any) => ({ ...prev, status }))
+    setMessage(null)
+    try {
+      const res = await fetch(`/api/admin/orders/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status, carrier, trackingNumber, notify }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error ?? 'Save failed')
+
+      setOrder((prev: any) => ({ ...prev, ...json.order }))
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2000)
+      if (json.emailSent) {
+        setMessage({ tone: 'ok', text: `Shipping email sent to ${order.email}.` })
+      } else if (json.emailError) {
+        setMessage({ tone: 'error', text: `Status saved, but the shipping email failed: ${json.emailError}` })
+      }
+    } catch (err: any) {
+      setMessage({ tone: 'error', text: err.message ?? 'Save failed' })
+    } finally {
+      setSaving(false)
+    }
   }
+
+  const trackingChanged =
+    status === 'shipped' &&
+    (trackingNumber.trim() !== (order?.tracking_number ?? '') ||
+      (trackingNumber.trim() !== '' && carrier !== (order?.carrier ?? 'usps')))
+  const isNewlyShipped = status === 'shipped' && order?.status !== 'shipped'
 
   if (loading) return <div className="text-text-secondary text-sm">Loading...</div>
   if (!order) return <div className="text-text-secondary text-sm">Order not found.</div>
@@ -105,12 +138,58 @@ export default function AdminOrderDetailPage() {
           ))}
           <button
             onClick={handleSave}
-            disabled={saving || status === order.status}
+            disabled={saving || (status === order.status && !trackingChanged)}
             className="ml-auto px-4 py-2 rounded-lg text-sm font-medium bg-primary text-white hover:bg-primary-hover transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {saving ? 'Saving...' : saved ? 'Saved ✓' : 'Save'}
           </button>
         </div>
+
+        {status === 'shipped' && (
+          <div className="mt-5 pt-5 border-t border-border space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <label className="block">
+                <span className="block text-xs font-medium text-text-secondary mb-1.5">Carrier</span>
+                <select
+                  value={carrier}
+                  onChange={e => setCarrier(e.target.value as Carrier)}
+                  className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-white focus:outline-none focus:border-primary"
+                >
+                  {CARRIER_OPTIONS.map(([value, label]) => (
+                    <option key={value} value={value}>{label}</option>
+                  ))}
+                </select>
+              </label>
+              <label className="block sm:col-span-2">
+                <span className="block text-xs font-medium text-text-secondary mb-1.5">Tracking number (optional)</span>
+                <input
+                  type="text"
+                  value={trackingNumber}
+                  onChange={e => setTrackingNumber(e.target.value)}
+                  placeholder="9400 1000 0000 0000 0000 00"
+                  className="w-full px-3 py-2 rounded-lg border border-border text-sm focus:outline-none focus:border-primary"
+                />
+              </label>
+            </div>
+            {isNewlyShipped && (
+              <label className="flex items-center gap-2 text-sm text-text-secondary">
+                <input
+                  type="checkbox"
+                  checked={notify}
+                  onChange={e => setNotify(e.target.checked)}
+                  className="accent-primary"
+                />
+                Email the customer that their order shipped
+              </label>
+            )}
+          </div>
+        )}
+
+        {message && (
+          <p className={`mt-4 text-sm ${message.tone === 'ok' ? 'text-emerald-700' : 'text-error'}`}>
+            {message.text}
+          </p>
+        )}
       </div>
 
       {/* Items */}
@@ -156,6 +235,7 @@ export default function AdminOrderDetailPage() {
           <h2 className="font-medium text-text-primary mb-4">Ship To</h2>
           {address ? (
             <address className="text-sm text-text-secondary not-italic leading-relaxed">
+              {address.name && <>{address.name}<br /></>}
               {address.line1}<br />
               {address.line2 && <>{address.line2}<br /></>}
               {address.city}, {address.state} {address.postal_code}<br />

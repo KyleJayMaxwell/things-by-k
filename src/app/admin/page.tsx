@@ -135,7 +135,12 @@ export default function AdminPage() {
     <div>
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-2xl font-semibold text-text-primary">Overview</h1>
-        <span className="text-xs text-text-secondary bg-gray-100 px-3 py-1 rounded-full">Last 30 days</span>
+        <div className="flex items-center gap-2">
+          {!hasOrders && (
+            <span className="text-xs font-medium text-amber-700 bg-amber-50 px-3 py-1 rounded-full">Sample data</span>
+          )}
+          <span className="text-xs text-text-secondary bg-gray-100 px-3 py-1 rounded-full">Last 30 days</span>
+        </div>
       </div>
 
       {/* Stat cards */}
