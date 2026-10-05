@@ -98,6 +98,21 @@ export default function ProductForm({ initialData }: ProductFormProps) {
     setForm(prev => ({ ...prev, images: prev.images.filter((_, i) => i !== index) }))
   }
 
+  // Move a photo from one position to another (drag and drop, or the arrow buttons)
+  const moveImage = (from: number, to: number) => {
+    if (from === to || to < 0) return
+    setForm(prev => {
+      if (to >= prev.images.length) return prev
+      const images = [...prev.images]
+      const [moved] = images.splice(from, 1)
+      images.splice(to, 0, moved)
+      return { ...prev, images }
+    })
+  }
+
+  const [dragIndex, setDragIndex] = useState<number | null>(null)
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setSaving(true)
@@ -265,11 +280,36 @@ export default function ProductForm({ initialData }: ProductFormProps) {
         {form.images.length > 0 && (
           <div className="flex flex-wrap gap-3">
             {form.images.map((url, i) => (
-              <div key={i} className="relative group">
-                <img src={url} alt="" className="w-20 h-20 object-cover rounded-lg border border-border" />
+              <div
+                key={url}
+                draggable
+                onDragStart={(e) => {
+                  setDragIndex(i)
+                  e.dataTransfer.effectAllowed = 'move'
+                }}
+                onDragOver={(e) => {
+                  e.preventDefault()
+                  if (dragOverIndex !== i) setDragOverIndex(i)
+                }}
+                onDrop={(e) => {
+                  e.preventDefault()
+                  if (dragIndex !== null) moveImage(dragIndex, i)
+                  setDragIndex(null)
+                  setDragOverIndex(null)
+                }}
+                onDragEnd={() => {
+                  setDragIndex(null)
+                  setDragOverIndex(null)
+                }}
+                className={`relative group cursor-grab active:cursor-grabbing rounded-lg transition-[opacity,box-shadow] ${
+                  dragIndex === i ? 'opacity-40' : ''
+                } ${dragOverIndex === i && dragIndex !== i ? 'ring-2 ring-primary ring-offset-2' : ''}`}
+              >
+                <img src={url} alt="" draggable={false} className="w-20 h-20 object-cover rounded-lg border border-border" />
                 <button
                   type="button"
                   onClick={() => removeImage(i)}
+                  aria-label="Remove image"
                   className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-error text-white rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                 >
                   ×
@@ -279,6 +319,27 @@ export default function ProductForm({ initialData }: ProductFormProps) {
                     Main
                   </span>
                 )}
+                {/* Arrow buttons for touch screens, where drag and drop isn't available */}
+                <div className="flex justify-between mt-1">
+                  <button
+                    type="button"
+                    onClick={() => moveImage(i, i - 1)}
+                    disabled={i === 0}
+                    aria-label="Move image left"
+                    className="w-6 h-6 text-xs text-text-secondary hover:text-text-primary disabled:opacity-30"
+                  >
+                    ←
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => moveImage(i, i + 1)}
+                    disabled={i === form.images.length - 1}
+                    aria-label="Move image right"
+                    className="w-6 h-6 text-xs text-text-secondary hover:text-text-primary disabled:opacity-30"
+                  >
+                    →
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -299,7 +360,7 @@ export default function ProductForm({ initialData }: ProductFormProps) {
         >
           {uploading ? 'Uploading...' : '+ Upload Image'}
         </button>
-        <p className="text-xs text-text-secondary">First image is used as the main product photo.</p>
+        <p className="text-xs text-text-secondary">First image is used as the main product photo. Drag photos to reorder them, then save.</p>
       </div>
 
       {/* Actions */}
