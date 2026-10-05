@@ -89,8 +89,8 @@ export async function POST(request: NextRequest) {
         if (product.category !== 'postcard') {
           throw new Error(`${product.name} isn't available handwritten`)
         }
+        // A blank note means K freestyles the card
         const message = (item.message ?? '').trim()
-        if (!message) throw new Error(`Add a note for your handwritten ${product.name}`)
         if (message.length > HANDWRITTEN_MESSAGE_MAX) {
           throw new Error(`Handwritten notes can be up to ${HANDWRITTEN_MESSAGE_MAX} characters`)
         }
@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
             currency: 'usd',
             product_data: {
               name: `${product.name} (Handwritten)`,
-              description: `Your note: ${message}`,
+              description: message ? `Your note: ${message}` : 'No note given: K will freestyle it',
               images: product.images.slice(0, 1),
               metadata: { product_id: product.id, handwritten: 'true', message },
             },
