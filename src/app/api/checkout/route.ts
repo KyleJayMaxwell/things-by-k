@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
 
     const { data: products, error } = await serviceClient
       .from('products')
-      .select('id, name, description, price, images, stock, handwritten_price')
+      .select('id, name, description, price, images, stock, category, handwritten_price')
       .in('id', productIds)
       .eq('is_active', true)
 
@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
       const product = products.find(p => p.id === item.productId)!
 
       if (item.handwritten) {
-        if (product.handwritten_price == null) {
+        if (product.category !== 'postcard') {
           throw new Error(`${product.name} isn't available handwritten`)
         }
         const message = (item.message ?? '').trim()
@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
               images: product.images.slice(0, 1),
               metadata: { product_id: product.id, handwritten: 'true', message },
             },
-            unit_amount: product.price + product.handwritten_price,
+            unit_amount: product.price + (product.handwritten_price ?? 0),
           },
           quantity: item.quantity,
         }

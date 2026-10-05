@@ -17,7 +17,7 @@ export interface Product {
   images: string[]       // Supabase Storage URLs
   stock: number
   is_active: boolean
-  handwritten_price: number | null  // extra cents for a handwritten card; null = not offered
+  handwritten_price: number | null  // extra cents for a handwritten postcard; null = no extra
   created_at: string
   updated_at: string
 }

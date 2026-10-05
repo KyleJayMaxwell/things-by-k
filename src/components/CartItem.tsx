@@ -9,7 +9,7 @@ import { CartItem as CartItemType } from '@/types'
 import { useCart } from '@/context/CartContext'
 import QuantitySelector from './QuantitySelector'
 import { formatPrice } from '@/lib/format'
-import { cartLineKey, unitPrice } from '@/lib/cart'
+import { cartLineKey, offersHandwritten, unitPrice } from '@/lib/cart'
 
 interface CartItemProps {
   item: CartItemType
@@ -63,7 +63,7 @@ export default function CartItem({ item }: CartItemProps) {
         </div>
 
         <p className="mt-1 text-sm text-text-secondary">
-          {item.handwritten ? 'Handwritten · ' : product.category === 'postcard' && product.handwritten_price != null ? 'Blank · ' : ''}
+          {item.handwritten ? 'Handwritten · ' : offersHandwritten(product) ? 'Blank · ' : ''}
           {formatPrice(price)} each
         </p>
         {item.handwritten && item.message && (

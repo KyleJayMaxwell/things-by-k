@@ -12,6 +12,11 @@ export function cartLineKey(item: Pick<CartItem, 'product' | 'handwritten' | 'me
   return item.handwritten ? `${item.product.id}:hw:${item.message ?? ''}` : item.product.id
 }
 
+// Every postcard can be ordered handwritten
+export function offersHandwritten(product: Pick<CartItem['product'], 'category'>): boolean {
+  return product.category === 'postcard'
+}
+
 export function unitPrice(item: Pick<CartItem, 'product' | 'handwritten'>): number {
   return item.product.price + (item.handwritten ? item.product.handwritten_price ?? 0 : 0)
 }

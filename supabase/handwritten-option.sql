@@ -4,8 +4,8 @@
 -- Run AFTER schema.sql (safe to run more than once)
 -- ─────────────────────────────────────────────
 
--- Extra price (cents) for having a postcard handwritten.
--- null = the product isn't offered handwritten.
+-- Extra price (cents) for having a postcard handwritten. Every postcard
+-- offers it; null or 0 = no extra charge.
 alter table public.products
   add column if not exists handwritten_price integer
     check (handwritten_price is null or handwritten_price >= 0);

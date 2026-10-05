@@ -41,7 +41,6 @@ export default function ProductForm({ initialData }: ProductFormProps) {
     stock: initialData?.stock?.toString() ?? '',
     is_active: initialData?.is_active ?? true,
     images: initialData?.images ?? [] as string[],
-    offers_handwritten: initialData?.handwritten_price != null,
     handwritten_price: initialData?.handwritten_price != null ? (initialData.handwritten_price / 100).toFixed(2) : '0.00',
   })
 
@@ -131,14 +130,10 @@ export default function ProductForm({ initialData }: ProductFormProps) {
       stock: parseInt(form.stock),
       is_active: form.is_active,
       images: form.images,
-      // Only sent when used, so saving still works before handwritten-option.sql is run
-      ...(form.offers_handwritten || initialData?.handwritten_price !== undefined
-        ? {
-            handwritten_price: form.offers_handwritten
-              ? Math.round((parseFloat(form.handwritten_price) || 0) * 100)
-              : null,
-          }
-        : {}),
+      // Extra charge for a handwritten postcard (every postcard offers it)
+      handwritten_price: form.category === 'postcard'
+        ? Math.round((parseFloat(form.handwritten_price) || 0) * 100)
+        : null,
     }
 
     try {
@@ -259,32 +254,20 @@ export default function ProductForm({ initialData }: ProductFormProps) {
       {form.category === 'postcard' && (
         <div className="bg-white border border-border rounded-xl p-6 space-y-4">
           <h2 className="font-medium text-text-primary">Handwritten option</h2>
-          <div className="flex items-center gap-3">
+          <p className="text-sm text-text-secondary">
+            Every postcard can be bought handwritten: the customer writes a note and you mail it as a postcard.
+          </p>
+          <Field label="Extra for handwritten ($)" hint="Added to the price above; 0 for no extra">
             <input
-              type="checkbox"
-              id="offers_handwritten"
-              name="offers_handwritten"
-              checked={form.offers_handwritten}
+              type="number"
+              name="handwritten_price"
+              value={form.handwritten_price}
               onChange={handleChange}
-              className="w-4 h-4 accent-primary"
+              min="0"
+              step="0.01"
+              className={inputClass}
             />
-            <label htmlFor="offers_handwritten" className="text-sm text-text-primary">
-              Offer a handwritten version (customer writes a note, you mail it as a postcard)
-            </label>
-          </div>
-          {form.offers_handwritten && (
-            <Field label="Extra for handwritten ($)" hint="Added to the price above; 0 for no extra">
-              <input
-                type="number"
-                name="handwritten_price"
-                value={form.handwritten_price}
-                onChange={handleChange}
-                min="0"
-                step="0.01"
-                className={inputClass}
-              />
-            </Field>
-          )}
+          </Field>
         </div>
       )}
 

@@ -11,7 +11,7 @@ import QuantitySelector from '@/components/QuantitySelector'
 import Toast from '@/components/Toast'
 import ImageLightbox from '@/components/ImageLightbox'
 import { formatPrice } from '@/lib/format'
-import { HANDWRITTEN_MESSAGE_MAX } from '@/lib/cart'
+import { HANDWRITTEN_MESSAGE_MAX, offersHandwritten } from '@/lib/cart'
 import { HANDWRITTEN_POSTCARD_RATES } from '@/lib/shipping'
 
 interface ProductDetailProps {
@@ -29,7 +29,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
   const { addItem } = useCart()
 
   const isSoldOut = product.stock === 0
-  const offersHandwritten = product.handwritten_price != null
+  const canHandwrite = offersHandwritten(product)
   const price = product.price + (handwritten ? product.handwritten_price ?? 0 : 0)
   const needsMessage = handwritten && message.trim().length === 0
 
@@ -127,7 +127,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
           )}
 
           {/* Blank or handwritten */}
-          {offersHandwritten && !isSoldOut && (
+          {canHandwrite && !isSoldOut && (
             <fieldset className="mt-8">
               <legend className="text-sm text-text-secondary mb-3">Choose</legend>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
