@@ -7,6 +7,7 @@ import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { CARRIER_NAMES, type Carrier } from '@/lib/tracking'
+import { DELIVERY_WEEKS, destinationForCountry } from '@/lib/shipping'
 
 function formatPrice(cents: number) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(cents / 100)
@@ -48,7 +49,7 @@ export default function AdminOrderDetailPage() {
     async function load() {
       const { data } = await supabase
         .from('orders')
-        .select(`*, order_items(id, product_name, price, quantity)`)
+        .select(`*, order_items(*)`)
         .eq('id', id)
         .single()
 
@@ -182,6 +183,16 @@ export default function AdminOrderDetailPage() {
                 Email the customer that their order shipped
               </label>
             )}
+            {isNewlyShipped && notify && (
+              <p className="text-xs text-text-secondary">
+                {trackingNumber.trim()
+                  ? 'The email will include this tracking number and a link to track it.'
+                  : (() => {
+                      const destination = destinationForCountry(order.shipping_address?.country)
+                      return `No tracking number, so the email will say it went by regular mail and to reply if it hasn't arrived in ${DELIVERY_WEEKS[destination]} weeks (${destination === 'domestic' ? 'US' : 'international'} order).`
+                    })()}
+              </p>
+            )}
           </div>
         )}
 
@@ -203,6 +214,12 @@ export default function AdminOrderDetailPage() {
               <div>
                 <p className="text-sm font-medium text-text-primary">{item.product_name}</p>
                 <p className="text-xs text-text-secondary mt-0.5">Qty: {item.quantity}</p>
+                {item.handwritten_message && (
+                  <p className="text-sm text-text-primary mt-2 px-3 py-2 bg-primary-light rounded-lg whitespace-pre-line">
+                    <span className="block text-xs text-text-secondary mb-0.5">Write on the card:</span>
+                    {item.handwritten_message}
+                  </p>
+                )}
               </div>
               <p className="text-sm font-medium text-text-primary">{formatPrice(item.price * item.quantity)}</p>
             </div>

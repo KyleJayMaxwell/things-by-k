@@ -9,6 +9,7 @@ import { CartItem as CartItemType } from '@/types'
 import { useCart } from '@/context/CartContext'
 import QuantitySelector from './QuantitySelector'
 import { formatPrice } from '@/lib/format'
+import { cartLineKey, offersHandwritten, unitPrice } from '@/lib/cart'
 
 interface CartItemProps {
   item: CartItemType
@@ -17,12 +18,14 @@ interface CartItemProps {
 export default function CartItem({ item }: CartItemProps) {
   const { updateQuantity, removeItem } = useCart()
   const { product, quantity } = item
-  const lineTotal = product.price * quantity
+  const lineKey = cartLineKey(item)
+  const price = unitPrice(item)
+  const lineTotal = price * quantity
   const [removing, setRemoving] = useState(false)
 
   const handleRemove = () => {
     setRemoving(true)
-    setTimeout(() => removeItem(product.id), 280)
+    setTimeout(() => removeItem(lineKey), 280)
   }
 
   return (
@@ -60,15 +63,19 @@ export default function CartItem({ item }: CartItemProps) {
         </div>
 
         <p className="mt-1 text-sm text-text-secondary">
-          {formatPrice(product.price)} each
+          {item.handwritten ? 'Handwritten · ' : offersHandwritten(product) ? 'Blank · ' : ''}
+          {formatPrice(price)} each
         </p>
+        {item.handwritten && item.message && (
+          <p className="mt-1 text-sm text-text-secondary italic break-words">“{item.message}”</p>
+        )}
 
         <div className="mt-3 flex items-center gap-4">
           <QuantitySelector
             value={quantity}
             min={1}
             max={product.stock}
-            onChange={(val) => updateQuantity(product.id, val)}
+            onChange={(val) => updateQuantity(lineKey, val)}
           />
           <button
             onClick={handleRemove}

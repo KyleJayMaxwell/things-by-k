@@ -3,8 +3,18 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
+import type Stripe from 'stripe'
 import { createServiceClient } from '@/lib/supabase/server'
 import { createClient } from '@/lib/supabase/server'
+import { HANDWRITTEN_MESSAGE_MAX } from '@/lib/cart'
+import { shippingQuote, INTERNATIONAL_COUNTRIES, type Destination } from '@/lib/shipping'
+
+interface CheckoutItem {
+  productId: string
+  quantity: number
+  handwritten?: boolean
+  message?: string
+}
 
 // Simple in-memory rate limiter — max 5 checkout attempts per IP per minute
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>()
@@ -30,7 +40,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
   }
   try {
-    const { items } = await request.json()
+    const { items, destination: rawDestination } = (await request.json()) as {
+      items: CheckoutItem[]
+      destination?: string
+    }
+    const destination: Destination = rawDestination === 'international' ? 'international' : 'domestic'
 
     if (!items || items.length === 0) {
       return NextResponse.json({ error: 'No items in cart' }, { status: 400 })
@@ -42,11 +56,11 @@ export async function POST(request: NextRequest) {
 
     // Fetch product details from Supabase to build line items
     const serviceClient = createServiceClient()
-    const productIds = items.map((i: { productId: string }) => i.productId)
+    const productIds = [...new Set(items.map(i => i.productId))]
 
     const { data: products, error } = await serviceClient
       .from('products')
-      .select('id, name, description, price, images, stock')
+      .select('id, name, description, price, images, stock, category, handwritten_price')
       .in('id', productIds)
       .eq('is_active', true)
 
@@ -54,16 +68,50 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 })
     }
 
-    // Build Stripe line items
-    const lineItems = items.map((item: { productId: string; quantity: number }) => {
-      const product = products.find(p => p.id === item.productId)
-      if (!product) throw new Error(`Product ${item.productId} not found`)
+    // Validate stock across all lines of the same product (blank + handwritten)
+    const requested = new Map<string, number>()
+    for (const item of items) {
+      requested.set(item.productId, (requested.get(item.productId) ?? 0) + item.quantity)
+    }
+    for (const [productId, quantity] of requested) {
+      const product = products.find(p => p.id === productId)
+      if (!product) throw new Error('A product in your cart is no longer available')
+      if (quantity > product.stock) throw new Error(`Not enough stock for ${product.name}`)
+    }
 
-      // Validate stock
-      if (item.quantity > product.stock) {
-        throw new Error(`Not enough stock for ${product.name}`)
+    // Build Stripe line items
+    let handwrittenCards = 0
+    let packagedItems = 0
+    const lineItems = items.map((item): Stripe.Checkout.SessionCreateParams.LineItem => {
+      const product = products.find(p => p.id === item.productId)!
+
+      if (item.handwritten) {
+        if (product.category !== 'postcard') {
+          throw new Error(`${product.name} isn't available handwritten`)
+        }
+        const message = (item.message ?? '').trim()
+        if (!message) throw new Error(`Add a note for your handwritten ${product.name}`)
+        if (message.length > HANDWRITTEN_MESSAGE_MAX) {
+          throw new Error(`Handwritten notes can be up to ${HANDWRITTEN_MESSAGE_MAX} characters`)
+        }
+        handwrittenCards += item.quantity
+
+        return {
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: `${product.name} (Handwritten)`,
+              description: `Your note: ${message}`,
+              images: product.images.slice(0, 1),
+              metadata: { product_id: product.id, handwritten: 'true', message },
+            },
+            unit_amount: product.price + (product.handwritten_price ?? 0),
+          },
+          quantity: item.quantity,
+        }
       }
 
+      packagedItems += item.quantity
       return {
         price_data: {
           currency: 'usd',
@@ -79,6 +127,8 @@ export async function POST(request: NextRequest) {
       }
     })
 
+    const shipping = shippingQuote(destination, handwrittenCards, packagedItems)
+
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
 
     // Create Stripe Checkout Session
@@ -86,18 +136,14 @@ export async function POST(request: NextRequest) {
       mode: 'payment',
       line_items: lineItems,
       shipping_address_collection: {
-        allowed_countries: ['US', 'CA'],
+        allowed_countries: destination === 'domestic' ? ['US'] : [...INTERNATIONAL_COUNTRIES],
       },
       shipping_options: [
         {
           shipping_rate_data: {
             type: 'fixed_amount',
-            fixed_amount: { amount: 300, currency: 'usd' },
-            display_name: 'Standard Shipping',
-            delivery_estimate: {
-              minimum: { unit: 'business_day', value: 3 },
-              maximum: { unit: 'business_day', value: 7 },
-            },
+            fixed_amount: { amount: shipping.amount, currency: 'usd' },
+            display_name: shipping.label,
           },
         },
       ],

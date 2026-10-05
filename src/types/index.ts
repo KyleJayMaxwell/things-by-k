@@ -17,6 +17,7 @@ export interface Product {
   images: string[]       // Supabase Storage URLs
   stock: number
   is_active: boolean
+  handwritten_price: number | null  // extra cents for a handwritten postcard; null = no extra
   created_at: string
   updated_at: string
 }
@@ -60,6 +61,7 @@ export interface OrderItem {
   product_name: string   // snapshot at time of purchase
   price: number          // snapshot in cents
   quantity: number
+  handwritten_message: string | null
 }
 
 export interface OrderWithItems extends Order {
@@ -79,6 +81,8 @@ export interface Profile {
 export interface CartItem {
   product: Product
   quantity: number
+  handwritten?: boolean
+  message?: string       // what to write on a handwritten card
 }
 
 export interface Cart {

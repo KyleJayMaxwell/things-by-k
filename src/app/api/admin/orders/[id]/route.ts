@@ -7,6 +7,7 @@ import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { isAdminEmail } from '@/lib/admin'
 import { sendShippingUpdate } from '@/lib/email'
 import type { Carrier } from '@/lib/tracking'
+import { destinationForCountry } from '@/lib/shipping'
 
 const STATUSES = ['processing', 'shipped', 'delivered'] as const
 const CARRIERS: Carrier[] = ['usps', 'ups', 'fedex', 'other']
@@ -81,6 +82,7 @@ export async function PATCH(
         })),
         carrier: trackingNumber ? carrier : null,
         trackingNumber,
+        destination: destinationForCountry(existing.shipping_address?.country),
       })
       emailSent = true
     } catch (err) {
