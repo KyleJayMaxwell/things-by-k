@@ -142,7 +142,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                     value: true,
                     title: 'Handwritten',
                     price: product.price + (product.handwritten_price ?? 0),
-                    detail: `I write your note and mail it as a real postcard. Postage from ${formatPrice(HANDWRITTEN_POSTCARD_RATES.domestic)}.`,
+                    detail: `I write your note, or a surprise for you, and mail it as a real postcard. Postage from ${formatPrice(HANDWRITTEN_POSTCARD_RATES.domestic)}.`,
                   },
                 ].map(option => (
                   <button
@@ -174,12 +174,12 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                     id="handwritten-message"
                     value={message}
                     onChange={e => setMessage(e.target.value.slice(0, HANDWRITTEN_MESSAGE_MAX))}
-                    rows={4}
-                    placeholder="Dear Sam, wish you were here for the fog..."
+                    rows={5}
+                    placeholder={'Sending it to someone? Write your message, like "Dear Sam, wish you were here for the fog..."\n\nSending it to yourself? Give me a little inspiration (a favorite place, a memory, something you need to hear) and I\'ll write you a surprise.'}
                     className="w-full px-3 py-2.5 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors bg-white"
                   />
                   <p className="mt-1.5 flex justify-between text-xs text-text-secondary">
-                    <span>It goes to the shipping address you enter at checkout, so you can send it to a friend.</span>
+                    <span>It's mailed to the shipping address you enter at checkout. Send a pick-me-up to a friend, or treat yourself to something fun in the mailbox instead of bills.</span>
                     <span className="flex-shrink-0 ml-3">{message.length}/{HANDWRITTEN_MESSAGE_MAX}</span>
                   </p>
                 </div>
