@@ -5,6 +5,7 @@ import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import Badge from '@/components/Badge'
+import { CARRIER_NAMES, trackingUrl, type Carrier } from '@/lib/tracking'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Order Details' }
@@ -46,6 +47,8 @@ export default async function OrderDetailPage({ params }: Props) {
   if (!order) notFound()
 
   const address = order.shipping_address
+  const carrier = order.carrier as Carrier | null
+  const trackingLink = carrier && order.tracking_number ? trackingUrl(carrier, order.tracking_number) : null
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-12">
@@ -130,6 +133,18 @@ export default async function OrderDetailPage({ params }: Props) {
             {address.city}, {address.state} {address.postal_code}<br />
             {address.country}
           </address>
+          {order.tracking_number && (
+            <p className="text-sm text-text-secondary mt-4 pt-4 border-t border-border">
+              Tracking{carrier && carrier !== 'other' ? ` (${CARRIER_NAMES[carrier]})` : ''}:{' '}
+              {trackingLink ? (
+                <a href={trackingLink} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                  {order.tracking_number}
+                </a>
+              ) : (
+                <span className="text-text-primary">{order.tracking_number}</span>
+              )}
+            </p>
+          )}
         </div>
       </div>
     </div>

@@ -3,6 +3,7 @@
 // Server-only — never import in Client Components
 
 import { Resend } from 'resend'
+import { CARRIER_NAMES, trackingUrl, type Carrier } from '@/lib/tracking'
 
 if (!process.env.RESEND_API_KEY) {
   throw new Error('Missing RESEND_API_KEY environment variable')
@@ -274,6 +275,189 @@ Total:     ${formatPrice(p.total)}
 
 SHIPPING TO
 ${p.addressLines}
+
+Questions? Reply to this email or reach us at hello@things-by-k.com
+
+© ${new Date().getFullYear()} Things by K
+`
+}
+// ── Shipping Update ───────────────────────────────────────────────────────────
+
+interface SendShippingUpdateParams {
+  to: string
+  orderNumber: string
+  recipientName?: string
+  items: OrderItem[]
+  carrier?: Carrier | null
+  trackingNumber?: string | null
+}
+
+function escapeHtml(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+}
+
+export async function sendShippingUpdate(params: SendShippingUpdateParams) {
+  const { to, orderNumber, recipientName, items, carrier, trackingNumber } = params
+
+  const tracking = carrier && trackingNumber
+    ? {
+        carrierName: carrier === 'other' ? 'Carrier' : CARRIER_NAMES[carrier],
+        number: trackingNumber,
+        url: trackingUrl(carrier, trackingNumber),
+      }
+    : null
+
+  const firstName = recipientName?.trim().split(/\s+/)[0] ?? ''
+  const greeting = firstName ? `Good news, ${firstName}!` : 'Good news!'
+
+  const { data, error } = await resend.emails.send({
+    from: FROM,
+    to,
+    subject: `Your order has shipped — ${orderNumber}`,
+    html: shippingUpdateHtml({ orderNumber, greeting, items, tracking }),
+    text: shippingUpdateText({ orderNumber, greeting, items, tracking }),
+  })
+
+  if (error) {
+    console.error('Failed to send shipping update email:', error)
+    throw new Error(`Email send failed: ${error.message}`)
+  }
+
+  return data
+}
+
+interface ShippingTemplateParams {
+  orderNumber: string
+  greeting: string
+  items: OrderItem[]
+  tracking: { carrierName: string; number: string; url: string | null } | null
+}
+
+function shippingUpdateHtml(p: ShippingTemplateParams): string {
+  const itemRows = p.items
+    .map(
+      (item) => `
+      <tr>
+        <td style="padding:10px 0;border-bottom:1px solid #E4E0EF;color:#1A1A2E;font-size:14px;">
+          ${escapeHtml(item.name)} &times; ${item.quantity}
+        </td>
+      </tr>`
+    )
+    .join('')
+
+  const trackingBlock = p.tracking
+    ? `
+              <table width="100%" cellpadding="0" cellspacing="0" style="background:#EDE6F5;border-radius:8px;margin-bottom:28px;">
+                <tr>
+                  <td style="padding:12px 16px;">
+                    <p style="margin:0;font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#360F5A;font-weight:600;">
+                      Tracking (${escapeHtml(p.tracking.carrierName)})
+                    </p>
+                    <p style="margin:4px 0 0;font-size:16px;font-weight:600;color:#360F5A;">
+                      ${escapeHtml(p.tracking.number)}
+                    </p>
+                  </td>
+                </tr>
+              </table>
+              ${p.tracking.url ? `
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+                <tr>
+                  <td style="text-align:center;">
+                    <a href="${escapeHtml(p.tracking.url)}" style="display:inline-block;background:#360F5A;color:#FFFFFF;text-decoration:none;font-size:14px;font-weight:600;padding:12px 24px;border-radius:8px;">
+                      Track your package
+                    </a>
+                  </td>
+                </tr>
+              </table>` : ''}`
+    : ''
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your order has shipped — ${p.orderNumber}</title>
+</head>
+<body style="margin:0;padding:0;background:#FAF9FC;font-family:system-ui,-apple-system,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#FAF9FC;padding:40px 0;">
+    <tr>
+      <td align="center">
+        <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">
+
+          <!-- Header -->
+          <tr>
+            <td style="padding:0 0 32px 0;text-align:center;">
+              <p style="margin:0;font-size:22px;font-weight:600;color:#360F5A;letter-spacing:-0.3px;">
+                Things by K
+              </p>
+            </td>
+          </tr>
+
+          <!-- Card -->
+          <tr>
+            <td style="background:#FFFFFF;border:1px solid #E4E0EF;border-radius:12px;padding:40px;">
+
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="text-align:center;padding-bottom:8px;">
+                    <h1 style="margin:0;font-size:22px;font-weight:600;color:#1A1A2E;">
+                      ${escapeHtml(p.greeting)}
+                    </h1>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="text-align:center;padding-bottom:32px;">
+                    <p style="margin:0;font-size:14px;color:#6B6A80;">
+                      Your order ${p.orderNumber} is packed up and on its way.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+${trackingBlock}
+              <!-- Items -->
+              <p style="margin:0 0 12px;font-size:12px;text-transform:uppercase;letter-spacing:0.08em;color:#6B6A80;font-weight:600;">
+                In this package
+              </p>
+              <table width="100%" cellpadding="0" cellspacing="0">
+                ${itemRows}
+              </table>
+
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding:28px 0 0;text-align:center;">
+              <p style="margin:0;font-size:12px;color:#6B6A80;">
+                Questions? Reply to this email or reach us at
+                <a href="mailto:hello@things-by-k.com" style="color:#360F5A;">hello@things-by-k.com</a>
+              </p>
+              <p style="margin:8px 0 0;font-size:12px;color:#6B6A80;">
+                © ${new Date().getFullYear()} Things by K
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`
+}
+
+function shippingUpdateText(p: ShippingTemplateParams): string {
+  const itemLines = p.items.map((item) => `  ${item.name} x${item.quantity}`).join('\n')
+  const trackingLines = p.tracking
+    ? `\nTRACKING (${p.tracking.carrierName})\n${p.tracking.number}${p.tracking.url ? `\n${p.tracking.url}` : ''}\n`
+    : ''
+
+  return `Things by K — Your order has shipped
+
+${p.greeting} Your order ${p.orderNumber} is packed up and on its way.
+${trackingLines}
+IN THIS PACKAGE
+${itemLines}
 
 Questions? Reply to this email or reach us at hello@things-by-k.com
 
