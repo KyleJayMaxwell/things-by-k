@@ -12,6 +12,7 @@ import Link from 'next/link'
 import Badge, { STATUS_CHART_COLORS } from '@/components/Badge'
 import type { OrderStatus } from '@/types'
 import { formatPrice, formatDate } from '@/lib/format'
+import DateRangeFilter, { rangeBounds, toDayString, type DateRange } from './DateRangeFilter'
 
 interface OverviewOrder {
   id: string
@@ -30,50 +31,66 @@ interface OverviewProduct {
   is_active: boolean
 }
 
-// Sums a value per day, keeping days in order
-function totalsByDay(orders: OverviewOrder[], value: (o: OverviewOrder) => number) {
+// Sums a value per day (or per month for long ranges), keeping them in order
+function totalsByPeriod(orders: OverviewOrder[], byMonth: boolean, value: (o: OverviewOrder) => number) {
   const map: Record<string, number> = {}
   orders.forEach(o => {
-    const day = formatDate(o.created_at, 'day')
-    map[day] = (map[day] ?? 0) + value(o)
+    const period = formatDate(o.created_at, byMonth ? 'month' : 'day')
+    map[period] = (map[period] ?? 0) + value(o)
   })
   return Object.entries(map)
+}
+
+function defaultRange(): DateRange {
+  const today = new Date()
+  const monthAgo = new Date()
+  monthAgo.setDate(monthAgo.getDate() - 29)
+  return { key: 'month', from: toDayString(monthAgo), to: toDayString(today) }
 }
 
 export default function AdminPage() {
   const [orders, setOrders] = useState<OverviewOrder[]>([])
   const [products, setProducts] = useState<OverviewProduct[]>([])
   const [loading, setLoading] = useState(true)
+  const [range, setRange] = useState<DateRange>(defaultRange)
 
   useEffect(() => {
     const supabase = createClient()
+    let cancelled = false
     async function load() {
-      const since = new Date()
-      since.setDate(since.getDate() - 30)
+      const { start, end } = rangeBounds(range)
+      let ordersQuery = supabase
+        .from('orders')
+        .select('id, order_number, email, total, status, created_at, order_items(product_name, quantity)')
+        .gte('created_at', start.toISOString())
+        .order('created_at', { ascending: true })
+      if (end) ordersQuery = ordersQuery.lt('created_at', end.toISOString())
 
       const [ordersRes, productsRes] = await Promise.all([
-        supabase
-          .from('orders')
-          .select('id, order_number, email, total, status, created_at, order_items(product_name, quantity)')
-          .gte('created_at', since.toISOString())
-          .order('created_at', { ascending: true }),
+        ordersQuery,
         supabase.from('products').select('id, name, stock, is_active'),
       ])
+      if (cancelled) return
 
       setOrders((ordersRes.data as OverviewOrder[] | null) ?? [])
       setProducts(productsRes.data ?? [])
       setLoading(false)
     }
     load()
-  }, [])
+    return () => { cancelled = true }
+  }, [range])
+
+  // Group charts by month once the range is longer than about two months
+  const { start, end } = rangeBounds(range)
+  const byMonth = ((end ?? new Date()).getTime() - start.getTime()) / 86_400_000 > 62
 
   // Refunded orders don't count toward revenue or units sold
   const paidOrders = orders.filter(o => o.status !== 'refunded')
 
-  const revenueByDay = totalsByDay(paidOrders, o => o.total)
+  const revenueByDay = totalsByPeriod(paidOrders, byMonth, o => o.total)
     .map(([date, cents]) => ({ date, revenue: cents / 100 }))
 
-  const volumeByDay = totalsByDay(orders, () => 1)
+  const volumeByDay = totalsByPeriod(orders, byMonth, () => 1)
     .map(([date, count]) => ({ date, orders: count }))
 
   const statusData = (Object.keys(STATUS_CHART_COLORS) as OrderStatus[])
@@ -101,11 +118,9 @@ export default function AdminPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-wrap items-start justify-between gap-4 mb-8">
         <h1 className="text-2xl font-semibold text-text-primary">Overview</h1>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-text-secondary bg-gray-100 px-3 py-1 rounded-full">Last 30 days</span>
-        </div>
+        <DateRangeFilter value={range} onChange={setRange} />
       </div>
 
       {/* Stat cards */}
@@ -175,7 +190,7 @@ export default function AdminPage() {
 
         {/* Daily order volume */}
         <div className="bg-white border border-border rounded-xl p-5">
-          <h2 className="font-medium text-text-primary mb-4">Daily Orders</h2>
+          <h2 className="font-medium text-text-primary mb-4">{byMonth ? 'Monthly Orders' : 'Daily Orders'}</h2>
           {volumeByDay.length === 0 ? (
             <EmptyChart />
           ) : (
@@ -226,7 +241,7 @@ export default function AdminPage() {
             </Link>
           </div>
           {recentOrders.length === 0 ? (
-            <p className="text-text-secondary text-sm px-5 py-8 text-center">No orders in the last 30 days.</p>
+            <p className="text-text-secondary text-sm px-5 py-8 text-center">No orders in this period.</p>
           ) : (
             <div className="divide-y divide-border">
               {recentOrders.map(order => (
