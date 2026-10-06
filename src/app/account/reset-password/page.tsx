@@ -5,10 +5,13 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import Button from '@/components/Button'
 import PasswordInput from '@/components/PasswordInput'
-import { checkNewPassword } from '@/lib/password'
+import { passwordError, confirmPasswordError } from '@/lib/password'
+import { authErrorMessage } from '@/lib/validation'
+import { errorMessage } from '@/lib/errors'
 
 export default function ResetPasswordPage() {
   const router = useRouter()
@@ -18,22 +21,30 @@ export default function ResetPasswordPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  const errors = {
+    password: passwordError(password),
+    confirm: confirm ? confirmPasswordError(password, confirm) : 'Type your new password again.',
+  }
+  const canSave = !errors.password && !errors.confirm
+  const linkExpired = error === authErrorMessage('session missing')
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!canSave) return
     setError(null)
-    const passwordProblem = checkNewPassword(password, confirm)
-    if (passwordProblem) {
-      setError(passwordProblem)
-      return
-    }
     setLoading(true)
-    const { error } = await supabase.auth.updateUser({ password })
-    setLoading(false)
-    if (error) {
-      setError(error.message)
-    } else {
+    try {
+      const { error } = await supabase.auth.updateUser({ password })
+      if (error) {
+        setError(authErrorMessage(error.message))
+        setLoading(false)
+        return
+      }
       router.push('/account')
       router.refresh()
+    } catch (err) {
+      setError(authErrorMessage(errorMessage(err, 'Saving failed. Please try again.')))
+      setLoading(false)
     }
   }
 
@@ -45,10 +56,15 @@ export default function ResetPasswordPage() {
         {error && (
           <div role="alert" className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-error">
             {error}
+            {linkExpired && (
+              <Link href="/account/forgot-password" className="block mt-2 font-medium underline hover:no-underline">
+                Send me a new reset link
+              </Link>
+            )}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} noValidate className="space-y-4">
           <PasswordInput
             id="new-password"
             label="New password"
@@ -56,7 +72,8 @@ export default function ResetPasswordPage() {
             onChange={setPassword}
             autoComplete="new-password"
             placeholder="At least 8 characters"
-            minLength={8}
+            error={errors.password}
+            hint="At least 8 characters."
           />
           <PasswordInput
             id="new-password-confirm"
@@ -65,9 +82,9 @@ export default function ResetPasswordPage() {
             onChange={setConfirm}
             autoComplete="new-password"
             placeholder="Type it again"
-            minLength={8}
+            error={errors.confirm}
           />
-          <Button type="submit" variant="primary" size="lg" fullWidth loading={loading}>
+          <Button type="submit" variant="primary" size="lg" fullWidth loading={loading} disabled={!canSave}>
             Save password
           </Button>
         </form>

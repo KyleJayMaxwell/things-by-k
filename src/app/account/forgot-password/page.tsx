@@ -6,6 +6,9 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import Button from '@/components/Button'
+import TextField from '@/components/TextField'
+import { isValidEmail, authErrorMessage } from '@/lib/validation'
+import { errorMessage } from '@/lib/errors'
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
@@ -13,16 +16,23 @@ export default function ForgotPasswordPage() {
   const [sent, setSent] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  const emailValid = isValidEmail(email)
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!emailValid) return
     setError(null)
     setLoading(true)
-    const { error } = await createClient().auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/callback?next=/account/reset-password`,
-    })
+    try {
+      const { error } = await createClient().auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: `${window.location.origin}/auth/callback?next=/account/reset-password`,
+      })
+      if (error) setError(authErrorMessage(error.message))
+      else setSent(true)
+    } catch (err) {
+      setError(authErrorMessage(errorMessage(err, 'Something went wrong. Please try again.')))
+    }
     setLoading(false)
-    if (error) setError(error.message)
-    else setSent(true)
   }
 
   return (
@@ -35,31 +45,26 @@ export default function ForgotPasswordPage() {
 
         {sent ? (
           <div role="status" className="p-4 bg-emerald-50 border border-emerald-200 rounded-lg text-sm text-success">
-            If there’s an account for {email}, a reset link is on its way. Check your inbox (and spam folder).
+            If there’s an account for {email.trim()}, a reset link is on its way. Check your inbox (and spam folder).
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} noValidate className="space-y-4">
             {error && (
               <div role="alert" className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-error">
                 {error}
               </div>
             )}
-            <div>
-              <label htmlFor="forgot-email" className="block text-sm font-medium text-text-primary mb-1.5">
-                Email
-              </label>
-              <input
-                id="forgot-email"
-                type="email"
-                required
-                autoComplete="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                className="w-full px-3 py-2.5 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors"
-                placeholder="you@example.com"
-              />
-            </div>
-            <Button type="submit" variant="primary" size="lg" fullWidth loading={loading}>
+            <TextField
+              id="forgot-email"
+              label="Email"
+              type="email"
+              autoComplete="email"
+              value={email}
+              onChange={setEmail}
+              error={emailValid ? null : 'Enter a valid email, like you@example.com.'}
+              placeholder="you@example.com"
+            />
+            <Button type="submit" variant="primary" size="lg" fullWidth loading={loading} disabled={!emailValid}>
               Send reset link
             </Button>
           </form>

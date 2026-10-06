@@ -8,8 +8,11 @@ import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import Button from '@/components/Button'
 import PasswordInput from '@/components/PasswordInput'
-import { checkNewPassword } from '@/lib/password'
+import TextField from '@/components/TextField'
+import { passwordError, confirmPasswordError } from '@/lib/password'
 import { safeRedirectPath } from '@/lib/redirect'
+import { isValidEmail, authErrorMessage } from '@/lib/validation'
+import { errorMessage } from '@/lib/errors'
 
 type Tab = 'signin' | 'register'
 
@@ -35,55 +38,107 @@ function LoginForm() {
   const [registerPassword, setRegisterPassword] = useState('')
   const [registerConfirm, setRegisterConfirm] = useState('')
 
+  const [needsConfirmation, setNeedsConfirmation] = useState(false)
+  const [resending, setResending] = useState(false)
+
   const supabase = createClient()
+
+  const emailError = (email: string) => (isValidEmail(email) ? null : 'Enter a valid email, like you@example.com.')
+
+  const signInErrors = {
+    email: emailError(signInEmail),
+    password: signInPassword ? null : 'Enter your password.',
+  }
+  const registerErrors = {
+    firstName: firstName.trim() ? null : 'Enter your first name.',
+    email: emailError(registerEmail),
+    password: passwordError(registerPassword),
+    confirm: registerConfirm ? confirmPasswordError(registerPassword, registerConfirm) : 'Type your password again.',
+  }
+  const canSignIn = Object.values(signInErrors).every(e => !e)
+  const canRegister = Object.values(registerErrors).every(e => !e)
+
+  const switchTab = (next: Tab) => {
+    setTab(next)
+    setError(null)
+    setSuccess(null)
+    setNeedsConfirmation(false)
+  }
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!canSignIn) return
     setError(null)
+    setNeedsConfirmation(false)
     setLoading(true)
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email: signInEmail,
-      password: signInPassword,
-    })
-
-    if (error) {
-      setError(error.message)
-      setLoading(false)
-    } else {
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: signInEmail.trim(),
+        password: signInPassword,
+      })
+      if (error) {
+        setError(authErrorMessage(error.message))
+        setNeedsConfirmation(error.message.toLowerCase().includes('email not confirmed'))
+        setLoading(false)
+        return
+      }
       router.push(redirectTo)
       router.refresh()
+    } catch (err) {
+      setError(authErrorMessage(errorMessage(err, 'Sign in failed. Please try again.')))
+      setLoading(false)
+    }
+  }
+
+  const handleResendConfirmation = async () => {
+    setResending(true)
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email: signInEmail.trim(),
+      options: { emailRedirectTo: `${window.location.origin}/auth/callback?next=/account` },
+    })
+    setResending(false)
+    if (error) {
+      setError(authErrorMessage(error.message))
+    } else {
+      setError(null)
+      setNeedsConfirmation(false)
+      setSuccess(`We sent a new confirmation link to ${signInEmail.trim()}.`)
     }
   }
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!canRegister) return
     setError(null)
     setLoading(true)
 
-    const passwordProblem = checkNewPassword(registerPassword, registerConfirm)
-    if (passwordProblem) {
-      setError(passwordProblem)
-      setLoading(false)
-      return
-    }
+    try {
+      const email = registerEmail.trim()
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password: registerPassword,
+        options: {
+          data: { first_name: firstName.trim() },
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=/account`,
+        },
+      })
 
-    const { error } = await supabase.auth.signUp({
-      email: registerEmail,
-      password: registerPassword,
-      options: {
-        data: { first_name: firstName },
-        emailRedirectTo: `${window.location.origin}/auth/callback?next=/account`,
-      },
-    })
-
-    if (error) {
-      setError(error.message)
-      setLoading(false)
-    } else {
-      setSuccess('Account created! Check your email to confirm, then sign in.')
-      setLoading(false)
+      if (error) {
+        setError(authErrorMessage(error.message))
+      } else if (data.user && data.user.identities?.length === 0) {
+        // Supabase answers this way, without an error, when the email already has an account
+        setError(authErrorMessage('already registered'))
+      } else {
+        setSuccess(`Account created! We sent a confirmation link to ${email}. Click it, then sign in.`)
+        setRegisterPassword('')
+        setRegisterConfirm('')
+      }
+    } catch (err) {
+      setError(authErrorMessage(errorMessage(err, 'Sign up failed. Please try again.')))
     }
+    setLoading(false)
   }
 
   return (
@@ -98,7 +153,7 @@ function LoginForm() {
           <button
             role="tab"
             aria-selected={tab === 'signin'}
-            onClick={() => { setTab('signin'); setError(null); setSuccess(null) }}
+            onClick={() => switchTab('signin')}
             className={`flex-1 py-2.5 text-sm font-medium transition-colors ${
               tab === 'signin'
                 ? 'bg-primary text-white'
@@ -110,7 +165,7 @@ function LoginForm() {
           <button
             role="tab"
             aria-selected={tab === 'register'}
-            onClick={() => { setTab('register'); setError(null); setSuccess(null) }}
+            onClick={() => switchTab('register')}
             className={`flex-1 py-2.5 text-sm font-medium transition-colors ${
               tab === 'register'
                 ? 'bg-primary text-white'
@@ -125,6 +180,16 @@ function LoginForm() {
         {error && (
           <div role="alert" className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-error">
             {error}
+            {needsConfirmation && (
+              <button
+                type="button"
+                onClick={handleResendConfirmation}
+                disabled={resending}
+                className="block mt-2 font-medium underline hover:no-underline disabled:opacity-50"
+              >
+                {resending ? 'Sending...' : 'Send me a new confirmation link'}
+              </button>
+            )}
           </div>
         )}
         {success && (
@@ -135,22 +200,17 @@ function LoginForm() {
 
         {/* Sign In form */}
         {tab === 'signin' && (
-          <form onSubmit={handleSignIn} className="space-y-4">
-            <div>
-              <label htmlFor="signin-email" className="block text-sm font-medium text-text-primary mb-1.5">
-                Email
-              </label>
-              <input
-                id="signin-email"
-                type="email"
-                required
-                autoComplete="email"
-                value={signInEmail}
-                onChange={e => setSignInEmail(e.target.value)}
-                className="w-full px-3 py-2.5 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors"
-                placeholder="you@example.com"
-              />
-            </div>
+          <form onSubmit={handleSignIn} noValidate className="space-y-4">
+            <TextField
+              id="signin-email"
+              label="Email"
+              type="email"
+              autoComplete="email"
+              value={signInEmail}
+              onChange={setSignInEmail}
+              error={signInErrors.email}
+              placeholder="you@example.com"
+            />
             <PasswordInput
               id="signin-password"
               label="Password"
@@ -158,9 +218,10 @@ function LoginForm() {
               onChange={setSignInPassword}
               autoComplete="current-password"
               placeholder="••••••••"
+              error={signInErrors.password}
             />
 
-            <Button type="submit" variant="primary" size="lg" fullWidth loading={loading}>
+            <Button type="submit" variant="primary" size="lg" fullWidth loading={loading} disabled={!canSignIn}>
               Sign In
             </Button>
 
@@ -175,37 +236,27 @@ function LoginForm() {
 
         {/* Register form */}
         {tab === 'register' && (
-          <form onSubmit={handleRegister} className="space-y-4">
-            <div>
-              <label htmlFor="register-firstname" className="block text-sm font-medium text-text-primary mb-1.5">
-                First Name
-              </label>
-              <input
-                id="register-firstname"
-                type="text"
-                required
-                autoComplete="given-name"
-                value={firstName}
-                onChange={e => setFirstName(e.target.value)}
-                className="w-full px-3 py-2.5 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors"
-                placeholder="K"
-              />
-            </div>
-            <div>
-              <label htmlFor="register-email" className="block text-sm font-medium text-text-primary mb-1.5">
-                Email
-              </label>
-              <input
-                id="register-email"
-                type="email"
-                required
-                autoComplete="email"
-                value={registerEmail}
-                onChange={e => setRegisterEmail(e.target.value)}
-                className="w-full px-3 py-2.5 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors"
-                placeholder="you@example.com"
-              />
-            </div>
+          <form onSubmit={handleRegister} noValidate className="space-y-4">
+            <TextField
+              id="register-firstname"
+              label="First Name"
+              autoComplete="given-name"
+              value={firstName}
+              onChange={setFirstName}
+              error={registerErrors.firstName}
+              placeholder="K"
+              maxLength={50}
+            />
+            <TextField
+              id="register-email"
+              label="Email"
+              type="email"
+              autoComplete="email"
+              value={registerEmail}
+              onChange={setRegisterEmail}
+              error={registerErrors.email}
+              placeholder="you@example.com"
+            />
             <PasswordInput
               id="register-password"
               label="Password"
@@ -213,7 +264,8 @@ function LoginForm() {
               onChange={setRegisterPassword}
               autoComplete="new-password"
               placeholder="Min. 8 characters"
-              minLength={8}
+              error={registerErrors.password}
+              hint="At least 8 characters."
             />
             <PasswordInput
               id="register-password-confirm"
@@ -222,10 +274,10 @@ function LoginForm() {
               onChange={setRegisterConfirm}
               autoComplete="new-password"
               placeholder="Type it again"
-              minLength={8}
+              error={registerErrors.confirm}
             />
 
-            <Button type="submit" variant="primary" size="lg" fullWidth loading={loading}>
+            <Button type="submit" variant="primary" size="lg" fullWidth loading={loading} disabled={!canRegister}>
               Create Account
             </Button>
           </form>
