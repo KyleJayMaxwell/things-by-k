@@ -36,7 +36,9 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  const isAccountRoute = pathname.startsWith('/account') && pathname !== '/account/login'
+  // Pages for signed-out visitors
+  const publicAccountPages = ['/account/login', '/account/forgot-password']
+  const isAccountRoute = pathname.startsWith('/account') && !publicAccountPages.includes(pathname)
   if (isAccountRoute && !user) {
     const loginUrl = request.nextUrl.clone()
     loginUrl.pathname = '/account/login'

@@ -5,27 +5,13 @@
 import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import Link from 'next/link'
 import Button from '@/components/Button'
+import PasswordInput from '@/components/PasswordInput'
+import { checkNewPassword } from '@/lib/password'
 import { safeRedirectPath } from '@/lib/redirect'
 
 type Tab = 'signin' | 'register'
-
-function EyeIcon({ open }: { open: boolean }) {
-  if (open) {
-    return (
-      <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-        <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-        <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
-      </svg>
-    )
-  }
-  return (
-    <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-      <path fillRule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clipRule="evenodd" />
-      <path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.064 7 9.542 7 .847 0 1.669-.105 2.454-.303z" />
-    </svg>
-  )
-}
 
 function LoginForm() {
   const router = useRouter()
@@ -42,13 +28,12 @@ function LoginForm() {
   // Sign in form state
   const [signInEmail, setSignInEmail] = useState('')
   const [signInPassword, setSignInPassword] = useState('')
-  const [showSignInPassword, setShowSignInPassword] = useState(false)
 
   // Register form state
   const [firstName, setFirstName] = useState('')
   const [registerEmail, setRegisterEmail] = useState('')
   const [registerPassword, setRegisterPassword] = useState('')
-  const [showRegisterPassword, setShowRegisterPassword] = useState(false)
+  const [registerConfirm, setRegisterConfirm] = useState('')
 
   const supabase = createClient()
 
@@ -76,8 +61,9 @@ function LoginForm() {
     setError(null)
     setLoading(true)
 
-    if (registerPassword.length < 8) {
-      setError('Password must be at least 8 characters.')
+    const passwordProblem = checkNewPassword(registerPassword, registerConfirm)
+    if (passwordProblem) {
+      setError(passwordProblem)
       setLoading(false)
       return
     }
@@ -98,19 +84,6 @@ function LoginForm() {
       setSuccess('Account created! Check your email to confirm, then sign in.')
       setLoading(false)
     }
-  }
-
-  const handleForgotPassword = async () => {
-    if (!signInEmail) {
-      setError('Enter your email address above first.')
-      return
-    }
-    setLoading(true)
-    await supabase.auth.resetPasswordForEmail(signInEmail, {
-      redirectTo: `${window.location.origin}/auth/callback?next=/account/reset-password`,
-    })
-    setSuccess('Password reset email sent — check your inbox.')
-    setLoading(false)
   }
 
   return (
@@ -178,43 +151,25 @@ function LoginForm() {
                 placeholder="you@example.com"
               />
             </div>
-            <div>
-              <label htmlFor="signin-password" className="block text-sm font-medium text-text-primary mb-1.5">
-                Password
-              </label>
-              <div className="relative">
-                <input
-                  id="signin-password"
-                  type={showSignInPassword ? 'text' : 'password'}
-                  required
-                  autoComplete="current-password"
-                  value={signInPassword}
-                  onChange={e => setSignInPassword(e.target.value)}
-                  className="w-full px-3 py-2.5 pr-10 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors"
-                  placeholder="••••••••"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowSignInPassword(v => !v)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-text-secondary hover:text-text-primary transition-colors"
-                  aria-label={showSignInPassword ? 'Hide password' : 'Show password'}
-                >
-                  <EyeIcon open={showSignInPassword} />
-                </button>
-              </div>
-            </div>
+            <PasswordInput
+              id="signin-password"
+              label="Password"
+              value={signInPassword}
+              onChange={setSignInPassword}
+              autoComplete="current-password"
+              placeholder="••••••••"
+            />
 
             <Button type="submit" variant="primary" size="lg" fullWidth loading={loading}>
               Sign In
             </Button>
 
-            <button
-              type="button"
-              onClick={handleForgotPassword}
-              className="w-full text-center text-sm text-text-secondary hover:text-primary transition-colors"
+            <Link
+              href="/account/forgot-password"
+              className="block w-full text-center text-sm text-text-secondary hover:text-primary transition-colors"
             >
               Forgot password?
-            </button>
+            </Link>
           </form>
         )}
 
@@ -251,32 +206,24 @@ function LoginForm() {
                 placeholder="you@example.com"
               />
             </div>
-            <div>
-              <label htmlFor="register-password" className="block text-sm font-medium text-text-primary mb-1.5">
-                Password
-              </label>
-              <div className="relative">
-                <input
-                  id="register-password"
-                  type={showRegisterPassword ? 'text' : 'password'}
-                  required
-                  minLength={8}
-                  autoComplete="new-password"
-                  value={registerPassword}
-                  onChange={e => setRegisterPassword(e.target.value)}
-                  className="w-full px-3 py-2.5 pr-10 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors"
-                  placeholder="Min. 8 characters"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowRegisterPassword(v => !v)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-text-secondary hover:text-text-primary transition-colors"
-                  aria-label={showRegisterPassword ? 'Hide password' : 'Show password'}
-                >
-                  <EyeIcon open={showRegisterPassword} />
-                </button>
-              </div>
-            </div>
+            <PasswordInput
+              id="register-password"
+              label="Password"
+              value={registerPassword}
+              onChange={setRegisterPassword}
+              autoComplete="new-password"
+              placeholder="Min. 8 characters"
+              minLength={8}
+            />
+            <PasswordInput
+              id="register-password-confirm"
+              label="Confirm password"
+              value={registerConfirm}
+              onChange={setRegisterConfirm}
+              autoComplete="new-password"
+              placeholder="Type it again"
+              minLength={8}
+            />
 
             <Button type="submit" variant="primary" size="lg" fullWidth loading={loading}>
               Create Account

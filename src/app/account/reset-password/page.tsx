@@ -7,19 +7,23 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Button from '@/components/Button'
+import PasswordInput from '@/components/PasswordInput'
+import { checkNewPassword } from '@/lib/password'
 
 export default function ResetPasswordPage() {
   const router = useRouter()
   const supabase = createClient()
   const [password, setPassword] = useState('')
+  const [confirm, setConfirm] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters.')
+    const passwordProblem = checkNewPassword(password, confirm)
+    if (passwordProblem) {
+      setError(passwordProblem)
       return
     }
     setLoading(true)
@@ -45,21 +49,24 @@ export default function ResetPasswordPage() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="new-password" className="block text-sm font-medium text-text-primary mb-1.5">
-              New password
-            </label>
-            <input
-              id="new-password"
-              type="password"
-              required
-              autoComplete="new-password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              className="w-full px-3 py-2.5 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors"
-              placeholder="At least 8 characters"
-            />
-          </div>
+          <PasswordInput
+            id="new-password"
+            label="New password"
+            value={password}
+            onChange={setPassword}
+            autoComplete="new-password"
+            placeholder="At least 8 characters"
+            minLength={8}
+          />
+          <PasswordInput
+            id="new-password-confirm"
+            label="Confirm new password"
+            value={confirm}
+            onChange={setConfirm}
+            autoComplete="new-password"
+            placeholder="Type it again"
+            minLength={8}
+          />
           <Button type="submit" variant="primary" size="lg" fullWidth loading={loading}>
             Save password
           </Button>
