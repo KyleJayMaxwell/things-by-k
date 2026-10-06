@@ -24,7 +24,7 @@ export interface Product {
 
 // ── Orders ────────────────────────────────────────────────────────────────────
 
-export type OrderStatus = 'processing' | 'shipped' | 'delivered'
+export type OrderStatus = 'processing' | 'shipped' | 'delivered' | 'refunded'
 
 export interface ShippingAddress {
   name?: string
@@ -51,6 +51,8 @@ export interface Order {
   carrier: 'usps' | 'ups' | 'fedex' | 'other' | null
   tracking_number: string | null
   shipped_at: string | null
+  refunded_at: string | null
+  refund_amount: number | null  // in cents
   created_at: string
 }
 

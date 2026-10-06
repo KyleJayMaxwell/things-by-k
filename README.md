@@ -67,6 +67,7 @@ supabase/schema.sql          # tables, triggers, RLS policies
 supabase/storage.sql         # product-images storage bucket
 supabase/decrement-stock.sql # stock decrement function
 supabase/order-tracking.sql  # carrier + tracking number columns on orders
+supabase/refunds.sql         # "refunded" order status + refund columns
 supabase/admin-policies.sql  # lets the admin account manage products, images and orders
 supabase/seed.sql            # MVP postcard product
 ```
@@ -174,7 +175,7 @@ In the Stripe Dashboard → Developers → Event Destinations → Add destinatio
 https://things-by-k.com/api/webhooks/stripe
 ```
 
-Select the `checkout.session.completed` event. Copy the signing secret into `STRIPE_WEBHOOK_SECRET` in Vercel, then redeploy.
+Select the `checkout.session.completed` and `charge.refunded` events. Copy the signing secret into `STRIPE_WEBHOOK_SECRET` in Vercel, then redeploy.
 
 **4. Set up Resend for production email:**
 

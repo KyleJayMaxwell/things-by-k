@@ -22,9 +22,10 @@ const STATUS_COLORS: Record<string, string> = {
   processing: '#360F5A',
   shipped: '#3b82f6',
   delivered: '#059669',
+  refunded: '#9CA3AF',
 }
 
-const DONUT_COLORS = ['#360F5A', '#3b82f6', '#059669']
+const DONUT_COLORS = ['#360F5A', '#3b82f6', '#059669', '#9CA3AF']
 
 export default function AdminPage() {
   const supabase = createClient()
@@ -85,7 +86,7 @@ export default function AdminPage() {
     const map: Record<string, number> = {}
     orders.forEach(o => {
       const day = new Date(o.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-      map[day] = (map[day] ?? 0) + o.total
+      if (o.status !== 'refunded') map[day] = (map[day] ?? 0) + o.total
     })
     return Object.entries(map).map(([date, revenue]) => ({ date, revenue: revenue / 100 }))
   })() : MOCK_REVENUE
@@ -102,7 +103,7 @@ export default function AdminPage() {
 
   // Orders by status
   const statusData = hasOrders ? (() => {
-    const map: Record<string, number> = { processing: 0, shipped: 0, delivered: 0 }
+    const map: Record<string, number> = { processing: 0, shipped: 0, delivered: 0, refunded: 0 }
     orders.forEach(o => { map[o.status] = (map[o.status] ?? 0) + 1 })
     return Object.entries(map)
       .filter(([, count]) => count > 0)
@@ -122,7 +123,8 @@ export default function AdminPage() {
   })() : MOCK_PRODUCTS
 
   // Summary stats
-  const totalRevenue = orders.reduce((s, o) => s + o.total, 0)
+  // Refunded orders don't count toward revenue
+  const totalRevenue = orders.reduce((s, o) => s + (o.status === 'refunded' ? 0 : o.total), 0)
   const processingCount = orders.filter(o => o.status === 'processing').length
   const lowStock = products.filter(p => p.is_active && p.stock <= 5)
   const recentOrders = [...orders].reverse().slice(0, 5)
@@ -190,7 +192,7 @@ export default function AdminPage() {
                   dataKey="value"
                 >
                   {statusData.map((entry, i) => (
-                    <Cell key={entry.name} fill={DONUT_COLORS[i % DONUT_COLORS.length]} />
+                    <Cell key={entry.name} fill={STATUS_COLORS[entry.name] ?? DONUT_COLORS[i % DONUT_COLORS.length]} />
                   ))}
                 </Pie>
                 <Tooltip formatter={(v, name) => [(Number(v) || 0).toFixed(2), name]} contentStyle={tooltipStyle} />
@@ -341,6 +343,7 @@ function StatusBadge({ status }: { status: string }) {
     processing: 'bg-primary-light text-primary',
     shipped: 'bg-blue-50 text-blue-700',
     delivered: 'bg-emerald-50 text-emerald-700',
+    refunded: 'bg-gray-100 text-gray-600',
   }
   return (
     <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${styles[status] ?? 'bg-gray-100 text-gray-600'}`}>

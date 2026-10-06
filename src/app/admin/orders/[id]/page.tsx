@@ -20,7 +20,7 @@ function formatDate(dateStr: string) {
 }
 
 const STATUS_OPTIONS = ['processing', 'shipped', 'delivered'] as const
-type OrderStatus = typeof STATUS_OPTIONS[number]
+type OrderStatus = typeof STATUS_OPTIONS[number] | 'refunded'
 
 const CARRIER_OPTIONS = Object.entries(CARRIER_NAMES) as [Carrier, string][]
 
@@ -28,6 +28,7 @@ const statusStyles: Record<OrderStatus, string> = {
   processing: 'bg-primary-light text-primary',
   shipped: 'bg-blue-50 text-blue-700',
   delivered: 'bg-emerald-50 text-emerald-700',
+  refunded: 'bg-gray-100 text-gray-600',
 }
 
 export default function AdminOrderDetailPage() {
@@ -44,6 +45,8 @@ export default function AdminOrderDetailPage() {
   const [trackingNumber, setTrackingNumber] = useState('')
   const [notify, setNotify] = useState(true)
   const [message, setMessage] = useState<{ tone: 'ok' | 'error'; text: string } | null>(null)
+  const [refunding, setRefunding] = useState(false)
+  const [refundError, setRefundError] = useState<string | null>(null)
 
   useEffect(() => {
     async function load() {
@@ -91,6 +94,23 @@ export default function AdminOrderDetailPage() {
     }
   }
 
+  const handleRefund = async () => {
+    if (!confirm(`Refund ${formatPrice(order.total)} to ${order.email}? This can't be undone.`)) return
+    setRefunding(true)
+    setRefundError(null)
+    try {
+      const res = await fetch(`/api/admin/orders/${id}/refund`, { method: 'POST' })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error ?? 'Refund failed')
+      setOrder((prev: any) => ({ ...prev, ...json.order }))
+      setStatus('refunded')
+    } catch (err: any) {
+      setRefundError(err.message ?? 'Refund failed')
+    } finally {
+      setRefunding(false)
+    }
+  }
+
   const trackingChanged =
     status === 'shipped' &&
     (trackingNumber.trim() !== (order?.tracking_number ?? '') ||
@@ -120,7 +140,16 @@ export default function AdminOrderDetailPage() {
         </span>
       </div>
 
+      {order.status === 'refunded' && (
+        <div className="bg-gray-50 border border-border rounded-xl p-5 mb-6 text-sm text-text-secondary">
+          Refunded {formatPrice(order.refund_amount ?? order.total)}
+          {order.refunded_at && <> on {formatDate(order.refunded_at)}</>}. Stripe returns it to the
+          customer&apos;s card in 5–10 business days.
+        </div>
+      )}
+
       {/* Status update */}
+      {order.status !== 'refunded' && (
       <div className="bg-white border border-border rounded-xl p-5 mb-6">
         <h2 className="font-medium text-text-primary mb-4">Update Status</h2>
         <div className="flex items-center gap-3">
@@ -202,6 +231,7 @@ export default function AdminOrderDetailPage() {
           </p>
         )}
       </div>
+      )}
 
       {/* Items */}
       <div className="bg-white border border-border rounded-xl overflow-hidden mb-6">
@@ -263,6 +293,28 @@ export default function AdminOrderDetailPage() {
           )}
         </div>
       </div>
+
+      {/* Refund */}
+      {order.status !== 'refunded' && (
+        <div className="bg-white border border-border rounded-xl p-5 mt-6">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h2 className="font-medium text-text-primary">Refund</h2>
+              <p className="text-sm text-text-secondary mt-1">
+                Refunds the full {formatPrice(order.total)} to the customer&apos;s card through Stripe.
+              </p>
+            </div>
+            <button
+              onClick={handleRefund}
+              disabled={refunding}
+              className="flex-shrink-0 px-4 py-2 rounded-lg text-sm font-medium border border-error text-error hover:bg-red-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              {refunding ? 'Refunding...' : 'Refund order'}
+            </button>
+          </div>
+          {refundError && <p className="mt-3 text-sm text-error">{refundError}</p>}
+        </div>
+      )}
     </div>
   )
 }
