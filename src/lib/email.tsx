@@ -488,3 +488,99 @@ Questions? Reply to this email or reach us at hello@things-by-k.com
 © ${new Date().getFullYear()} Things by K
 `
 }
+
+// ── Refund Notice ─────────────────────────────────────────────────────────────
+
+interface SendRefundNoticeParams {
+  to: string
+  orderNumber: string
+  recipientName?: string
+  amount: number  // cents
+}
+
+export async function sendRefundNotice(params: SendRefundNoticeParams) {
+  const { to, orderNumber, recipientName, amount } = params
+  const firstName = recipientName?.trim().split(/\s+/)[0] ?? ''
+  const greeting = firstName ? `Hi ${firstName},` : 'Hi,'
+  const body = `Your order ${orderNumber} has been refunded. ${formatPrice(amount)} is on its way back to your original payment method. Depending on your bank, it can take 5–10 business days to show up.`
+
+  const { data, error } = await getResend().emails.send({
+    from: FROM,
+    to,
+    subject: `Your refund is on its way — ${orderNumber}`,
+    html: refundNoticeHtml({ orderNumber, greeting, body }),
+    text: `Things by K — Your refund is on its way
+
+${greeting}
+
+${body}
+
+Questions? Reply to this email or reach us at hello@things-by-k.com
+
+© ${new Date().getFullYear()} Things by K
+`,
+  })
+
+  if (error) {
+    console.error('Failed to send refund email:', error)
+    throw new Error(`Email send failed: ${error.message}`)
+  }
+
+  return data
+}
+
+function refundNoticeHtml(p: { orderNumber: string; greeting: string; body: string }): string {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your refund is on its way — ${escapeHtml(p.orderNumber)}</title>
+</head>
+<body style="margin:0;padding:0;background:#FAF9FC;font-family:system-ui,-apple-system,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#FAF9FC;padding:40px 0;">
+    <tr>
+      <td align="center">
+        <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">
+
+          <!-- Header -->
+          <tr>
+            <td style="padding:0 0 32px 0;text-align:center;">
+              <p style="margin:0;font-size:22px;font-weight:600;color:#360F5A;letter-spacing:-0.3px;">
+                Things by K
+              </p>
+            </td>
+          </tr>
+
+          <!-- Card -->
+          <tr>
+            <td style="background:#FFFFFF;border:1px solid #E4E0EF;border-radius:12px;padding:40px;">
+              <h1 style="margin:0 0 16px;font-size:22px;font-weight:600;color:#1A1A2E;">
+                ${escapeHtml(p.greeting)}
+              </h1>
+              <p style="margin:0;font-size:14px;line-height:1.6;color:#1A1A2E;">
+                ${escapeHtml(p.body)}
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding:28px 0 0;text-align:center;">
+              <p style="margin:0;font-size:12px;color:#6B6A80;">
+                Questions? Reply to this email or reach us at
+                <a href="mailto:hello@things-by-k.com" style="color:#360F5A;">hello@things-by-k.com</a>
+              </p>
+              <p style="margin:8px 0 0;font-size:12px;color:#6B6A80;">
+                © ${new Date().getFullYear()} Things by K
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`
+}

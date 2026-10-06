@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
 import { createServiceClient } from '@/lib/supabase/server'
 import { sendOrderConfirmation } from '@/lib/email'
+import { markOrderRefunded } from '@/lib/refunds'
 import Stripe from 'stripe'
 
 export async function POST(request: NextRequest) {
@@ -179,16 +180,5 @@ async function handleChargeRefunded(chargeId: string) {
     ? charge.payment_intent
     : charge.payment_intent.id
 
-  const supabase = createServiceClient()
-  const { error } = await supabase
-    .from('orders')
-    .update({
-      status: 'refunded',
-      refunded_at: new Date().toISOString(),
-      refund_amount: charge.amount_refunded,
-    })
-    .eq('stripe_payment_intent', paymentIntent)
-    .neq('status', 'refunded')
-
-  if (error) throw new Error(`Failed to mark order refunded: ${error.message}`)
+  await markOrderRefunded({ paymentIntent }, charge.amount_refunded)
 }

@@ -6,6 +6,7 @@ import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Button from '@/components/Button'
+import { safeRedirectPath } from '@/lib/redirect'
 
 type Tab = 'signin' | 'register'
 
@@ -29,11 +30,13 @@ function EyeIcon({ open }: { open: boolean }) {
 function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const redirectTo = searchParams.get('redirectTo') ?? '/account'
+  const redirectTo = safeRedirectPath(searchParams.get('redirectTo'), '/account')
 
   const [tab, setTab] = useState<Tab>('signin')
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(
+    searchParams.get('error') === 'link' ? 'That link has expired or was already used. Please try again.' : null
+  )
   const [success, setSuccess] = useState<string | null>(null)
 
   // Sign in form state
@@ -84,6 +87,7 @@ function LoginForm() {
       password: registerPassword,
       options: {
         data: { first_name: firstName },
+        emailRedirectTo: `${window.location.origin}/auth/callback?next=/account`,
       },
     })
 
@@ -103,7 +107,7 @@ function LoginForm() {
     }
     setLoading(true)
     await supabase.auth.resetPasswordForEmail(signInEmail, {
-      redirectTo: `${window.location.origin}/account/reset-password`,
+      redirectTo: `${window.location.origin}/auth/callback?next=/account/reset-password`,
     })
     setSuccess('Password reset email sent — check your inbox.')
     setLoading(false)

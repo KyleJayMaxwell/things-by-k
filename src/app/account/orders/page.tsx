@@ -1,6 +1,7 @@
 // src/app/account/orders/page.tsx
 
 import { createClient } from '@/lib/supabase/server'
+import { claimGuestOrders } from '@/lib/orders'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import Badge from '@/components/Badge'
@@ -24,6 +25,8 @@ export default async function OrdersPage() {
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) redirect('/account/login')
+
+  await claimGuestOrders(user)
 
   const { data: orders } = await supabase
     .from('orders')
