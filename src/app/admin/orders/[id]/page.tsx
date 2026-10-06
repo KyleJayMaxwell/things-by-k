@@ -95,7 +95,7 @@ export default function AdminOrderDetailPage() {
   }
 
   const handleRefund = async () => {
-    if (!confirm(`Refund ${formatPrice(order.total)} to ${order.email}? This can't be undone.`)) return
+    if (!confirm(`Refund ${formatPrice(order.total)} to ${order.email} and email them? This can't be undone.`)) return
     setRefunding(true)
     setRefundError(null)
     try {
@@ -301,7 +301,8 @@ export default function AdminOrderDetailPage() {
             <div>
               <h2 className="font-medium text-text-primary">Refund</h2>
               <p className="text-sm text-text-secondary mt-1">
-                Refunds the full {formatPrice(order.total)} to the customer&apos;s card through Stripe.
+                Refunds the full {formatPrice(order.total)} to the customer&apos;s card through Stripe
+                and emails them.{order.status === 'processing' && ' Its items go back in stock.'}
               </p>
             </div>
             <button

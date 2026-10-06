@@ -1,11 +1,13 @@
 // src/app/api/admin/orders/[id]/refund/route.ts
-// Admin-only: refund an order in full through Stripe and mark it refunded.
+// Admin-only: refund an order in full through Stripe, mark it refunded,
+// restock unshipped items and email the customer.
 
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { stripe } from '@/lib/stripe'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { isAdminEmail } from '@/lib/admin'
+import { markOrderRefunded } from '@/lib/refunds'
 
 export async function POST(
   _request: NextRequest,
@@ -48,22 +50,21 @@ export async function POST(
     }
   }
 
-  const { data: order, error: updateError } = await service
-    .from('orders')
-    .update({
-      status: 'refunded',
-      refunded_at: new Date().toISOString(),
-      refund_amount: refundAmount,
-    })
-    .eq('id', id)
-    .select()
-    .single()
-
-  if (updateError) {
+  let order
+  try {
+    order = await markOrderRefunded({ id: existing.id }, refundAmount)
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'unknown error'
     return NextResponse.json(
-      { error: `Refunded in Stripe, but saving the order failed: ${updateError.message}` },
+      { error: `Refunded in Stripe, but saving the order failed: ${message}` },
       { status: 500 }
     )
+  }
+
+  // Null means the charge.refunded webhook got there first; return the saved order
+  if (!order) {
+    const { data } = await service.from('orders').select().eq('id', id).single()
+    order = data
   }
 
   return NextResponse.json({ order })
