@@ -16,6 +16,21 @@ interface CheckoutItem {
   message?: string
 }
 
+const MAX_LINES = 50
+const MAX_QUANTITY = 99
+
+// A problem with the cart the customer can fix; its message is safe to show them
+class CartError extends Error {}
+
+function isValidItem(item: unknown): item is CheckoutItem {
+  if (!item || typeof item !== 'object') return false
+  const { productId, quantity, handwritten, message } = item as Record<string, unknown>
+  return typeof productId === 'string' && productId.length > 0
+    && Number.isInteger(quantity) && (quantity as number) >= 1 && (quantity as number) <= MAX_QUANTITY
+    && (handwritten === undefined || typeof handwritten === 'boolean')
+    && (message === undefined || typeof message === 'string')
+}
+
 // Simple in-memory rate limiter — max 5 checkout attempts per IP per minute
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>()
 
@@ -37,18 +52,21 @@ function isRateLimited(ip: string): boolean {
 export async function POST(request: NextRequest) {
   const ip = request.headers.get('x-forwarded-for') ?? 'unknown'
   if (isRateLimited(ip)) {
-    return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+    return NextResponse.json({ error: 'Too many checkout attempts. Please wait a minute and try again.' }, { status: 429 })
   }
   try {
-    const { items, destination: rawDestination } = (await request.json()) as {
-      items: CheckoutItem[]
-      destination?: string
-    }
+    const body = await request.json().catch(() => null)
+    const rawItems: unknown = body?.items
+    const rawDestination: unknown = body?.destination
     const destination: Destination = rawDestination === 'international' ? 'international' : 'domestic'
 
-    if (!items || items.length === 0) {
-      return NextResponse.json({ error: 'No items in cart' }, { status: 400 })
+    if (!Array.isArray(rawItems) || rawItems.length === 0) {
+      return NextResponse.json({ error: 'Your cart is empty.' }, { status: 400 })
     }
+    if (rawItems.length > MAX_LINES || !rawItems.every(isValidItem)) {
+      return NextResponse.json({ error: 'Something in your cart looks off. Please remove it and add it again.' }, { status: 400 })
+    }
+    const items: CheckoutItem[] = rawItems
 
     // Get current user (optional — guest checkout is allowed)
     const supabase = await createClient()
@@ -75,8 +93,8 @@ export async function POST(request: NextRequest) {
     }
     for (const [productId, quantity] of requested) {
       const product = products.find(p => p.id === productId)
-      if (!product) throw new Error('A product in your cart is no longer available')
-      if (quantity > product.stock) throw new Error(`Not enough stock for ${product.name}`)
+      if (!product) throw new CartError('A product in your cart is no longer available. Please remove it.')
+      if (quantity > product.stock) throw new CartError(`Only ${product.stock} of ${product.name} left. Please lower the quantity.`)
     }
 
     // Build Stripe line items
@@ -87,12 +105,12 @@ export async function POST(request: NextRequest) {
 
       if (item.handwritten) {
         if (product.category !== 'postcard') {
-          throw new Error(`${product.name} isn't available handwritten`)
+          throw new CartError(`${product.name} isn’t available handwritten`)
         }
         // A blank note means K freestyles the card
         const message = (item.message ?? '').trim()
         if (message.length > HANDWRITTEN_MESSAGE_MAX) {
-          throw new Error(`Handwritten notes can be up to ${HANDWRITTEN_MESSAGE_MAX} characters`)
+          throw new CartError(`Handwritten notes can be up to ${HANDWRITTEN_MESSAGE_MAX} characters`)
         }
         handwrittenCards += item.quantity
 
@@ -157,8 +175,11 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ url: session.url })
   } catch (error) {
+    if (error instanceof CartError) {
+      return NextResponse.json({ error: error.message }, { status: 400 })
+    }
+    // Stripe and database errors can be technical, so the customer gets a plain message
     console.error('Checkout error:', error)
-    const message = error instanceof Error ? error.message : 'Internal server error'
-    return NextResponse.json({ error: message }, { status: 500 })
+    return NextResponse.json({ error: 'We couldn’t start checkout. Please try again in a moment.' }, { status: 500 })
   }
 }

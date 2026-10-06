@@ -89,7 +89,7 @@ export default function DateRangeFilter({ value, onChange }: Props) {
             aria-label="From"
             value={value.from}
             max={value.to}
-            onChange={e => e.target.value && onChange({ ...value, from: e.target.value })}
+            onChange={e => e.target.value && e.target.value <= value.to && onChange({ ...value, from: e.target.value })}
             className="px-2 py-1 border border-border rounded-lg bg-white"
           />
           <span>to</span>
@@ -99,7 +99,7 @@ export default function DateRangeFilter({ value, onChange }: Props) {
             value={value.to}
             min={value.from}
             max={today}
-            onChange={e => e.target.value && onChange({ ...value, to: e.target.value })}
+            onChange={e => e.target.value && e.target.value >= value.from && e.target.value <= today && onChange({ ...value, to: e.target.value })}
             className="px-2 py-1 border border-border rounded-lg bg-white"
           />
         </div>

@@ -4,6 +4,7 @@
 // Labeled password field with a show/hide toggle
 
 import { useState } from 'react'
+import { FieldMessage, inputClass, inputBorder, useTouched } from '@/components/TextField'
 
 function EyeIcon({ open }: { open: boolean }) {
   if (open) {
@@ -29,11 +30,14 @@ interface PasswordInputProps {
   onChange: (value: string) => void
   autoComplete: 'current-password' | 'new-password'
   placeholder?: string
-  minLength?: number
+  error?: string | null  // shown after the field is left
+  hint?: string
 }
 
-export default function PasswordInput({ id, label, value, onChange, autoComplete, placeholder, minLength }: PasswordInputProps) {
+export default function PasswordInput({ id, label, value, onChange, autoComplete, placeholder, error, hint }: PasswordInputProps) {
   const [show, setShow] = useState(false)
+  const { touched, onBlur } = useTouched()
+  const showError = touched && !!error
   return (
     <div>
       <label htmlFor={id} className="block text-sm font-medium text-text-primary mb-1.5">
@@ -44,11 +48,13 @@ export default function PasswordInput({ id, label, value, onChange, autoComplete
           id={id}
           type={show ? 'text' : 'password'}
           required
-          minLength={minLength}
           autoComplete={autoComplete}
           value={value}
           onChange={e => onChange(e.target.value)}
-          className="w-full px-3 py-2.5 pr-10 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors"
+          onBlur={onBlur}
+          aria-invalid={showError}
+          aria-describedby={showError || hint ? `${id}-message` : undefined}
+          className={`${inputClass} ${inputBorder(showError)} pr-10`}
           placeholder={placeholder}
         />
         <button
@@ -60,6 +66,7 @@ export default function PasswordInput({ id, label, value, onChange, autoComplete
           <EyeIcon open={show} />
         </button>
       </div>
+      <FieldMessage id={`${id}-message`} error={showError ? error : null} hint={hint} />
     </div>
   )
 }

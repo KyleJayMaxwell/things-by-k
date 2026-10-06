@@ -2,9 +2,11 @@
 
 export const MIN_PASSWORD_LENGTH = 8
 
-// Returns what's wrong with a new password, or null if it's fine
-export function checkNewPassword(password: string, confirm: string): string | null {
-  if (password.length < MIN_PASSWORD_LENGTH) return `Password must be at least ${MIN_PASSWORD_LENGTH} characters.`
-  if (password !== confirm) return 'Passwords don’t match.'
-  return null
+export function passwordError(password: string): string | null {
+  return password.length < MIN_PASSWORD_LENGTH ? `Use at least ${MIN_PASSWORD_LENGTH} characters.` : null
 }
+
+export function confirmPasswordError(password: string, confirm: string): string | null {
+  return confirm !== password ? 'Passwords don’t match.' : null
+}
+

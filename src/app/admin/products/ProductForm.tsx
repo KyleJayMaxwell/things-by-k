@@ -6,6 +6,8 @@ import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { errorMessage } from '@/lib/errors'
+import { SLUG_PATTERN, slugify, isValidDollarAmount, isWholeNumber } from '@/lib/validation'
+import { FieldMessage, inputClass as baseInputClass, inputBorder } from '@/components/TextField'
 import Image from 'next/image'
 
 interface ProductFormProps {
@@ -25,6 +27,7 @@ interface ProductFormProps {
 }
 
 const CATEGORIES = ['postcard', 'necklace', 'zine']
+const MAX_IMAGE_MB = 20
 
 export default function ProductForm({ initialData }: ProductFormProps) {
   const router = useRouter()
@@ -63,14 +66,23 @@ export default function ProductForm({ initialData }: ProductFormProps) {
       setForm(prev => ({
         ...prev,
         name: value,
-        slug: value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+        slug: slugify(value),
       }))
     }
   }
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
+    e.target.value = ''  // lets the same file be picked again after an error
     if (!file) return
+    if (!file.type.startsWith('image/')) {
+      setError('That file isn’t an image. Upload a JPG, PNG or WebP.')
+      return
+    }
+    if (file.size > MAX_IMAGE_MB * 1024 * 1024) {
+      setError(`That image is over ${MAX_IMAGE_MB} MB. Please upload a smaller one.`)
+      return
+    }
 
     setUploading(true)
     setError(null)
@@ -117,19 +129,42 @@ export default function ProductForm({ initialData }: ProductFormProps) {
   const [dragIndex, setDragIndex] = useState<number | null>(null)
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
 
+  // Fields the admin has left; their errors show from then on
+  const [touched, setTouched] = useState<Set<string>>(new Set())
+  const markTouched = (e: React.FocusEvent<HTMLFormElement>) => {
+    const { name } = e.target as EventTarget as HTMLInputElement
+    if (name && !touched.has(name)) setTouched(prev => new Set(prev).add(name))
+  }
+
+  const errors: Record<string, string | null> = {
+    name: form.name.trim() ? null : 'Enter a name.',
+    slug: SLUG_PATTERN.test(form.slug) ? null : 'Use lowercase letters, numbers and single dashes, like foggy-golden-gate.',
+    price: isValidDollarAmount(form.price) ? null : 'Enter a price above $0, like 5.00.',
+    stock: isWholeNumber(form.stock) ? null : 'Enter a whole number, 0 or more.',
+    handwritten_price: form.category !== 'postcard' || isValidDollarAmount(form.handwritten_price, { allowZero: true })
+      ? null
+      : 'Enter an amount like 1.00, or 0 for no extra.',
+    description: form.description.trim() ? null : 'Enter a short description.',
+    long_description: form.long_description.trim() ? null : 'Enter a long description.',
+  }
+  const isValid = Object.values(errors).every(e => !e)
+  const fieldError = (name: string) => (touched.has(name) ? errors[name] : null)
+  const inputClass = (name: string) => `${baseInputClass} ${inputBorder(!!fieldError(name))}`
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!isValid) return
     setSaving(true)
     setError(null)
 
     const payload = {
-      name: form.name,
+      name: form.name.trim(),
       slug: form.slug,
-      description: form.description,
-      long_description: form.long_description,
+      description: form.description.trim(),
+      long_description: form.long_description.trim(),
       price: Math.round(parseFloat(form.price) * 100),
       category: form.category,
-      stock: parseInt(form.stock),
+      stock: parseInt(form.stock, 10),
       is_active: form.is_active,
       images: form.images,
       // Extra charge for a handwritten postcard (every postcard offers it)
@@ -154,7 +189,9 @@ export default function ProductForm({ initialData }: ProductFormProps) {
       router.push('/admin/products')
       router.refresh()
     } catch (err) {
-      setError(errorMessage(err, 'Save failed'))
+      // 23505 is Postgres's "duplicate value" error; the slug is the only unique field here
+      const duplicate = typeof err === 'object' && err !== null && 'code' in err && err.code === '23505'
+      setError(duplicate ? 'Another product already uses that slug. Pick a different one.' : errorMessage(err, 'Save failed'))
       setSaving(false)
     }
   }
@@ -162,15 +199,24 @@ export default function ProductForm({ initialData }: ProductFormProps) {
   const handleDelete = async () => {
     if (!confirm('Delete this product? This cannot be undone.')) return
     setDeleting(true)
-    await supabase.from('products').delete().eq('id', initialData!.id)
+    setError(null)
+    const { error } = await supabase.from('products').delete().eq('id', initialData!.id)
+    if (error) {
+      // 23503: past orders still point at this product
+      setError(error.code === '23503'
+        ? 'This product has orders, so it can’t be deleted. Untick Active to hide it from the shop instead.'
+        : errorMessage(error, 'Delete failed'))
+      setDeleting(false)
+      return
+    }
     router.push('/admin/products')
     router.refresh()
   }
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-2xl space-y-6">
+    <form onSubmit={handleSubmit} onBlur={markTouched} noValidate className="max-w-2xl space-y-6">
       {error && (
-        <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-error">
+        <div role="alert" className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-error">
           {error}
         </div>
       )}
@@ -179,58 +225,58 @@ export default function ProductForm({ initialData }: ProductFormProps) {
       <div className="bg-white border border-border rounded-xl p-6 space-y-4">
         <h2 className="font-medium text-text-primary">Basic Info</h2>
 
-        <Field label="Name">
+        <Field label="Name" htmlFor="name" error={fieldError('name')}>
           <input
+            id="name"
             name="name"
             value={form.name}
             onChange={handleChange}
-            required
-            className={inputClass}
+            className={inputClass('name')}
             placeholder="Seoul Hanok Postcard"
           />
         </Field>
 
-        <Field label="Slug" hint="URL-safe identifier, auto-generated from name">
+        <Field label="Slug" hint="URL-safe identifier, auto-generated from name" htmlFor="slug" error={fieldError('slug')}>
           <input
+            id="slug"
             name="slug"
             value={form.slug}
             onChange={handleChange}
-            required
-            className={inputClass}
+            className={inputClass('slug')}
             placeholder="seoul-hanok-postcard"
           />
         </Field>
 
         <div className="grid grid-cols-2 gap-4">
-          <Field label="Price (USD)">
+          <Field label="Price (USD)" htmlFor="price" error={fieldError('price')}>
             <input
+              id="price"
               name="price"
               value={form.price}
               onChange={handleChange}
-              required
               type="number"
               step="0.01"
               min="0"
-              className={inputClass}
+              className={inputClass('price')}
               placeholder="5.00"
             />
           </Field>
-          <Field label="Stock">
+          <Field label="Stock" htmlFor="stock" error={fieldError('stock')}>
             <input
+              id="stock"
               name="stock"
               value={form.stock}
               onChange={handleChange}
-              required
               type="number"
               min="0"
-              className={inputClass}
+              className={inputClass('stock')}
               placeholder="25"
             />
           </Field>
         </div>
 
-        <Field label="Category">
-          <select name="category" value={form.category} onChange={handleChange} className={inputClass}>
+        <Field label="Category" htmlFor="category">
+          <select id="category" name="category" value={form.category} onChange={handleChange} className={inputClass('category')}>
             {CATEGORIES.map(c => (
               <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>
             ))}
@@ -259,15 +305,16 @@ export default function ProductForm({ initialData }: ProductFormProps) {
           <p className="text-sm text-text-secondary">
             Every postcard can be bought handwritten: the customer writes a note and you mail it as a postcard.
           </p>
-          <Field label="Extra for handwritten ($)" hint="Added to the price above; 0 for no extra">
+          <Field label="Extra for handwritten ($)" hint="Added to the price above; 0 for no extra" htmlFor="handwritten_price" error={fieldError('handwritten_price')}>
             <input
               type="number"
+              id="handwritten_price"
               name="handwritten_price"
               value={form.handwritten_price}
               onChange={handleChange}
               min="0"
               step="0.01"
-              className={inputClass}
+              className={inputClass('handwritten_price')}
             />
           </Field>
         </div>
@@ -277,26 +324,26 @@ export default function ProductForm({ initialData }: ProductFormProps) {
       <div className="bg-white border border-border rounded-xl p-6 space-y-4">
         <h2 className="font-medium text-text-primary">Descriptions</h2>
 
-        <Field label="Short description" hint="Shown on product card">
+        <Field label="Short description" hint="Shown on product card" htmlFor="description" error={fieldError('description')}>
           <textarea
+            id="description"
             name="description"
             value={form.description}
             onChange={handleChange}
-            required
             rows={2}
-            className={inputClass}
+            className={inputClass('description')}
             placeholder="An original photograph printed on premium postcard stock."
           />
         </Field>
 
-        <Field label="Long description" hint="Shown on product detail page">
+        <Field label="Long description" hint="Shown on product detail page" htmlFor="long_description" error={fieldError('long_description')}>
           <textarea
+            id="long_description"
             name="long_description"
             value={form.long_description}
             onChange={handleChange}
-            required
             rows={6}
-            className={inputClass}
+            className={inputClass('long_description')}
             placeholder="Full product details, materials, dimensions..."
           />
         </Field>
@@ -398,11 +445,14 @@ export default function ProductForm({ initialData }: ProductFormProps) {
       <div className="flex items-center justify-between">
         <button
           type="submit"
-          disabled={saving}
+          disabled={saving || uploading || !isValid}
           className="px-6 py-2.5 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-hover transition-colors disabled:opacity-50"
         >
           {saving ? 'Saving...' : isEdit ? 'Save Changes' : 'Create Product'}
         </button>
+        {!isValid && !saving && (
+          <p className="text-xs text-text-secondary mr-auto ml-4">Fill in every field above to save.</p>
+        )}
 
         {isEdit && (
           <button
@@ -419,16 +469,21 @@ export default function ProductForm({ initialData }: ProductFormProps) {
   )
 }
 
-const inputClass = 'w-full px-3 py-2.5 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors bg-white'
-
-function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
+function Field({ label, hint, htmlFor, error, children }: {
+  label: string
+  hint?: string
+  htmlFor: string
+  error?: string | null
+  children: React.ReactNode
+}) {
   return (
     <div>
-      <label className="block text-sm font-medium text-text-primary mb-1.5">
+      <label htmlFor={htmlFor} className="block text-sm font-medium text-text-primary mb-1.5">
         {label}
         {hint && <span className="text-text-secondary font-normal ml-1.5">— {hint}</span>}
       </label>
       {children}
+      <FieldMessage id={`${htmlFor}-message`} error={error} />
     </div>
   )
 }
