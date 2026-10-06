@@ -19,6 +19,10 @@ const config: Record<OrderStatus, { label: string; className: string }> = {
     label: 'Delivered',
     className: 'bg-emerald-50 text-emerald-700',
   },
+  refunded: {
+    label: 'Refunded',
+    className: 'bg-gray-100 text-gray-600',
+  },
 }
 
 export default function Badge({ status }: BadgeProps) {

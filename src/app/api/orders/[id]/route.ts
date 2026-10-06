@@ -3,6 +3,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
+import { createServiceClient } from '@/lib/supabase/server'
 
 export async function GET(
   request: NextRequest,
@@ -15,8 +16,16 @@ export async function GET(
       expand: ['line_items', 'line_items.data.price.product'],
     })
 
+    // The order (and its number) is created by the Stripe webhook, which can
+    // land a few seconds after the customer is redirected here. Null until then.
+    const { data: order } = await createServiceClient()
+      .from('orders')
+      .select('order_number')
+      .eq('stripe_session_id', session.id)
+      .maybeSingle()
+
     return NextResponse.json({
-      orderNumber: session.metadata?.order_number,
+      orderNumber: order?.order_number ?? null,
       customerEmail: session.customer_details?.email,
       shippingAddress: session.shipping_details?.address,
       lineItems: session.line_items?.data.map(item => ({

@@ -1,6 +1,7 @@
 // src/app/api/webhooks/stripe/route.ts
 // Handles Stripe webhook events — creates orders in Supabase on successful payment
-// and sends an order confirmation email via Resend
+// and sends an order confirmation email via Resend. Also marks orders refunded
+// when a refund is issued from the Stripe dashboard (charge.refunded).
 
 import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
@@ -29,15 +30,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
   }
 
-  // Only handle checkout.session.completed
-  if (event.type !== 'checkout.session.completed') {
-    return NextResponse.json({ received: true })
-  }
-
-  const session = event.data.object as Stripe.Checkout.Session
-
   try {
-    await handleCheckoutComplete(session)
+    if (event.type === 'checkout.session.completed') {
+      await handleCheckoutComplete(event.data.object as Stripe.Checkout.Session)
+    } else if (event.type === 'charge.refunded') {
+      await handleChargeRefunded((event.data.object as Stripe.Charge).id)
+    }
   } catch (err) {
     console.error('Failed to process webhook:', err)
     // Return 500 so Stripe retries
@@ -49,6 +47,15 @@ export async function POST(request: NextRequest) {
 
 async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
   const supabase = createServiceClient()
+
+  // Stripe can deliver the same event more than once (retries, manual resend).
+  // If the order already exists, there's nothing to do.
+  const { data: existingOrder } = await supabase
+    .from('orders')
+    .select('id')
+    .eq('stripe_session_id', session.id)
+    .maybeSingle()
+  if (existingOrder) return
 
   // Fetch line items from Stripe
   const lineItems = await stripe.checkout.sessions.listLineItems(session.id, {
@@ -161,4 +168,27 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
       console.error('Order confirmation email failed:', emailErr)
     }
   }
+}
+
+async function handleChargeRefunded(chargeId: string) {
+  // Re-fetch so the fields match our API version, not the endpoint's
+  const charge = await stripe.charges.retrieve(chargeId)
+  if (!charge.refunded || !charge.payment_intent) return  // partial refunds stay as-is
+
+  const paymentIntent = typeof charge.payment_intent === 'string'
+    ? charge.payment_intent
+    : charge.payment_intent.id
+
+  const supabase = createServiceClient()
+  const { error } = await supabase
+    .from('orders')
+    .update({
+      status: 'refunded',
+      refunded_at: new Date().toISOString(),
+      refund_amount: charge.amount_refunded,
+    })
+    .eq('stripe_payment_intent', paymentIntent)
+    .neq('status', 'refunded')
+
+  if (error) throw new Error(`Failed to mark order refunded: ${error.message}`)
 }

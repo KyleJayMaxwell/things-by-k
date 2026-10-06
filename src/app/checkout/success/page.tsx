@@ -9,6 +9,7 @@ import { useCart } from '@/context/CartContext'
 import Button from '@/components/Button'
 
 interface OrderDetails {
+  orderNumber?: string | null
   customerEmail?: string
   shippingAddress?: {
     line1: string
@@ -24,6 +25,8 @@ interface OrderDetails {
   amountTotal?: number
 }
 
+const MAX_ORDER_NUMBER_CHECKS = 6
+
 function formatPrice(cents: number) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(cents / 100)
 }
@@ -34,15 +37,33 @@ function SuccessContent() {
   const { clearCart } = useCart()
   const [order, setOrder] = useState<OrderDetails | null>(null)
   const [loading, setLoading] = useState(true)
+  const [stillConfirming, setStillConfirming] = useState(true)
 
   useEffect(() => {
     clearCart()
     if (!sessionId) { setLoading(false); return }
 
-    fetch(`/api/orders/${sessionId}`)
-      .then(r => r.json())
-      .then(data => { setOrder(data); setLoading(false) })
-      .catch(() => setLoading(false))
+    // The order number comes from the Stripe webhook, which can land a moment
+    // after the redirect. Check again a few times until it shows up.
+    let cancelled = false
+    let timer: ReturnType<typeof setTimeout>
+    const load = (attempt: number) => {
+      fetch(`/api/orders/${sessionId}`)
+        .then(r => r.json())
+        .then(data => {
+          if (cancelled) return
+          setOrder(data)
+          setLoading(false)
+          if (!data.orderNumber && !data.error && attempt < MAX_ORDER_NUMBER_CHECKS) {
+            timer = setTimeout(() => load(attempt + 1), 2000)
+          } else {
+            setStillConfirming(false)
+          }
+        })
+        .catch(() => { if (!cancelled) setLoading(false) })
+    }
+    load(1)
+    return () => { cancelled = true; clearTimeout(timer) }
   }, [sessionId, clearCart])
 
   return (
@@ -60,8 +81,20 @@ function SuccessContent() {
         <div className="text-text-secondary">Loading order details...</div>
       ) : order && !('error' in order) ? (
         <div className="bg-surface border border-border rounded-xl p-6 text-left space-y-6">
+          <div className="flex flex-wrap justify-between gap-x-4 gap-y-1 text-sm">
+            <span className="text-text-secondary">Order number</span>
+            <span className="font-semibold text-text-primary">
+              {order.orderNumber ?? (stillConfirming ? 'Confirming…' : 'Coming in your email')}
+            </span>
+            {order.customerEmail && (
+              <p className="w-full text-text-secondary">
+                A confirmation is on its way to {order.customerEmail}.
+              </p>
+            )}
+          </div>
+
           {order.lineItems && order.lineItems.length > 0 && (
-            <div>
+            <div className="border-t border-border pt-4">
               <h2 className="text-sm font-semibold text-text-primary uppercase tracking-wider mb-3">Items</h2>
               <div className="space-y-2">
                 {order.lineItems.map((item, i) => (

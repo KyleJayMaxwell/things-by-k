@@ -23,6 +23,7 @@ const statusStyles: Record<string, string> = {
   processing: 'bg-primary-light text-primary',
   shipped: 'bg-blue-50 text-blue-700',
   delivered: 'bg-emerald-50 text-emerald-700',
+  refunded: 'bg-gray-100 text-gray-600',
 }
 
 export default async function AdminOrdersPage() {

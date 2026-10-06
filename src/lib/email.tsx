@@ -6,11 +6,18 @@ import { Resend } from 'resend'
 import { CARRIER_NAMES, trackingUrl, type Carrier } from '@/lib/tracking'
 import { untrackedMailNote, type Destination } from '@/lib/shipping'
 
-if (!process.env.RESEND_API_KEY) {
-  throw new Error('Missing RESEND_API_KEY environment variable')
-}
+let client: Resend | null = null
 
-export const resend = new Resend(process.env.RESEND_API_KEY)
+// Created on first send rather than at import, so `next build` doesn't need the key
+function getResend(): Resend {
+  if (!client) {
+    if (!process.env.RESEND_API_KEY) {
+      throw new Error('Missing RESEND_API_KEY environment variable')
+    }
+    client = new Resend(process.env.RESEND_API_KEY)
+  }
+  return client
+}
 
 const FROM = 'Things by K <hello@things-by-k.com>'
 
@@ -75,7 +82,7 @@ export async function sendOrderConfirmation(params: SendOrderConfirmationParams)
     .filter(Boolean)
     .join('\n')
 
-  const { data, error } = await resend.emails.send({
+  const { data, error } = await getResend().emails.send({
     from: FROM,
     to,
     subject: `Order confirmed — ${orderNumber}`,
@@ -315,7 +322,7 @@ export async function sendShippingUpdate(params: SendShippingUpdateParams) {
   const firstName = recipientName?.trim().split(/\s+/)[0] ?? ''
   const greeting = firstName ? `Good news, ${firstName}!` : 'Good news!'
 
-  const { data, error } = await resend.emails.send({
+  const { data, error } = await getResend().emails.send({
     from: FROM,
     to,
     subject: `Your order has shipped — ${orderNumber}`,

@@ -47,6 +47,10 @@ export async function PATCH(
     return NextResponse.json({ error: 'Order not found' }, { status: 404 })
   }
 
+  if (existing.status === 'refunded') {
+    return NextResponse.json({ error: 'Refunded orders can’t change status' }, { status: 400 })
+  }
+
   const isNewlyShipped = status === 'shipped' && existing.status !== 'shipped'
 
   const { data: order, error: updateError } = await service
