@@ -5,17 +5,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { stripe } from '@/lib/stripe'
-import { createClient, createServiceClient } from '@/lib/supabase/server'
-import { isAdminEmail } from '@/lib/admin'
+import { createServiceClient, getAdminUser } from '@/lib/supabase/server'
 import { markOrderRefunded } from '@/lib/refunds'
 
 export async function POST(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!isAdminEmail(user?.email)) {
+  if (!(await getAdminUser())) {
     return NextResponse.json({ error: 'Not authorized' }, { status: 403 })
   }
 

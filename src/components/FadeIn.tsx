@@ -17,11 +17,6 @@ export default function FadeIn({ children, delay = 0, className = '' }: FadeInPr
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      setVisible(true)
-      return
-    }
-
     const el = ref.current
     if (!el) return
 
@@ -45,7 +40,7 @@ export default function FadeIn({ children, delay = 0, className = '' }: FadeInPr
       style={{ transitionDelay: delay ? `${delay}ms` : undefined }}
       className={`transition-[opacity,transform] duration-500 ease-out ${
         visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'
-      } ${className}`}
+      } motion-reduce:opacity-100 motion-reduce:translate-y-0 motion-reduce:transition-none ${className}`}
     >
       {children}
     </div>

@@ -63,7 +63,7 @@ export default function CartPage() {
           </svg>
         </div>
         <h1 className="text-xl font-semibold text-text-primary mb-2">Your cart is empty</h1>
-        <p className="text-text-secondary mb-8">Looks like you haven't added anything yet.</p>
+        <p className="text-text-secondary mb-8">Looks like you haven’t added anything yet.</p>
         <Link href="/shop">
           <Button variant="primary" size="lg">
             Shop Now

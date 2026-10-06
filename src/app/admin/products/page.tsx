@@ -1,22 +1,16 @@
 // src/app/admin/products/page.tsx
 
-import { createServiceClient } from '@/lib/supabase/server'
-import { createClient } from '@/lib/supabase/server'
-import { isAdminEmail } from '@/lib/admin'
+import { createServiceClient, getAdminUser } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import { formatPrice } from '@/lib/format'
+import Image from 'next/image'
 
 export const metadata: Metadata = { title: 'Products' }
 
-function formatPrice(cents: number) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(cents / 100)
-}
-
 export default async function AdminProductsPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user || !isAdminEmail(user.email)) redirect('/')
+  if (!(await getAdminUser())) redirect('/')
 
   const serviceClient = createServiceClient()
   const { data: products } = await serviceClient
@@ -62,9 +56,11 @@ export default async function AdminProductsPage() {
               >
                 <div className="col-span-5 flex items-center gap-3">
                   {product.images?.[0] ? (
-                    <img
+                    <Image
                       src={product.images[0]}
                       alt={product.name}
+                      width={40}
+                      height={40}
                       className="w-10 h-10 rounded-lg object-cover border border-border flex-shrink-0"
                     />
                   ) : (

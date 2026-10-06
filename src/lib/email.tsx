@@ -5,6 +5,7 @@
 import { Resend } from 'resend'
 import { CARRIER_NAMES, trackingUrl, type Carrier } from '@/lib/tracking'
 import { untrackedMailNote, type Destination } from '@/lib/shipping'
+import { formatPrice } from '@/lib/format'
 
 let client: Resend | null = null
 
@@ -50,13 +51,6 @@ interface SendOrderConfirmationParams {
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-
-function formatPrice(cents: number): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-  }).format(cents / 100)
-}
 
 // ── Order Confirmation ────────────────────────────────────────────────────────
 

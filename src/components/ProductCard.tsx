@@ -5,13 +5,10 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { Product } from '@/types'
+import { formatPrice } from '@/lib/format'
 
 interface ProductCardProps {
   product: Product
-}
-
-function formatPrice(cents: number) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(cents / 100)
 }
 
 export default function ProductCard({ product }: ProductCardProps) {

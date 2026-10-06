@@ -1,30 +1,16 @@
 // src/app/admin/orders/page.tsx
 
-import { createServiceClient } from '@/lib/supabase/server'
-import { createClient } from '@/lib/supabase/server'
-import { isAdminEmail } from '@/lib/admin'
+import { createServiceClient, getAdminUser } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import Badge from '@/components/Badge'
 import type { Metadata } from 'next'
+import { formatPrice, formatDate } from '@/lib/format'
 
 export const metadata: Metadata = { title: 'Orders' }
 
-function formatPrice(cents: number) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(cents / 100)
-}
-
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString('en-US', {
-    month: 'short', day: 'numeric', year: 'numeric',
-  })
-}
-
-
 export default async function AdminOrdersPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user || !isAdminEmail(user.email)) redirect('/')
+  if (!(await getAdminUser())) redirect('/')
 
   const serviceClient = createServiceClient()
   const { data: orders } = await serviceClient
@@ -60,7 +46,7 @@ export default async function AdminOrdersPage() {
                   {order.order_number}
                 </span>
                 <span className="col-span-4 text-sm text-text-secondary truncate pr-4">{order.email}</span>
-                <span className="col-span-2 text-sm text-text-secondary">{formatDate(order.created_at)}</span>
+                <span className="col-span-2 text-sm text-text-secondary">{formatDate(order.created_at, 'short')}</span>
                 <span className="col-span-2">
                   <Badge status={order.status} />
                 </span>

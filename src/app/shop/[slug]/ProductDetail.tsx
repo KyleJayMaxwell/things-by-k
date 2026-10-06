@@ -178,7 +178,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                     className="w-full px-3 py-2.5 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors bg-white"
                   />
                   <p className="mt-1.5 flex justify-between text-xs text-text-secondary">
-                    <span>It's mailed to the shipping address you enter at checkout. Send a pick-me-up to a friend, or treat yourself to something fun in the mailbox instead of bills.</span>
+                    <span>It’s mailed to the shipping address you enter at checkout. Send a pick-me-up to a friend, or treat yourself to something fun in the mailbox instead of bills.</span>
                     <span className="flex-shrink-0 ml-3">{message.length}/{HANDWRITTEN_MESSAGE_MAX}</span>
                   </p>
                 </div>

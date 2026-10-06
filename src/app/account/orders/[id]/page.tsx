@@ -7,18 +7,9 @@ import Image from 'next/image'
 import Badge from '@/components/Badge'
 import { CARRIER_NAMES, trackingUrl, type Carrier } from '@/lib/tracking'
 import type { Metadata } from 'next'
+import { formatPrice, formatDate } from '@/lib/format'
 
 export const metadata: Metadata = { title: 'Order Details' }
-
-function formatPrice(cents: number) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(cents / 100)
-}
-
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString('en-US', {
-    year: 'numeric', month: 'long', day: 'numeric',
-  })
-}
 
 interface Props {
   params: Promise<{ id: string }>
