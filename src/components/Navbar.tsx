@@ -32,8 +32,12 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  // Close menu on route change
-  useEffect(() => { setMenuOpen(false) }, [pathname])
+  // Close menu on route change (adjusting state during render, per React docs)
+  const [menuPath, setMenuPath] = useState(pathname)
+  if (menuPath !== pathname) {
+    setMenuPath(pathname)
+    setMenuOpen(false)
+  }
 
   const navLink = (href: string, label: string) => (
     <Link

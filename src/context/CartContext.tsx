@@ -33,6 +33,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     try {
       const stored = localStorage.getItem(CART_KEY)
+      // localStorage only exists in the browser, so this has to wait for mount
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       if (stored) setItems(JSON.parse(stored))
     } catch {
       // ignore parse errors

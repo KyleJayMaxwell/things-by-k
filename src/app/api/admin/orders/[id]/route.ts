@@ -3,8 +3,7 @@
 // Sends the customer a shipping email when an order moves to "shipped".
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient, createServiceClient } from '@/lib/supabase/server'
-import { isAdminEmail } from '@/lib/admin'
+import { createServiceClient, getAdminUser } from '@/lib/supabase/server'
 import { sendShippingUpdate } from '@/lib/email'
 import type { Carrier } from '@/lib/tracking'
 import { destinationForCountry } from '@/lib/shipping'
@@ -16,9 +15,7 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!isAdminEmail(user?.email)) {
+  if (!(await getAdminUser())) {
     return NextResponse.json({ error: 'Not authorized' }, { status: 403 })
   }
 

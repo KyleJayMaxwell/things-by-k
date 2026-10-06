@@ -5,6 +5,8 @@
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { errorMessage } from '@/lib/errors'
+import Image from 'next/image'
 
 interface ProductFormProps {
   initialData?: {
@@ -89,8 +91,8 @@ export default function ProductForm({ initialData }: ProductFormProps) {
         .getPublicUrl(path)
 
       setForm(prev => ({ ...prev, images: [...prev.images, publicUrl] }))
-    } catch (err: any) {
-      setError(err.message ?? 'Upload failed')
+    } catch (err) {
+      setError(errorMessage(err, 'Upload failed'))
     } finally {
       setUploading(false)
     }
@@ -151,8 +153,8 @@ export default function ProductForm({ initialData }: ProductFormProps) {
       }
       router.push('/admin/products')
       router.refresh()
-    } catch (err: any) {
-      setError(err.message ?? 'Save failed')
+    } catch (err) {
+      setError(errorMessage(err, 'Save failed'))
       setSaving(false)
     }
   }
@@ -333,7 +335,7 @@ export default function ProductForm({ initialData }: ProductFormProps) {
                 } ${dragOverIndex === i && dragIndex !== i ? 'ring-2 ring-primary ring-offset-2' : ''}`}
               >
                 <div className="relative">
-                  <img src={url} alt="" draggable={false} className="w-20 h-20 object-cover rounded-lg border border-border" />
+                  <Image src={url} alt="" width={80} height={80} draggable={false} className="w-20 h-20 object-cover rounded-lg border border-border" />
                   {i === 0 && (
                     <span className="absolute bottom-1 left-1 text-[10px] bg-black/60 text-white px-1 rounded">
                       Main

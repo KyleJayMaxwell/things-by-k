@@ -1,7 +1,6 @@
 // src/app/admin/products/new/page.tsx
 
-import { createClient } from '@/lib/supabase/server'
-import { isAdminEmail } from '@/lib/admin'
+import { getAdminUser } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import ProductForm from '../ProductForm'
@@ -10,9 +9,7 @@ import type { Metadata } from 'next'
 export const metadata: Metadata = { title: 'Add Product' }
 
 export default async function NewProductPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user || !isAdminEmail(user.email)) redirect('/')
+  if (!(await getAdminUser())) redirect('/')
 
   return (
     <div>

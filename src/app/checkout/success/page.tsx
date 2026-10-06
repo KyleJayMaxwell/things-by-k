@@ -7,6 +7,7 @@ import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useCart } from '@/context/CartContext'
 import Button from '@/components/Button'
+import { formatPrice } from '@/lib/format'
 
 interface OrderDetails {
   orderNumber?: string | null
@@ -27,21 +28,17 @@ interface OrderDetails {
 
 const MAX_ORDER_NUMBER_CHECKS = 6
 
-function formatPrice(cents: number) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(cents / 100)
-}
-
 function SuccessContent() {
   const searchParams = useSearchParams()
   const sessionId = searchParams.get('session_id')
   const { clearCart } = useCart()
   const [order, setOrder] = useState<OrderDetails | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(Boolean(sessionId))
   const [stillConfirming, setStillConfirming] = useState(true)
 
   useEffect(() => {
     clearCart()
-    if (!sessionId) { setLoading(false); return }
+    if (!sessionId) return
 
     // The order number comes from the Stripe webhook, which can land a moment
     // after the redirect. Check again a few times until it shows up.
@@ -75,7 +72,7 @@ function SuccessContent() {
       </div>
 
       <h1 className="text-3xl font-semibold text-text-primary mb-2">Thank you for your order!</h1>
-      <p className="text-text-secondary mb-10">We'll get it packed up and on its way soon.</p>
+      <p className="text-text-secondary mb-10">We’ll get it packed up and on its way soon.</p>
 
       {loading ? (
         <div className="text-text-secondary">Loading order details...</div>

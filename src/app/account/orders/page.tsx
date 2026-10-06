@@ -5,20 +5,10 @@ import { claimGuestOrders } from '@/lib/orders'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import Badge from '@/components/Badge'
-import { Order } from '@/types'
 import type { Metadata } from 'next'
+import { formatPrice, formatDate } from '@/lib/format'
 
 export const metadata: Metadata = { title: 'Order History' }
-
-function formatPrice(cents: number) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(cents / 100)
-}
-
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString('en-US', {
-    year: 'numeric', month: 'short', day: 'numeric',
-  })
-}
 
 export default async function OrdersPage() {
   const supabase = await createClient()
@@ -30,7 +20,7 @@ export default async function OrdersPage() {
 
   const { data: orders } = await supabase
     .from('orders')
-    .select('*, order_items(id)')
+    .select('id, order_number, status, total, created_at, order_items(id)')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
 
@@ -45,14 +35,14 @@ export default async function OrdersPage() {
 
       {!orders || orders.length === 0 ? (
         <div className="text-center py-20">
-          <p className="text-text-secondary mb-6">You haven't placed any orders yet.</p>
+          <p className="text-text-secondary mb-6">You haven’t placed any orders yet.</p>
           <Link href="/shop" className="inline-flex items-center px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors font-medium">
             Start Shopping
           </Link>
         </div>
       ) : (
         <div className="space-y-3">
-          {orders.map((order: Order & { order_items: { id: string }[] }) => (
+          {orders.map(order => (
             <Link
               key={order.id}
               href={`/account/orders/${order.id}`}
@@ -64,7 +54,7 @@ export default async function OrdersPage() {
                     {order.order_number}
                   </p>
                   <p className="text-sm text-text-secondary mt-1">
-                    {formatDate(order.created_at)} · {order.order_items.length} {order.order_items.length === 1 ? 'item' : 'items'}
+                    {formatDate(order.created_at, 'short')} · {order.order_items.length} {order.order_items.length === 1 ? 'item' : 'items'}
                   </p>
                 </div>
                 <div className="flex items-center gap-3 flex-shrink-0">

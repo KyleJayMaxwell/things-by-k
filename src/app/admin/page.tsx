@@ -11,116 +11,86 @@ import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import Badge, { STATUS_CHART_COLORS } from '@/components/Badge'
 import type { OrderStatus } from '@/types'
+import { formatPrice, formatDate } from '@/lib/format'
 
-function formatPrice(cents: number) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(cents / 100)
+interface OverviewOrder {
+  id: string
+  order_number: string
+  email: string
+  total: number
+  status: OrderStatus
+  created_at: string
+  order_items: { product_name: string; quantity: number }[]
 }
 
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+interface OverviewProduct {
+  id: string
+  name: string
+  stock: number
+  is_active: boolean
 }
 
-
-const DONUT_COLORS = ['#360F5A', '#3b82f6', '#059669', '#9CA3AF']
+// Sums a value per day, keeping days in order
+function totalsByDay(orders: OverviewOrder[], value: (o: OverviewOrder) => number) {
+  const map: Record<string, number> = {}
+  orders.forEach(o => {
+    const day = formatDate(o.created_at, 'day')
+    map[day] = (map[day] ?? 0) + value(o)
+  })
+  return Object.entries(map)
+}
 
 export default function AdminPage() {
-  const supabase = createClient()
-  const [orders, setOrders] = useState<any[]>([])
-  const [orderItems, setOrderItems] = useState<any[]>([])
-  const [products, setProducts] = useState<any[]>([])
+  const [orders, setOrders] = useState<OverviewOrder[]>([])
+  const [products, setProducts] = useState<OverviewProduct[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    const supabase = createClient()
     async function load() {
       const since = new Date()
       since.setDate(since.getDate() - 30)
-      const sinceStr = since.toISOString()
 
-      const [ordersRes, itemsRes, productsRes] = await Promise.all([
-        supabase.from('orders').select('id, total, status, created_at, email, order_number').gte('created_at', sinceStr).order('created_at', { ascending: true }),
-        supabase.from('order_items').select('product_name, quantity, price, order_id'),
+      const [ordersRes, productsRes] = await Promise.all([
+        supabase
+          .from('orders')
+          .select('id, order_number, email, total, status, created_at, order_items(product_name, quantity)')
+          .gte('created_at', since.toISOString())
+          .order('created_at', { ascending: true }),
         supabase.from('products').select('id, name, stock, is_active'),
       ])
 
-      setOrders(ordersRes.data ?? [])
-      setOrderItems(itemsRes.data ?? [])
+      setOrders((ordersRes.data as OverviewOrder[] | null) ?? [])
       setProducts(productsRes.data ?? [])
       setLoading(false)
     }
     load()
   }, [])
 
-  // --- Mock data (used when no real orders exist) ---
-  const MOCK_REVENUE = [
-    { date: 'Mar 1', revenue: 15 }, { date: 'Mar 3', revenue: 25 },
-    { date: 'Mar 5', revenue: 20 }, { date: 'Mar 8', revenue: 40 },
-    { date: 'Mar 10', revenue: 30 }, { date: 'Mar 12', revenue: 55 },
-    { date: 'Mar 15', revenue: 45 }, { date: 'Mar 18', revenue: 70 },
-    { date: 'Mar 20', revenue: 60 }, { date: 'Mar 22', revenue: 85 },
-    { date: 'Mar 25', revenue: 75 }, { date: 'Mar 28', revenue: 95 },
-  ]
-  const MOCK_VOLUME = [
-    { date: 'Mar 1', orders: 1 }, { date: 'Mar 3', orders: 2 },
-    { date: 'Mar 5', orders: 1 }, { date: 'Mar 8', orders: 3 },
-    { date: 'Mar 10', orders: 2 }, { date: 'Mar 12', orders: 4 },
-    { date: 'Mar 15', orders: 3 }, { date: 'Mar 18', orders: 5 },
-    { date: 'Mar 20', orders: 4 }, { date: 'Mar 22', orders: 6 },
-    { date: 'Mar 25', orders: 5 }, { date: 'Mar 28', orders: 7 },
-  ]
-  const MOCK_STATUS = [{ name: 'processing', value: 4 }, { name: 'shipped', value: 3 }, { name: 'delivered', value: 8 }]
-  const MOCK_PRODUCTS = [
-    { name: 'Seoul Hanok', units: 12 }, { name: 'Sunset Print', units: 8 },
-    { name: 'City Zine', units: 5 }, { name: 'Brass Necklace', units: 3 },
-  ]
+  // Refunded orders don't count toward revenue or units sold
+  const paidOrders = orders.filter(o => o.status !== 'refunded')
 
-  const hasOrders = orders.length > 0
+  const revenueByDay = totalsByDay(paidOrders, o => o.total)
+    .map(([date, cents]) => ({ date, revenue: cents / 100 }))
 
-  // --- Derived data ---
+  const volumeByDay = totalsByDay(orders, () => 1)
+    .map(([date, count]) => ({ date, orders: count }))
 
-  // Revenue over time
-  const revenueByDay = hasOrders ? (() => {
-    const map: Record<string, number> = {}
-    orders.forEach(o => {
-      const day = new Date(o.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-      if (o.status !== 'refunded') map[day] = (map[day] ?? 0) + o.total
-    })
-    return Object.entries(map).map(([date, revenue]) => ({ date, revenue: revenue / 100 }))
-  })() : MOCK_REVENUE
+  const statusData = (Object.keys(STATUS_CHART_COLORS) as OrderStatus[])
+    .map(name => ({ name, value: orders.filter(o => o.status === name).length }))
+    .filter(entry => entry.value > 0)
 
-  // Daily order volume
-  const volumeByDay = hasOrders ? (() => {
-    const map: Record<string, number> = {}
-    orders.forEach(o => {
-      const day = new Date(o.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-      map[day] = (map[day] ?? 0) + 1
-    })
-    return Object.entries(map).map(([date, count]) => ({ date, orders: count }))
-  })() : MOCK_VOLUME
-
-  // Orders by status
-  const statusData = hasOrders ? (() => {
-    const map: Record<string, number> = { processing: 0, shipped: 0, delivered: 0, refunded: 0 }
-    orders.forEach(o => { map[o.status] = (map[o.status] ?? 0) + 1 })
-    return Object.entries(map)
-      .filter(([, count]) => count > 0)
-      .map(([name, value]) => ({ name, value }))
-  })() : MOCK_STATUS
-
-  // Sales by product
-  const salesByProduct = hasOrders ? (() => {
-    const map: Record<string, number> = {}
-    orderItems.forEach(item => {
-      map[item.product_name] = (map[item.product_name] ?? 0) + item.quantity
-    })
-    return Object.entries(map)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 6)
-      .map(([name, units]) => ({ name: name.length > 20 ? name.slice(0, 18) + '…' : name, units }))
-  })() : MOCK_PRODUCTS
+  const unitsByProduct: Record<string, number> = {}
+  paidOrders.forEach(o => o.order_items.forEach(item => {
+    unitsByProduct[item.product_name] = (unitsByProduct[item.product_name] ?? 0) + item.quantity
+  }))
+  const salesByProduct = Object.entries(unitsByProduct)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 6)
+    .map(([name, units]) => ({ name: name.length > 20 ? name.slice(0, 18) + '…' : name, units }))
 
   // Summary stats
-  // Refunded orders don't count toward revenue
-  const totalRevenue = orders.reduce((s, o) => s + (o.status === 'refunded' ? 0 : o.total), 0)
+  const totalRevenue = paidOrders.reduce((sum, o) => sum + o.total, 0)
   const processingCount = orders.filter(o => o.status === 'processing').length
   const lowStock = products.filter(p => p.is_active && p.stock <= 5)
   const recentOrders = [...orders].reverse().slice(0, 5)
@@ -134,9 +104,6 @@ export default function AdminPage() {
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-2xl font-semibold text-text-primary">Overview</h1>
         <div className="flex items-center gap-2">
-          {!hasOrders && (
-            <span className="text-xs font-medium text-amber-700 bg-amber-50 px-3 py-1 rounded-full">Sample data</span>
-          )}
           <span className="text-xs text-text-secondary bg-gray-100 px-3 py-1 rounded-full">Last 30 days</span>
         </div>
       </div>
@@ -187,8 +154,8 @@ export default function AdminPage() {
                   paddingAngle={3}
                   dataKey="value"
                 >
-                  {statusData.map((entry, i) => (
-                    <Cell key={entry.name} fill={STATUS_CHART_COLORS[entry.name as OrderStatus] ?? DONUT_COLORS[i % DONUT_COLORS.length]} />
+                  {statusData.map(entry => (
+                    <Cell key={entry.name} fill={STATUS_CHART_COLORS[entry.name]} />
                   ))}
                 </Pie>
                 <Tooltip formatter={(v, name) => [(Number(v) || 0).toFixed(2), name]} contentStyle={tooltipStyle} />
@@ -272,7 +239,7 @@ export default function AdminPage() {
                     <p className="text-sm font-medium text-text-primary group-hover:text-primary transition-colors">
                       {order.order_number}
                     </p>
-                    <p className="text-xs text-text-secondary mt-0.5">{order.email} · {formatDate(order.created_at)}</p>
+                    <p className="text-xs text-text-secondary mt-0.5">{order.email} · {formatDate(order.created_at, 'day')}</p>
                   </div>
                   <div className="flex items-center gap-3">
                     <Badge status={order.status} />

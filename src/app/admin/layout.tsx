@@ -1,8 +1,7 @@
 // src/app/admin/layout.tsx
 
-import { createClient } from '@/lib/supabase/server'
+import { getAdminUser } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { isAdminEmail } from '@/lib/admin'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 
@@ -11,10 +10,9 @@ export const metadata: Metadata = {
 }
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getAdminUser()
 
-  if (!user || !isAdminEmail(user.email)) {
+  if (!user) {
     redirect('/')
   }
 
@@ -29,7 +27,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <p className="text-sm font-semibold text-text-primary mt-1">Admin</p>
         </div>
         <nav className="flex-1 px-3 py-4 space-y-1">
-          <AdminNavLink href="/admin" label="Overview" exact />
+          <AdminNavLink href="/admin" label="Overview" />
           <AdminNavLink href="/admin/orders" label="Orders" />
           <AdminNavLink href="/admin/products" label="Products" />
         </nav>
@@ -46,7 +44,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   )
 }
 
-function AdminNavLink({ href, label, exact }: { href: string; label: string; exact?: boolean }) {
+function AdminNavLink({ href, label }: { href: string; label: string }) {
   // We use a client component for active state
   return (
     <Link

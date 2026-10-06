@@ -3,35 +3,24 @@
 // src/app/admin/orders/[id]/page.tsx
 
 import { useEffect, useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import Badge from '@/components/Badge'
 import { createClient } from '@/lib/supabase/client'
 import { CARRIER_NAMES, type Carrier } from '@/lib/tracking'
 import { DELIVERY_WEEKS, destinationForCountry } from '@/lib/shipping'
-
-function formatPrice(cents: number) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(cents / 100)
-}
-
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString('en-US', {
-    year: 'numeric', month: 'long', day: 'numeric',
-  })
-}
+import type { OrderStatus, OrderWithItems } from '@/types'
+import { formatPrice, formatDate } from '@/lib/format'
+import { errorMessage } from '@/lib/errors'
 
 const STATUS_OPTIONS = ['processing', 'shipped', 'delivered'] as const
-type OrderStatus = typeof STATUS_OPTIONS[number] | 'refunded'
 
 const CARRIER_OPTIONS = Object.entries(CARRIER_NAMES) as [Carrier, string][]
 
-
 export default function AdminOrderDetailPage() {
   const { id } = useParams<{ id: string }>()
-  const router = useRouter()
-  const supabase = createClient()
 
-  const [order, setOrder] = useState<any>(null)
+  const [order, setOrder] = useState<OrderWithItems | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [status, setStatus] = useState<OrderStatus>('processing')
@@ -44,6 +33,7 @@ export default function AdminOrderDetailPage() {
   const [refundError, setRefundError] = useState<string | null>(null)
 
   useEffect(() => {
+    const supabase = createClient()
     async function load() {
       const { data } = await supabase
         .from('orders')
@@ -52,7 +42,7 @@ export default function AdminOrderDetailPage() {
         .single()
 
       if (data) {
-        setOrder(data)
+        setOrder(data as OrderWithItems)
         setStatus(data.status)
         if (data.carrier) setCarrier(data.carrier)
         setTrackingNumber(data.tracking_number ?? '')
@@ -74,33 +64,33 @@ export default function AdminOrderDetailPage() {
       const json = await res.json()
       if (!res.ok) throw new Error(json.error ?? 'Save failed')
 
-      setOrder((prev: any) => ({ ...prev, ...json.order }))
+      setOrder(prev => prev && { ...prev, ...json.order })
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
       if (json.emailSent) {
-        setMessage({ tone: 'ok', text: `Shipping email sent to ${order.email}.` })
+        setMessage({ tone: 'ok', text: `Shipping email sent to ${order?.email}.` })
       } else if (json.emailError) {
         setMessage({ tone: 'error', text: `Status saved, but the shipping email failed: ${json.emailError}` })
       }
-    } catch (err: any) {
-      setMessage({ tone: 'error', text: err.message ?? 'Save failed' })
+    } catch (err) {
+      setMessage({ tone: 'error', text: errorMessage(err, 'Save failed') })
     } finally {
       setSaving(false)
     }
   }
 
   const handleRefund = async () => {
-    if (!confirm(`Refund ${formatPrice(order.total)} to ${order.email} and email them? This can't be undone.`)) return
+    if (!order || !confirm(`Refund ${formatPrice(order.total)} to ${order.email} and email them? This can't be undone.`)) return
     setRefunding(true)
     setRefundError(null)
     try {
       const res = await fetch(`/api/admin/orders/${id}/refund`, { method: 'POST' })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error ?? 'Refund failed')
-      setOrder((prev: any) => ({ ...prev, ...json.order }))
+      setOrder(prev => prev && { ...prev, ...json.order })
       setStatus('refunded')
-    } catch (err: any) {
-      setRefundError(err.message ?? 'Refund failed')
+    } catch (err) {
+      setRefundError(errorMessage(err, 'Refund failed'))
     } finally {
       setRefunding(false)
     }
@@ -232,7 +222,7 @@ export default function AdminOrderDetailPage() {
           <h2 className="font-medium text-text-primary">Items</h2>
         </div>
         <div className="divide-y divide-border">
-          {order.order_items.map((item: any) => (
+          {order.order_items.map(item => (
             <div key={item.id} className="flex items-center justify-between px-5 py-4">
               <div>
                 <p className="text-sm font-medium text-text-primary">{item.product_name}</p>

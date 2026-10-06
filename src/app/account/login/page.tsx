@@ -35,7 +35,7 @@ function LoginForm() {
   const [tab, setTab] = useState<Tab>('signin')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(
-    searchParams.get('error') === 'link' ? 'That link has expired or was already used. Please try again.' : null
+    searchParams.get('error') === 'link' ? 'That link has expired or was already used. If you were confirming your email, try signing in. Otherwise request a new link.' : null
   )
   const [success, setSuccess] = useState<string | null>(null)
 

@@ -1,8 +1,6 @@
 // src/app/admin/products/[id]/page.tsx
 
-import { createClient } from '@/lib/supabase/server'
-import { createServiceClient } from '@/lib/supabase/server'
-import { isAdminEmail } from '@/lib/admin'
+import { createServiceClient, getAdminUser } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import ProductForm from '../ProductForm'
@@ -16,9 +14,7 @@ interface Props {
 
 export default async function EditProductPage({ params }: Props) {
   const { id } = await params
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user || !isAdminEmail(user.email)) redirect('/')
+  if (!(await getAdminUser())) redirect('/')
 
   const serviceClient = createServiceClient()
   const { data: product } = await serviceClient
