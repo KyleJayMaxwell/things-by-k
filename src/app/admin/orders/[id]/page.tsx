@@ -5,6 +5,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Badge from '@/components/Badge'
 import { createClient } from '@/lib/supabase/client'
 import { CARRIER_NAMES, type Carrier } from '@/lib/tracking'
 import { DELIVERY_WEEKS, destinationForCountry } from '@/lib/shipping'
@@ -24,12 +25,6 @@ type OrderStatus = typeof STATUS_OPTIONS[number] | 'refunded'
 
 const CARRIER_OPTIONS = Object.entries(CARRIER_NAMES) as [Carrier, string][]
 
-const statusStyles: Record<OrderStatus, string> = {
-  processing: 'bg-primary-light text-primary',
-  shipped: 'bg-blue-50 text-blue-700',
-  delivered: 'bg-emerald-50 text-emerald-700',
-  refunded: 'bg-gray-100 text-gray-600',
-}
 
 export default function AdminOrderDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -135,9 +130,7 @@ export default function AdminOrderDetailPage() {
           <h1 className="text-2xl font-semibold text-text-primary">{order.order_number}</h1>
           <p className="text-text-secondary text-sm mt-1">{formatDate(order.created_at)} · {order.email}</p>
         </div>
-        <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${statusStyles[status as OrderStatus]}`}>
-          {status}
-        </span>
+        <Badge status={status} />
       </div>
 
       {order.status === 'refunded' && (

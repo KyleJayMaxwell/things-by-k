@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { isAdminEmail } from '@/lib/admin'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import Badge from '@/components/Badge'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Orders' }
@@ -19,12 +20,6 @@ function formatDate(dateStr: string) {
   })
 }
 
-const statusStyles: Record<string, string> = {
-  processing: 'bg-primary-light text-primary',
-  shipped: 'bg-blue-50 text-blue-700',
-  delivered: 'bg-emerald-50 text-emerald-700',
-  refunded: 'bg-gray-100 text-gray-600',
-}
 
 export default async function AdminOrdersPage() {
   const supabase = await createClient()
@@ -67,9 +62,7 @@ export default async function AdminOrdersPage() {
                 <span className="col-span-4 text-sm text-text-secondary truncate pr-4">{order.email}</span>
                 <span className="col-span-2 text-sm text-text-secondary">{formatDate(order.created_at)}</span>
                 <span className="col-span-2">
-                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusStyles[order.status] ?? 'bg-gray-100 text-gray-600'}`}>
-                    {order.status}
-                  </span>
+                  <Badge status={order.status} />
                 </span>
                 <span className="col-span-1 text-sm text-text-secondary text-right">
                   {(order.order_items as { id: string }[]).length}

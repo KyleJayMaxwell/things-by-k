@@ -9,6 +9,8 @@ import {
 } from 'recharts'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
+import Badge, { STATUS_CHART_COLORS } from '@/components/Badge'
+import type { OrderStatus } from '@/types'
 
 function formatPrice(cents: number) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(cents / 100)
@@ -18,12 +20,6 @@ function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
-const STATUS_COLORS: Record<string, string> = {
-  processing: '#360F5A',
-  shipped: '#3b82f6',
-  delivered: '#059669',
-  refunded: '#9CA3AF',
-}
 
 const DONUT_COLORS = ['#360F5A', '#3b82f6', '#059669', '#9CA3AF']
 
@@ -192,7 +188,7 @@ export default function AdminPage() {
                   dataKey="value"
                 >
                   {statusData.map((entry, i) => (
-                    <Cell key={entry.name} fill={STATUS_COLORS[entry.name] ?? DONUT_COLORS[i % DONUT_COLORS.length]} />
+                    <Cell key={entry.name} fill={STATUS_CHART_COLORS[entry.name as OrderStatus] ?? DONUT_COLORS[i % DONUT_COLORS.length]} />
                   ))}
                 </Pie>
                 <Tooltip formatter={(v, name) => [(Number(v) || 0).toFixed(2), name]} contentStyle={tooltipStyle} />
@@ -279,7 +275,7 @@ export default function AdminPage() {
                     <p className="text-xs text-text-secondary mt-0.5">{order.email} · {formatDate(order.created_at)}</p>
                   </div>
                   <div className="flex items-center gap-3">
-                    <StatusBadge status={order.status} />
+                    <Badge status={order.status} />
                     <span className="text-sm font-medium text-text-primary">{formatPrice(order.total)}</span>
                   </div>
                 </Link>
@@ -335,20 +331,6 @@ function StatCard({ label, value, highlight }: { label: string; value: string; h
       <p className="text-xs text-text-secondary uppercase tracking-widest mb-1">{label}</p>
       <p className={`text-2xl font-semibold ${highlight ? 'text-warning' : 'text-text-primary'}`}>{value}</p>
     </div>
-  )
-}
-
-function StatusBadge({ status }: { status: string }) {
-  const styles: Record<string, string> = {
-    processing: 'bg-primary-light text-primary',
-    shipped: 'bg-blue-50 text-blue-700',
-    delivered: 'bg-emerald-50 text-emerald-700',
-    refunded: 'bg-gray-100 text-gray-600',
-  }
-  return (
-    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${styles[status] ?? 'bg-gray-100 text-gray-600'}`}>
-      {status}
-    </span>
   )
 }
 
