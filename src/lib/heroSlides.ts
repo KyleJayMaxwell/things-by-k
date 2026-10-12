@@ -29,7 +29,7 @@ export const heroSlides: HeroSlide[] = [
   {
     id: 'about',
     image: aboutImage,
-    alt: 'Postcard design, front and back',
+    alt: 'Bay Bridge over the water on a clear day',
     heading: 'Designed by K',
     buttons: [{ label: 'About Things by K', href: '/about' }],
   },

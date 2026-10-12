@@ -100,7 +100,7 @@ export default function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
                     key={b.href}
                     href={b.href}
                     tabIndex={active ? undefined : -1}
-                    className="inline-flex items-center justify-center rounded-lg bg-white px-6 py-3 text-sm sm:text-base font-medium text-text-primary shadow-sm transition-colors hover:bg-primary-light focus-ring"
+                    className="inline-flex items-center justify-center rounded-lg bg-neutral-900 px-6 py-3 text-sm sm:text-base font-medium text-white shadow-sm hover:shadow-md hover:-translate-y-px hover:bg-neutral-800 active:shadow-sm active:translate-y-0 transition-[background-color,box-shadow,transform] duration-150 focus-ring"
                   >
                     {b.label}
                   </Link>

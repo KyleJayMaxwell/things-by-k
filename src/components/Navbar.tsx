@@ -42,7 +42,7 @@ export default function Navbar() {
   const navLink = (href: string, label: string) => (
     <Link
       href={href}
-      className={`text-sm tracking-wide transition-colors duration-150 hover:text-white focus-ring-light rounded ${
+      className={`text-sm font-medium uppercase tracking-wider transition-colors duration-150 hover:text-white focus-ring-light rounded ${
         pathname === href ? 'text-white font-medium' : 'text-white/75'
       }`}
     >
@@ -56,7 +56,7 @@ export default function Navbar() {
         scrolled ? 'shadow-md' : ''
       }`}
     >
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 grid grid-cols-[1fr_auto_1fr] items-center gap-4">
+      <div className="px-4 sm:px-8 lg:px-10 h-16 grid grid-cols-[1fr_auto_1fr] items-center gap-4">
 
         {/* Left: links on desktop, menu button on mobile */}
         <div className="flex items-center">
@@ -83,7 +83,7 @@ export default function Navbar() {
         </div>
 
         {/* Logo, centered */}
-        <Link href="/" className="font-brand text-2xl leading-none -translate-y-[0.1em] text-white hover:text-white/85 transition-colors focus-ring-light rounded">
+        <Link href="/" className="font-brand text-3xl leading-none -translate-y-[0.1em] text-white hover:text-white/85 transition-colors focus-ring-light rounded">
           Things by K
         </Link>
 
