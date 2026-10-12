@@ -90,8 +90,8 @@ export default async function HomePage() {
           <FadeIn className="flex-1">
             <h2 className="font-brand text-4xl text-text-primary mb-3">Things by K</h2>
             <p className="text-text-secondary leading-relaxed max-w-lg">
-              A small shop for handmade goods. Every piece is made one at a time,
-              with intention and thought.
+              A small shop of original designs. Every piece is designed with
+              intention and thought.
             </p>
             <Link href="/about" className="inline-block mt-6">
               <Button variant="secondary" size="md">Learn More</Button>
