@@ -1,7 +1,5 @@
 // src/app/about/page.tsx
 
-import Link from 'next/link'
-import Button from '@/components/Button'
 import type { Metadata } from 'next'
 import { CONTACT_EMAIL } from '@/lib/site'
 
@@ -12,44 +10,29 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-16">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-10 pb-12 sm:py-24">
+      <div className="grid grid-cols-1 md:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] gap-8 md:gap-16 items-start">
 
-      <p className="text-xs tracking-widest text-text-secondary uppercase mb-4">About</p>
-      <h1 className="text-4xl sm:text-5xl font-light text-text-primary leading-tight mb-10">
-        Small-batch, made with care.<br />
-        Each piece is created by hand<br />
-        or captured through a lens.
-      </h1>
-
-      {/* Photo + Process */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-12 items-start mb-12">
-
-        {/* Placeholder photo */}
-        <div className="aspect-[3/4] bg-primary-light relative overflow-hidden rounded-sm flex items-center justify-center">
+        {/* Placeholder photo (to be replaced with a scanned polaroid) */}
+        <div className="w-full max-w-sm mx-auto md:mx-0 aspect-[3/4] bg-primary-light relative overflow-hidden rounded-sm shadow-[0_2px_6px_rgba(26,26,46,0.08),0_16px_36px_rgba(26,26,46,0.12)] flex items-center justify-center">
           <p className="text-xs text-text-secondary tracking-widest uppercase">Photo coming soon</p>
         </div>
 
-        {/* Process */}
-        <div className="space-y-5 pt-2">
-          <h2 className="font-medium text-text-primary">The process</h2>
-          <div className="space-y-4 text-text-secondary text-sm leading-relaxed">
-            <p>
-              Everything in this shop starts with an idea — something worth making slowly,
-              with intention. Whether it&apos;s a print pulled from an original photograph
-              or a handmade object, nothing here is mass-produced.
-            </p>
-            <p>
-              I work in small batches so that each piece gets the attention it deserves.
-              When something sells out, it&apos;s gone — or it comes back in a slightly
-              different form.
-            </p>
-            <p>
-              Things by K is a one-person studio. Every order is packed and shipped by me.
-            </p>
-          </div>
+        {/* Text */}
+        <div className="md:pt-6">
+          <p className="text-xs tracking-widest text-text-secondary uppercase mb-4">About</p>
+          <h1 className="text-3xl sm:text-4xl font-light text-text-primary leading-tight mb-8">
+            Original designs, made with intention and thought.
+          </h1>
 
-          <div className="pt-4 border-t border-border">
-            <p className="text-xs text-text-secondary tracking-widest uppercase mb-2">Get in touch</p>
+          <p className="text-text-secondary leading-relaxed">
+            <span className="font-medium text-text-primary">Things by K</span> is a small
+            shop of original designs. Each piece starts as an idea worth slowing down for
+            and is made in small runs, and every order is packed and shipped by me.
+          </p>
+
+          <div className="mt-8 md:mt-10">
+            <p className="text-xs text-text-secondary tracking-widest uppercase mb-2">Contact</p>
             <a
               href={`mailto:${CONTACT_EMAIL}`}
               className="text-sm text-text-primary underline underline-offset-4 hover:text-primary transition-colors"
@@ -58,16 +41,8 @@ export default function AboutPage() {
             </a>
           </div>
         </div>
-      </div>
 
-      {/* CTA */}
-      <div className="pt-8 border-t border-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-        <p className="text-text-secondary text-sm">Ready to find something you&apos;ll love?</p>
-        <Link href="/shop">
-          <Button variant="primary" size="lg">Shop the Collection</Button>
-        </Link>
       </div>
-
     </div>
   )
 }
