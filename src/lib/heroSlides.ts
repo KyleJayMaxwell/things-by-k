@@ -29,8 +29,8 @@ export const heroSlides: HeroSlide[] = [
   {
     id: 'about',
     image: aboutImage,
-    alt: 'Handwritten postcard, front and back',
-    heading: 'Made one at a time',
+    alt: 'Postcard design, front and back',
+    heading: 'Designed by K',
     buttons: [{ label: 'About Things by K', href: '/about' }],
   },
 ]
