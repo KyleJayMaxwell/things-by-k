@@ -25,18 +25,13 @@ export default function AboutPage() {
             Original designs, made with intention and thought.
           </h1>
 
-          <div className="space-y-5 text-text-secondary leading-relaxed">
-            <p>
-              <span className="font-medium text-text-primary">Things by K</span> is a small
-              shop of original designs. Each piece starts as an idea worth slowing down for,
-              and is made in small runs so it stays a little special.
-            </p>
-            <p>
-              Every order is packed and shipped by me.
-            </p>
-          </div>
+          <p className="text-text-secondary leading-relaxed">
+            <span className="font-medium text-text-primary">Things by K</span> is a small
+            shop of original designs. Each piece starts as an idea worth slowing down for
+            and is made in small runs, and every order is packed and shipped by me.
+          </p>
 
-          <div className="mt-8 pt-5 md:mt-10 md:pt-6 border-t border-border">
+          <div className="mt-8 md:mt-10">
             <p className="text-xs text-text-secondary tracking-widest uppercase mb-2">Contact</p>
             <a
               href={`mailto:${CONTACT_EMAIL}`}
