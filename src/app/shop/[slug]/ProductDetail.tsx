@@ -2,7 +2,7 @@
 
 // src/app/shop/[slug]/ProductDetail.tsx
 
-import Image from 'next/image'
+import FadeImage from '@/components/FadeImage'
 import { useState, useCallback } from 'react'
 import { Product } from '@/types'
 import { useCart } from '@/context/CartContext'
@@ -57,7 +57,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                   className="group absolute inset-0 cursor-zoom-in"
                 >
                   {/* object-contain so tall or wide photos show in full instead of being cropped */}
-                  <Image
+                  <FadeImage
                     src={product.images[selectedImage]}
                     alt={product.name}
                     fill
@@ -98,7 +98,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                       : 'border-border hover:border-primary/40 opacity-70 hover:opacity-100'
                   }`}
                 >
-                  <Image src={img} alt={`${product.name} ${i + 1}`} fill className="object-cover" sizes="80px" />
+                  <FadeImage src={img} alt={`${product.name} ${i + 1}`} fill className="object-cover" sizes="80px" />
                 </button>
               ))}
             </div>

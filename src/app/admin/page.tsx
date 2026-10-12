@@ -10,6 +10,7 @@ import {
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import Badge, { STATUS_CHART_COLORS } from '@/components/Badge'
+import Skeleton, { LoadingRegion } from '@/components/Skeleton'
 import type { OrderStatus } from '@/types'
 import { formatPrice, formatDate } from '@/lib/format'
 import DateRangeFilter, { rangeBounds, toDayString, type DateRange } from './DateRangeFilter'
@@ -113,7 +114,20 @@ export default function AdminPage() {
   const recentOrders = [...orders].reverse().slice(0, 5)
 
   if (loading) {
-    return <div className="text-text-secondary text-sm">Loading...</div>
+    return (
+      <LoadingRegion>
+        <Skeleton className="h-8 w-40 mb-8" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-24 rounded-xl" />
+          ))}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Skeleton className="h-72 rounded-xl lg:col-span-2" />
+          <Skeleton className="h-72 rounded-xl" />
+        </div>
+      </LoadingRegion>
+    )
   }
 
   return (

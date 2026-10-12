@@ -6,6 +6,8 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import Badge from '@/components/Badge'
+import Skeleton, { LoadingRegion } from '@/components/Skeleton'
+import Spinner from '@/components/Spinner'
 import { createClient } from '@/lib/supabase/client'
 import { CARRIER_NAMES, type Carrier } from '@/lib/tracking'
 import { DELIVERY_WEEKS, destinationForCountry } from '@/lib/shipping'
@@ -102,7 +104,15 @@ export default function AdminOrderDetailPage() {
       (trackingNumber.trim() !== '' && carrier !== (order?.carrier ?? 'usps')))
   const isNewlyShipped = status === 'shipped' && order?.status !== 'shipped'
 
-  if (loading) return <div className="text-text-secondary text-sm">Loading...</div>
+  if (loading) {
+    return (
+      <LoadingRegion className="space-y-6">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-24 rounded-xl" />
+        <Skeleton className="h-64 rounded-xl" />
+      </LoadingRegion>
+    )
+  }
   if (!order) return <div className="text-text-secondary text-sm">Order not found.</div>
 
   const address = order.shipping_address
@@ -152,8 +162,9 @@ export default function AdminOrderDetailPage() {
           <button
             onClick={handleSave}
             disabled={saving || (status === order.status && !trackingChanged)}
-            className="ml-auto px-4 py-2 rounded-lg text-sm font-medium bg-primary text-white hover:bg-primary-hover transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="ml-auto inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-primary text-white hover:bg-primary-hover transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
+            {saving && <Spinner />}
             {saving ? 'Saving...' : saved ? 'Saved ✓' : 'Save'}
           </button>
         </div>
@@ -291,8 +302,9 @@ export default function AdminOrderDetailPage() {
             <button
               onClick={handleRefund}
               disabled={refunding}
-              className="flex-shrink-0 px-4 py-2 rounded-lg text-sm font-medium border border-error text-error hover:bg-red-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="flex-shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border border-error text-error hover:bg-red-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
+              {refunding && <Spinner />}
               {refunding ? 'Refunding...' : 'Refund order'}
             </button>
           </div>

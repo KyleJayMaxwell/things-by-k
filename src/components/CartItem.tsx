@@ -2,7 +2,7 @@
 
 // src/components/CartItem.tsx
 
-import Image from 'next/image'
+import FadeImage from '@/components/FadeImage'
 import Link from 'next/link'
 import { useState } from 'react'
 import { CartItem as CartItemType } from '@/types'
@@ -38,7 +38,7 @@ export default function CartItem({ item }: CartItemProps) {
       <Link href={`/shop/${product.slug}`} className="flex-shrink-0">
         <div className="w-20 h-20 sm:w-24 sm:h-24 relative rounded-lg overflow-hidden bg-gray-50 border border-border">
           {product.images[0] ? (
-            <Image
+            <FadeImage
               src={product.images[0]}
               alt={product.name}
               fill

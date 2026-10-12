@@ -3,7 +3,7 @@
 // src/components/ProductCard.tsx
 
 import Link from 'next/link'
-import Image from 'next/image'
+import FadeImage from '@/components/FadeImage'
 import { Product } from '@/types'
 import { formatPrice } from '@/lib/format'
 
@@ -22,11 +22,11 @@ export default function ProductCard({ product }: ProductCardProps) {
       {/* Image */}
       <div className="aspect-square relative overflow-hidden bg-gray-50">
         {mainImage ? (
-          <Image
+          <FadeImage
             src={mainImage}
             alt={product.name}
             fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
+            className="object-cover group-hover:scale-105 transition-[transform,opacity] duration-300"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
         ) : (
