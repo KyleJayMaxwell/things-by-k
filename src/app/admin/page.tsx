@@ -146,7 +146,7 @@ export default function AdminPage() {
                 <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#6B7280' }} tickLine={false} axisLine={false} />
                 <YAxis tick={{ fontSize: 11, fill: '#6B7280' }} tickLine={false} axisLine={false} tickFormatter={v => `$${v}`} />
                 <Tooltip formatter={(v) => [`$${(Number(v) || 0).toFixed(2)}`, 'Revenue']} contentStyle={tooltipStyle} />
-                <Line type="monotone" dataKey="revenue" stroke="#360F5A" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="revenue" stroke="#171717" strokeWidth={2} dot={false} />
               </LineChart>
             </ResponsiveContainer>
           )}
@@ -200,7 +200,7 @@ export default function AdminPage() {
                 <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#6B7280' }} tickLine={false} axisLine={false} />
                 <YAxis tick={{ fontSize: 11, fill: '#6B7280' }} tickLine={false} axisLine={false} allowDecimals={false} />
                 <Tooltip formatter={(v) => [(Number(v) || 0).toFixed(2), 'Orders']} contentStyle={tooltipStyle} />
-                <Bar dataKey="orders" fill="#360F5A" radius={[3, 3, 0, 0]} />
+                <Bar dataKey="orders" fill="#171717" radius={[3, 3, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           )}
@@ -218,9 +218,9 @@ export default function AdminPage() {
                 <XAxis type="number" tick={{ fontSize: 11, fill: '#6B7280' }} tickLine={false} axisLine={false} allowDecimals={false} />
                 <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: '#6B7280' }} tickLine={false} axisLine={false} width={90} />
                 <Tooltip formatter={(v) => [(Number(v) || 0).toFixed(2), 'Units sold']} contentStyle={tooltipStyle} />
-                <Bar dataKey="units" fill="#E8DFF0" radius={[0, 3, 3, 0]}>
+                <Bar dataKey="units" fill="#E5E5E5" radius={[0, 3, 3, 0]}>
                   {salesByProduct.map((_, i) => (
-                    <Cell key={i} fill={i === 0 ? '#360F5A' : '#E8DFF0'} />
+                    <Cell key={i} fill={i === 0 ? '#171717' : '#E5E5E5'} />
                   ))}
                 </Bar>
               </BarChart>
