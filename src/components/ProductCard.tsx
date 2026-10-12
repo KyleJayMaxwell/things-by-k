@@ -17,7 +17,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   return (
     <Link
       href={`/shop/${product.slug}`}
-      className="group block bg-surface rounded-xl overflow-hidden border border-border hover:border-primary/30 hover:shadow-lg hover:-translate-y-1 transition-[transform,box-shadow,border-color] duration-200"
+      className="group flex flex-col h-full bg-surface rounded-xl overflow-hidden border border-border hover:border-primary/30 hover:shadow-lg hover:-translate-y-1 transition-[transform,box-shadow,border-color] duration-200"
     >
       {/* Image */}
       <div className="aspect-square relative overflow-hidden bg-gray-50">
@@ -44,8 +44,12 @@ export default function ProductCard({ product }: ProductCardProps) {
       </div>
 
       {/* Info */}
-      <div className="p-4">
-        <h3 className="font-medium text-text-primary group-hover:text-primary transition-colors">
+      {/* Title reserves two lines so cards in a row stay the same height */}
+      <div className="p-4 flex flex-col flex-1">
+        <h3
+          title={product.name}
+          className="font-medium leading-6 min-h-12 line-clamp-2 text-text-primary group-hover:text-primary transition-colors"
+        >
           {product.name}
         </h3>
         <p className="mt-1 text-text-secondary text-sm">{formatPrice(product.price)}</p>
