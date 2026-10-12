@@ -14,7 +14,7 @@ export default function AboutPage() {
       <div className="grid grid-cols-1 md:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] gap-8 md:gap-16 items-start">
 
         {/* Placeholder photo (to be replaced with a scanned polaroid) */}
-        <div className="w-full max-w-sm mx-auto md:mx-0 aspect-[3/4] bg-primary-light relative overflow-hidden rounded-sm flex items-center justify-center">
+        <div className="w-full max-w-sm mx-auto md:mx-0 aspect-[3/4] bg-primary-light relative overflow-hidden rounded-sm shadow-[0_2px_6px_rgba(26,26,46,0.08),0_16px_36px_rgba(26,26,46,0.12)] flex items-center justify-center">
           <p className="text-xs text-text-secondary tracking-widest uppercase">Photo coming soon</p>
         </div>
 
