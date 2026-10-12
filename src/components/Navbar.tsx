@@ -56,21 +56,39 @@ export default function Navbar() {
         scrolled ? 'shadow-md' : ''
       }`}
     >
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 grid grid-cols-[1fr_auto_1fr] items-center gap-4">
 
-        {/* Logo */}
+        {/* Left: links on desktop, menu button on mobile */}
+        <div className="flex items-center">
+          {/* Desktop nav links */}
+          <nav aria-label="Main navigation" className="hidden sm:flex items-center gap-8">
+            {navLink('/shop', 'Shop')}
+            {navLink('/about', 'About')}
+          </nav>
+
+          {/* Mobile hamburger */}
+          <button
+            className="sm:hidden min-w-[44px] min-h-[44px] flex items-center justify-center text-white/80 hover:text-white transition-colors focus-ring-light rounded-md"
+            onClick={() => setMenuOpen(o => !o)}
+            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={menuOpen}
+            aria-controls="mobile-menu"
+          >
+            <span className="block w-5 space-y-1">
+              <span className={`block h-px bg-current transition-transform duration-200 ${menuOpen ? 'rotate-45 translate-y-[5px]' : ''}`} />
+              <span className={`block h-px bg-current transition-opacity duration-200 ${menuOpen ? 'opacity-0' : ''}`} />
+              <span className={`block h-px bg-current transition-transform duration-200 ${menuOpen ? '-rotate-45 -translate-y-[5px]' : ''}`} />
+            </span>
+          </button>
+        </div>
+
+        {/* Logo, centered */}
         <Link href="/" className="font-brand text-2xl leading-none -translate-y-[0.1em] text-white hover:text-white/85 transition-colors focus-ring-light rounded">
           Things by K
         </Link>
 
-        {/* Desktop nav links */}
-        <nav aria-label="Main navigation" className="hidden sm:flex items-center gap-8">
-          {navLink('/shop', 'Shop')}
-          {navLink('/about', 'About')}
-        </nav>
-
         {/* Right icons */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center justify-end gap-1">
           {/* Cart */}
           <Link
             href="/cart"
@@ -99,21 +117,6 @@ export default function Navbar() {
             <AccountIcon className="w-5 h-5" />
             <span className="sr-only">Account</span>
           </Link>
-
-          {/* Mobile hamburger */}
-          <button
-            className="sm:hidden min-w-[44px] min-h-[44px] flex items-center justify-center text-white/80 hover:text-white transition-colors focus-ring-light rounded-md"
-            onClick={() => setMenuOpen(o => !o)}
-            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-            aria-expanded={menuOpen}
-            aria-controls="mobile-menu"
-          >
-            <span className="block w-5 space-y-1">
-              <span className={`block h-px bg-current transition-transform duration-200 ${menuOpen ? 'rotate-45 translate-y-[5px]' : ''}`} />
-              <span className={`block h-px bg-current transition-opacity duration-200 ${menuOpen ? 'opacity-0' : ''}`} />
-              <span className={`block h-px bg-current transition-transform duration-200 ${menuOpen ? '-rotate-45 -translate-y-[5px]' : ''}`} />
-            </span>
-          </button>
         </div>
       </div>
 
