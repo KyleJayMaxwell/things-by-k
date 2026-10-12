@@ -39,16 +39,25 @@ export default function Navbar() {
     setMenuOpen(false)
   }
 
-  const navLink = (href: string, label: string) => (
-    <Link
-      href={href}
-      className={`text-sm font-medium uppercase tracking-wider transition-colors duration-150 hover:text-white focus-ring-light rounded ${
-        pathname === href ? 'text-white font-medium' : 'text-white/75'
-      }`}
-    >
-      {label}
-    </Link>
-  )
+  // Active on the page itself and anything under it (e.g. /shop/some-product)
+  const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`)
+
+  const navLink = (href: string, label: string) => {
+    const active = isActive(href)
+    return (
+      <Link
+        href={href}
+        aria-current={active ? 'page' : undefined}
+        className={`text-sm font-medium uppercase tracking-wider py-1 border-b-2 transition-colors duration-150 focus-ring-light ${
+          active
+            ? 'text-white border-white'
+            : 'text-white/70 border-transparent hover:text-white hover:border-white/40'
+        }`}
+      >
+        {label}
+      </Link>
+    )
+  }
 
   return (
     <header

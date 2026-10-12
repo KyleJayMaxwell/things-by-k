@@ -8,7 +8,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Shop',
-  description: 'Browse handmade goods and original photography by K.',
+  description: 'Shop original designs by K.',
 }
 
 export default async function ShopPage() {
@@ -30,10 +30,7 @@ export default async function ShopPage() {
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
       {/* Header */}
       <div className="mb-10 animate-fade-up">
-        <h1 className="text-3xl font-semibold text-text-primary">Shop</h1>
-        <p className="mt-2 text-text-secondary">
-          Handmade goods & original photography.
-        </p>
+        <h1 className="text-3xl font-semibold text-text-primary">Shop All Products</h1>
       </div>
 
       {/* Grid */}
