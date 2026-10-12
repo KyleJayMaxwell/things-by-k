@@ -37,7 +37,7 @@ export default function AboutPage() {
           </div>
 
           <div className="mt-8 pt-5 md:mt-10 md:pt-6 border-t border-border">
-            <p className="text-xs text-text-secondary tracking-widest uppercase mb-2">Get in touch</p>
+            <p className="text-xs text-text-secondary tracking-widest uppercase mb-2">Contact</p>
             <a
               href={`mailto:${CONTACT_EMAIL}`}
               className="text-sm text-text-primary underline underline-offset-4 hover:text-primary transition-colors"
