@@ -214,231 +214,240 @@ export default function ProductForm({ initialData }: ProductFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} onBlur={markTouched} noValidate className="max-w-2xl space-y-6">
+    <form onSubmit={handleSubmit} onBlur={markTouched} noValidate className="max-w-7xl space-y-6">
       {error && (
         <div role="alert" className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-error">
           {error}
         </div>
       )}
 
-      {/* Basic info */}
-      <div className="bg-white border border-border rounded-xl p-6 space-y-4">
-        <h2 className="font-medium text-text-primary">Basic Info</h2>
+      {/* Two columns on wide screens: details on the left, photos and handwritten option on the right */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
+        <div className="lg:col-span-3 space-y-6">
+          {/* Basic info */}
+          <div className="bg-white border border-border rounded-xl p-6 space-y-4">
+            <h2 className="font-medium text-text-primary">Basic Info</h2>
 
-        <Field label="Name" htmlFor="name" error={fieldError('name')}>
-          <input
-            id="name"
-            name="name"
-            value={form.name}
-            onChange={handleChange}
-            className={inputClass('name')}
-            placeholder="Seoul Hanok Postcard"
-          />
-        </Field>
+            <Field label="Name" htmlFor="name" error={fieldError('name')}>
+              <input
+                id="name"
+                name="name"
+                value={form.name}
+                onChange={handleChange}
+                className={inputClass('name')}
+                placeholder="Seoul Hanok Postcard"
+              />
+            </Field>
 
-        <Field label="Slug" hint="URL-safe identifier, auto-generated from name" htmlFor="slug" error={fieldError('slug')}>
-          <input
-            id="slug"
-            name="slug"
-            value={form.slug}
-            onChange={handleChange}
-            className={inputClass('slug')}
-            placeholder="seoul-hanok-postcard"
-          />
-        </Field>
+            <Field label="Slug" hint="URL-safe identifier, auto-generated from name" htmlFor="slug" error={fieldError('slug')}>
+              <input
+                id="slug"
+                name="slug"
+                value={form.slug}
+                onChange={handleChange}
+                className={inputClass('slug')}
+                placeholder="seoul-hanok-postcard"
+              />
+            </Field>
 
-        <div className="grid grid-cols-2 gap-4">
-          <Field label="Price (USD)" htmlFor="price" error={fieldError('price')}>
-            <input
-              id="price"
-              name="price"
-              value={form.price}
-              onChange={handleChange}
-              type="number"
-              step="0.01"
-              min="0"
-              className={inputClass('price')}
-              placeholder="5.00"
-            />
-          </Field>
-          <Field label="Stock" htmlFor="stock" error={fieldError('stock')}>
-            <input
-              id="stock"
-              name="stock"
-              value={form.stock}
-              onChange={handleChange}
-              type="number"
-              min="0"
-              className={inputClass('stock')}
-              placeholder="25"
-            />
-          </Field>
-        </div>
+            <div className="grid grid-cols-2 gap-4">
+              <Field label="Price (USD)" htmlFor="price" error={fieldError('price')}>
+                <input
+                  id="price"
+                  name="price"
+                  value={form.price}
+                  onChange={handleChange}
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  className={inputClass('price')}
+                  placeholder="5.00"
+                />
+              </Field>
+              <Field label="Stock" htmlFor="stock" error={fieldError('stock')}>
+                <input
+                  id="stock"
+                  name="stock"
+                  value={form.stock}
+                  onChange={handleChange}
+                  type="number"
+                  min="0"
+                  className={inputClass('stock')}
+                  placeholder="25"
+                />
+              </Field>
+            </div>
 
-        <Field label="Category" htmlFor="category">
-          <select id="category" name="category" value={form.category} onChange={handleChange} className={inputClass('category')}>
-            {CATEGORIES.map(c => (
-              <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>
-            ))}
-          </select>
-        </Field>
+            <Field label="Category" htmlFor="category">
+              <select id="category" name="category" value={form.category} onChange={handleChange} className={inputClass('category')}>
+                {CATEGORIES.map(c => (
+                  <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>
+                ))}
+              </select>
+            </Field>
 
-        <div className="flex items-center gap-3">
-          <input
-            type="checkbox"
-            id="is_active"
-            name="is_active"
-            checked={form.is_active}
-            onChange={handleChange}
-            className="w-4 h-4 accent-primary"
-          />
-          <label htmlFor="is_active" className="text-sm text-text-primary">
-            Active (visible in shop)
-          </label>
-        </div>
-      </div>
-
-      {/* Handwritten option */}
-      {form.category === 'postcard' && (
-        <div className="bg-white border border-border rounded-xl p-6 space-y-4">
-          <h2 className="font-medium text-text-primary">Handwritten option</h2>
-          <p className="text-sm text-text-secondary">
-            Every postcard can be bought handwritten: the customer writes a note and you mail it as a postcard.
-          </p>
-          <Field label="Extra for handwritten ($)" hint="Added to the price above; 0 for no extra" htmlFor="handwritten_price" error={fieldError('handwritten_price')}>
-            <input
-              type="number"
-              id="handwritten_price"
-              name="handwritten_price"
-              value={form.handwritten_price}
-              onChange={handleChange}
-              min="0"
-              step="0.01"
-              className={inputClass('handwritten_price')}
-            />
-          </Field>
-        </div>
-      )}
-
-      {/* Descriptions */}
-      <div className="bg-white border border-border rounded-xl p-6 space-y-4">
-        <h2 className="font-medium text-text-primary">Descriptions</h2>
-
-        <Field label="Short description" hint="Shown on product card" htmlFor="description" error={fieldError('description')}>
-          <textarea
-            id="description"
-            name="description"
-            value={form.description}
-            onChange={handleChange}
-            rows={2}
-            className={inputClass('description')}
-            placeholder="An original photograph printed on premium postcard stock."
-          />
-        </Field>
-
-        <Field label="Long description" hint="Shown on product detail page" htmlFor="long_description" error={fieldError('long_description')}>
-          <textarea
-            id="long_description"
-            name="long_description"
-            value={form.long_description}
-            onChange={handleChange}
-            rows={6}
-            className={inputClass('long_description')}
-            placeholder="Full product details, materials, dimensions..."
-          />
-        </Field>
-      </div>
-
-      {/* Images */}
-      <div className="bg-white border border-border rounded-xl p-6 space-y-4">
-        <h2 className="font-medium text-text-primary">Images</h2>
-
-        {form.images.length > 0 && (
-          <div className="flex flex-wrap gap-3">
-            {form.images.map((url, i) => (
-              <div
-                key={url}
-                draggable
-                onDragStart={(e) => {
-                  setDragIndex(i)
-                  e.dataTransfer.effectAllowed = 'move'
-                }}
-                onDragOver={(e) => {
-                  e.preventDefault()
-                  if (dragOverIndex !== i) setDragOverIndex(i)
-                }}
-                onDrop={(e) => {
-                  e.preventDefault()
-                  if (dragIndex !== null) moveImage(dragIndex, i)
-                  setDragIndex(null)
-                  setDragOverIndex(null)
-                }}
-                onDragEnd={() => {
-                  setDragIndex(null)
-                  setDragOverIndex(null)
-                }}
-                className={`relative group cursor-grab active:cursor-grabbing rounded-lg transition-[opacity,box-shadow] ${
-                  dragIndex === i ? 'opacity-40' : ''
-                } ${dragOverIndex === i && dragIndex !== i ? 'ring-2 ring-primary ring-offset-2' : ''}`}
-              >
-                <div className="relative">
-                  <Image src={url} alt="" width={80} height={80} draggable={false} className="w-20 h-20 object-cover rounded-lg border border-border" />
-                  {i === 0 && (
-                    <span className="absolute bottom-1 left-1 text-[10px] bg-black/60 text-white px-1 rounded">
-                      Main
-                    </span>
-                  )}
-                </div>
-                <button
-                  type="button"
-                  onClick={() => removeImage(i)}
-                  aria-label="Remove image"
-                  className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-error text-white rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  ×
-                </button>
-                {/* Arrow buttons for touch screens, where drag and drop isn't available */}
-                <div className="flex justify-between mt-1">
-                  <button
-                    type="button"
-                    onClick={() => moveImage(i, i - 1)}
-                    disabled={i === 0}
-                    aria-label="Move image left"
-                    className="w-6 h-6 text-xs text-text-secondary hover:text-text-primary disabled:opacity-30"
-                  >
-                    ←
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => moveImage(i, i + 1)}
-                    disabled={i === form.images.length - 1}
-                    aria-label="Move image right"
-                    className="w-6 h-6 text-xs text-text-secondary hover:text-text-primary disabled:opacity-30"
-                  >
-                    →
-                  </button>
-                </div>
-              </div>
-            ))}
+            <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                id="is_active"
+                name="is_active"
+                checked={form.is_active}
+                onChange={handleChange}
+                className="w-4 h-4 accent-primary"
+              />
+              <label htmlFor="is_active" className="text-sm text-text-primary">
+                Active (visible in shop)
+              </label>
+            </div>
           </div>
-        )}
 
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          onChange={handleImageUpload}
-          className="hidden"
-        />
-        <button
-          type="button"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={uploading}
-          className="px-4 py-2 border border-border rounded-lg text-sm text-text-secondary hover:text-text-primary hover:border-primary/40 transition-colors disabled:opacity-50"
-        >
-          {uploading ? 'Uploading...' : '+ Upload Image'}
-        </button>
-        <p className="text-xs text-text-secondary">First image is used as the main product photo. Drag photos to reorder them, then save.</p>
+          {/* Descriptions */}
+          <div className="bg-white border border-border rounded-xl p-6 space-y-4">
+            <h2 className="font-medium text-text-primary">Descriptions</h2>
+
+            <Field label="Short description" hint="Shown on product card" htmlFor="description" error={fieldError('description')}>
+              <textarea
+                id="description"
+                name="description"
+                value={form.description}
+                onChange={handleChange}
+                rows={2}
+                className={inputClass('description')}
+                placeholder="An original photograph printed on premium postcard stock."
+              />
+            </Field>
+
+            <Field label="Long description" hint="Shown on product detail page" htmlFor="long_description" error={fieldError('long_description')}>
+              <textarea
+                id="long_description"
+                name="long_description"
+                value={form.long_description}
+                onChange={handleChange}
+                rows={8}
+                className={inputClass('long_description')}
+                placeholder="Full product details, materials, dimensions..."
+              />
+            </Field>
+          </div>
+
+        </div>
+
+        <div className="lg:col-span-2 space-y-6">
+          {/* Images */}
+          <div className="bg-white border border-border rounded-xl p-6 space-y-4">
+            <h2 className="font-medium text-text-primary">Images</h2>
+
+            {form.images.length > 0 && (
+              <div className="flex flex-wrap gap-3">
+                {form.images.map((url, i) => (
+                  <div
+                    key={url}
+                    draggable
+                    onDragStart={(e) => {
+                      setDragIndex(i)
+                      e.dataTransfer.effectAllowed = 'move'
+                    }}
+                    onDragOver={(e) => {
+                      e.preventDefault()
+                      if (dragOverIndex !== i) setDragOverIndex(i)
+                    }}
+                    onDrop={(e) => {
+                      e.preventDefault()
+                      if (dragIndex !== null) moveImage(dragIndex, i)
+                      setDragIndex(null)
+                      setDragOverIndex(null)
+                    }}
+                    onDragEnd={() => {
+                      setDragIndex(null)
+                      setDragOverIndex(null)
+                    }}
+                    className={`relative group cursor-grab active:cursor-grabbing rounded-lg transition-[opacity,box-shadow] ${
+                      dragIndex === i ? 'opacity-40' : ''
+                    } ${dragOverIndex === i && dragIndex !== i ? 'ring-2 ring-primary ring-offset-2' : ''}`}
+                  >
+                    <div className="relative">
+                      <Image src={url} alt="" width={80} height={80} draggable={false} className="w-20 h-20 object-cover rounded-lg border border-border" />
+                      {i === 0 && (
+                        <span className="absolute bottom-1 left-1 text-[10px] bg-black/60 text-white px-1 rounded">
+                          Main
+                        </span>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeImage(i)}
+                      aria-label="Remove image"
+                      className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-error text-white rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      ×
+                    </button>
+                    {/* Arrow buttons for touch screens, where drag and drop isn't available */}
+                    <div className="flex justify-between mt-1">
+                      <button
+                        type="button"
+                        onClick={() => moveImage(i, i - 1)}
+                        disabled={i === 0}
+                        aria-label="Move image left"
+                        className="w-6 h-6 text-xs text-text-secondary hover:text-text-primary disabled:opacity-30"
+                      >
+                        ←
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => moveImage(i, i + 1)}
+                        disabled={i === form.images.length - 1}
+                        aria-label="Move image right"
+                        className="w-6 h-6 text-xs text-text-secondary hover:text-text-primary disabled:opacity-30"
+                      >
+                        →
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              className="hidden"
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className="px-4 py-2 border border-border rounded-lg text-sm text-text-secondary hover:text-text-primary hover:border-primary/40 transition-colors disabled:opacity-50"
+            >
+              {uploading ? 'Uploading...' : '+ Upload Image'}
+            </button>
+            <p className="text-xs text-text-secondary">First image is used as the main product photo. Drag photos to reorder them, then save.</p>
+          </div>
+
+          {/* Handwritten option */}
+          {form.category === 'postcard' && (
+            <div className="bg-white border border-border rounded-xl p-6 space-y-4">
+              <h2 className="font-medium text-text-primary">Handwritten option</h2>
+              <p className="text-sm text-text-secondary">
+                Every postcard can be bought handwritten: the customer writes a note and you mail it as a postcard.
+              </p>
+              <Field label="Extra for handwritten ($)" hint="Added to the product price; 0 for no extra" htmlFor="handwritten_price" error={fieldError('handwritten_price')}>
+                <input
+                  type="number"
+                  id="handwritten_price"
+                  name="handwritten_price"
+                  value={form.handwritten_price}
+                  onChange={handleChange}
+                  min="0"
+                  step="0.01"
+                  className={inputClass('handwritten_price')}
+                />
+              </Field>
+            </div>
+          )}
+
+        </div>
       </div>
 
       {/* Actions */}

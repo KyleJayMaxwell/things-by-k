@@ -108,7 +108,7 @@ export default function AdminOrderDetailPage() {
   const address = order.shipping_address
 
   return (
-    <div className="max-w-3xl">
+    <div className="max-w-7xl">
       <div className="flex items-center gap-3 mb-8">
         <Link href="/admin/orders" className="text-sm text-text-secondary hover:text-primary transition-colors">
           ← Orders
