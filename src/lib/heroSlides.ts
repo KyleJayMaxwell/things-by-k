@@ -4,8 +4,8 @@
 // src/assets/hero/ (keep the same name) or point the import at a new file.
 
 import type { StaticImageData } from 'next/image'
-import shopImage from '@/assets/hero/shop.jpg'
-import aboutImage from '@/assets/hero/about.jpg'
+import bayBridge from '@/assets/hero/bay-bridge.jpg'
+import goldenGateFog from '@/assets/hero/golden-gate-fog.jpg'
 
 export interface HeroSlide {
   id: string
@@ -21,15 +21,16 @@ export interface HeroSlide {
 export const heroSlides: HeroSlide[] = [
   {
     id: 'shop',
-    image: shopImage,
-    alt: 'Foggy Golden Gate Bridge postcard print',
-    position: '20% center',
+    image: bayBridge,
+    alt: 'Bay Bridge over the water on a clear day',
     buttons: [{ label: 'Shop All Products', href: '/shop' }],
   },
   {
     id: 'about',
-    image: aboutImage,
-    alt: 'Bay Bridge over the water on a clear day',
+    image: goldenGateFog,
+    alt: 'Golden Gate Bridge tower in the fog',
+    // Anchor near the top so the tower isn't cropped off on wide screens
+    position: '20% 15%',
     heading: 'Designed by K',
     buttons: [{ label: 'About Things by K', href: '/about' }],
   },
