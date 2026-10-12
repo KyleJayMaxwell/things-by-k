@@ -84,7 +84,8 @@ export default function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
               priority={i === 0}
               placeholder="blur"
               quality={90}
-              sizes="100vw"
+              // Portrait screens fill the height, so a 3:2 photo renders ~1.5x the viewport height wide
+              sizes="(max-aspect-ratio: 3/2) 150vh, 100vw"
               className="object-cover"
               style={{ objectPosition: slide.position ?? 'center' }}
             />
