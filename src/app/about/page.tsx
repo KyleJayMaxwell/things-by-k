@@ -16,7 +16,7 @@ export default function AboutPage() {
 
       {/* Brand mark */}
       <div className="w-24 h-24 rounded-full bg-primary-light flex items-center justify-center mb-8">
-        <span className="text-4xl font-semibold text-primary select-none">K</span>
+        <span className="font-brand text-5xl leading-none -translate-y-[0.08em] text-primary select-none">K</span>
       </div>
 
       <p className="text-xs tracking-widest text-text-secondary uppercase mb-4">About</p>

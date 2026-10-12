@@ -29,6 +29,7 @@ const config: Config = {
       fontFamily: {
         sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
         display: ['var(--font-amatic)', 'cursive'],
+        brand: ['var(--font-brand)', 'serif'],
       },
     },
   },

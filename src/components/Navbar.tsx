@@ -61,7 +61,7 @@ export default function Navbar() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
 
         {/* Logo */}
-        <Link href="/" className="font-semibold text-lg tracking-tight text-text-primary hover:text-primary transition-colors focus-ring rounded">
+        <Link href="/" className="font-brand text-2xl leading-none -translate-y-[0.1em] text-text-primary hover:text-primary transition-colors focus-ring rounded">
           Things by K
         </Link>
 

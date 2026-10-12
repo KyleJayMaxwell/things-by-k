@@ -2,6 +2,7 @@
 
 import type { Metadata } from 'next'
 import { Inter, Amatic_SC } from 'next/font/google'
+import localFont from 'next/font/local'
 import './globals.css'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
@@ -20,6 +21,13 @@ const amaticSC = Amatic_SC({
   display: 'swap',
 })
 
+// Gothic blackletter for brand marks only (wordmark, "Made by K", K logo)
+const oldLondon = localFont({
+  src: '../fonts/OldLondon.ttf',
+  variable: '--font-brand',
+  display: 'swap',
+})
+
 export const metadata: Metadata = {
   title: {
     default: 'Things by K',
@@ -35,7 +43,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${amaticSC.variable}`}>
+    <html lang="en" className={`${inter.variable} ${amaticSC.variable} ${oldLondon.variable}`}>
       <body className="bg-background text-text-primary antialiased min-h-screen flex flex-col">
         <CartProvider>
           <a
