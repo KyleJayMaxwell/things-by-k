@@ -15,8 +15,8 @@ export default function AboutPage() {
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-16">
 
       {/* Brand mark */}
-      <div className="w-24 h-24 rounded-full bg-primary-light flex items-center justify-center mb-8">
-        <span className="font-brand text-5xl leading-none -translate-y-[0.17em] text-primary select-none">K</span>
+      <div className="w-24 h-24 rounded-full bg-neutral-900 flex items-center justify-center mb-8">
+        <span className="font-brand text-5xl leading-none -translate-y-[0.17em] text-white select-none">K</span>
       </div>
 
       <p className="text-xs tracking-widest text-text-secondary uppercase mb-4">About</p>
