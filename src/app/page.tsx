@@ -5,6 +5,8 @@ import Link from 'next/link'
 import ProductCard from '@/components/ProductCard'
 import Button from '@/components/Button'
 import FadeIn from '@/components/FadeIn'
+import HeroCarousel from '@/components/HeroCarousel'
+import { heroSlides } from '@/lib/heroSlides'
 import { Product } from '@/types'
 import type { Metadata } from 'next'
 
@@ -26,37 +28,10 @@ export default async function HomePage() {
 
   return (
     <div>
-      {/* Hero — CSS animations run immediately on load (above the fold) */}
-      <section className="relative bg-primary overflow-hidden">
-        <div className="absolute inset-0 opacity-10"
-          style={{
-            backgroundImage: `radial-gradient(circle at 20% 50%, #ffffff 0%, transparent 50%),
-                              radial-gradient(circle at 80% 20%, #a78bfa 0%, transparent 40%)`
-          }}
-        />
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 py-28 sm:py-36 flex flex-col items-center text-center gap-6">
-          <h1
-            className="text-4xl sm:text-6xl font-semibold text-white tracking-tight leading-tight animate-fade-up"
-            style={{ animationDelay: '0ms' }}
-          >
-            Handmade goods &<br className="hidden sm:block" /> original photography
-          </h1>
-          <p
-            className="text-primary-light text-lg sm:text-xl max-w-xl animate-fade-up"
-            style={{ animationDelay: '100ms' }}
-          >
-            Small-batch, made with care. Each piece is created by hand or captured through a lens.
-          </p>
-          <div className="mt-2 animate-fade-up" style={{ animationDelay: '200ms' }}>
-            <Link href="/shop" className="inline-block">
-              <Button variant="white" size="lg">Shop Now</Button>
-            </Link>
-          </div>
-        </div>
-      </section>
+      <HeroCarousel slides={heroSlides} />
 
       {/* Featured Products — scroll-triggered */}
-      <section className="max-w-6xl mx-auto px-4 sm:px-6 py-20">
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 pb-20">
         <FadeIn className="flex items-end justify-between mb-8">
           <div>
             <h2 className="text-2xl font-semibold text-text-primary">Featured</h2>
