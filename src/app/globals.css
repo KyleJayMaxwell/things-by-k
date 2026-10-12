@@ -46,6 +46,10 @@
   .focus-ring {
     @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2;
   }
+  /* For controls on the purple nav bar */
+  .focus-ring-light {
+    @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-primary;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

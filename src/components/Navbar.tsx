@@ -42,8 +42,8 @@ export default function Navbar() {
   const navLink = (href: string, label: string) => (
     <Link
       href={href}
-      className={`text-sm tracking-wide transition-colors duration-150 hover:text-primary focus-ring rounded ${
-        pathname === href ? 'text-primary font-medium' : 'text-text-secondary'
+      className={`text-sm tracking-wide transition-colors duration-150 hover:text-white focus-ring-light rounded ${
+        pathname === href ? 'text-white font-medium' : 'text-white/75'
       }`}
     >
       {label}
@@ -52,16 +52,14 @@ export default function Navbar() {
 
   return (
     <header
-      className={`sticky top-0 z-50 w-full transition-[background-color,border-color,box-shadow] duration-200 ${
-        scrolled
-          ? 'bg-white/90 backdrop-blur-sm border-b border-border shadow-sm'
-          : 'bg-background'
+      className={`sticky top-0 z-50 w-full bg-primary transition-shadow duration-200 ${
+        scrolled ? 'shadow-md' : ''
       }`}
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
 
         {/* Logo */}
-        <Link href="/" className="font-brand text-2xl leading-none -translate-y-[0.1em] text-text-primary hover:text-primary transition-colors focus-ring rounded">
+        <Link href="/" className="font-brand text-2xl leading-none -translate-y-[0.1em] text-white hover:text-white/85 transition-colors focus-ring-light rounded">
           Things by K
         </Link>
 
@@ -76,13 +74,13 @@ export default function Navbar() {
           {/* Cart */}
           <Link
             href="/cart"
-            className="relative min-w-[44px] min-h-[44px] flex items-center justify-center text-text-secondary hover:text-primary transition-colors focus-ring rounded-md"
+            className="relative min-w-[44px] min-h-[44px] flex items-center justify-center text-white/80 hover:text-white transition-colors focus-ring-light rounded-md"
           >
             <CartIcon className="w-5 h-5" />
             {itemCount > 0 && (
               <span
                 key={badgeKey}
-                className="absolute top-1 right-1 min-w-[18px] h-[18px] bg-primary text-white text-xs font-semibold rounded-full flex items-center justify-center px-1 animate-badge-pop"
+                className="absolute top-1 right-1 min-w-[18px] h-[18px] bg-white text-primary text-xs font-semibold rounded-full flex items-center justify-center px-1 animate-badge-pop"
                 aria-hidden="true"
               >
                 {itemCount > 99 ? '99+' : itemCount}
@@ -96,7 +94,7 @@ export default function Navbar() {
           {/* Account */}
           <Link
             href="/account"
-            className="min-w-[44px] min-h-[44px] flex items-center justify-center text-text-secondary hover:text-primary transition-colors focus-ring rounded-md"
+            className="min-w-[44px] min-h-[44px] flex items-center justify-center text-white/80 hover:text-white transition-colors focus-ring-light rounded-md"
           >
             <AccountIcon className="w-5 h-5" />
             <span className="sr-only">Account</span>
@@ -104,7 +102,7 @@ export default function Navbar() {
 
           {/* Mobile hamburger */}
           <button
-            className="sm:hidden min-w-[44px] min-h-[44px] flex items-center justify-center text-text-secondary hover:text-primary transition-colors focus-ring rounded-md"
+            className="sm:hidden min-w-[44px] min-h-[44px] flex items-center justify-center text-white/80 hover:text-white transition-colors focus-ring-light rounded-md"
             onClick={() => setMenuOpen(o => !o)}
             aria-label={menuOpen ? 'Close menu' : 'Open menu'}
             aria-expanded={menuOpen}
@@ -126,7 +124,7 @@ export default function Navbar() {
           menuOpen ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'
         }`}
       >
-        <nav aria-label="Mobile navigation" className="border-t border-border bg-white px-4 py-4 flex flex-col gap-4">
+        <nav aria-label="Mobile navigation" className="border-t border-white/15 bg-primary px-4 py-4 flex flex-col gap-4">
           {navLink('/shop', 'Shop')}
           {navLink('/about', 'About')}
         </nav>
