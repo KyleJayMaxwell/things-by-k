@@ -52,7 +52,7 @@ export default function Navbar() {
 
   return (
     <header
-      className={`sticky top-0 z-50 w-full bg-primary transition-shadow duration-200 ${
+      className={`sticky top-0 z-50 w-full bg-brand transition-shadow duration-200 ${
         scrolled ? 'shadow-md' : ''
       }`}
     >
@@ -80,7 +80,7 @@ export default function Navbar() {
             {itemCount > 0 && (
               <span
                 key={badgeKey}
-                className="absolute top-1 right-1 min-w-[18px] h-[18px] bg-white text-primary text-xs font-semibold rounded-full flex items-center justify-center px-1 animate-badge-pop"
+                className="absolute top-1 right-1 min-w-[18px] h-[18px] bg-white text-brand text-xs font-semibold rounded-full flex items-center justify-center px-1 animate-badge-pop"
                 aria-hidden="true"
               >
                 {itemCount > 99 ? '99+' : itemCount}
@@ -124,7 +124,7 @@ export default function Navbar() {
           menuOpen ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'
         }`}
       >
-        <nav aria-label="Mobile navigation" className="border-t border-white/15 bg-primary px-4 py-4 flex flex-col gap-4">
+        <nav aria-label="Mobile navigation" className="border-t border-white/15 bg-brand px-4 py-4 flex flex-col gap-4">
           {navLink('/shop', 'Shop')}
           {navLink('/about', 'About')}
         </nav>

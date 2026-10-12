@@ -7,9 +7,10 @@
 @layer base {
   :root {
     /* Things by K — CSS custom properties (mirrors PRD Section 2) */
-    --color-primary: #360F5A;
-    --color-primary-light: #EDE6F5;
-    --color-primary-hover: #4A1A7A;
+    --color-brand: #360F5A;
+    --color-primary: #171717;
+    --color-primary-light: #F5F5F5;
+    --color-primary-hover: #262626;
     --color-accent: #8B6914;
     --color-background: #FAF9FC;
     --color-surface: #FFFFFF;
@@ -48,7 +49,7 @@
   }
   /* For controls on the purple nav bar */
   .focus-ring-light {
-    @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-primary;
+    @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand;
   }
 }
 

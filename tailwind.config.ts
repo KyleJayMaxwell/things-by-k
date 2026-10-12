@@ -11,10 +11,12 @@ const config: Config = {
     extend: {
       colors: {
         // ── Things by K color tokens ──
+        // Deep purple is reserved for the nav bar; everything else is black/neutral
+        brand: '#360F5A',
         primary: {
-          DEFAULT: '#360F5A',
-          light: '#EDE6F5',   // richer lavender tint (was #E8DFF0)
-          hover: '#4A1A7A',
+          DEFAULT: '#171717', // neutral-900 (was purple #360F5A)
+          light: '#F5F5F5',   // neutral-100 (was lavender #EDE6F5)
+          hover: '#262626',   // neutral-800
         },
         accent: '#8B6914',            // warm gold — 5.1:1 on white, pairs with purple
         background: '#FAF9FC',        // barely purple-tinted (was #FAFAFA)
