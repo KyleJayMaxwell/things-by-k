@@ -94,12 +94,12 @@ export default async function HomePage() {
               intention and thought.
             </p>
             <Link href="/about" className="inline-block mt-6">
-              <Button variant="secondary" size="md">Learn More</Button>
+              <Button variant="black" size="md">Learn More</Button>
             </Link>
           </FadeIn>
           <FadeIn delay={100}>
-            <div className="w-32 h-32 sm:w-48 sm:h-48 rounded-full bg-primary-light flex items-center justify-center flex-shrink-0">
-              <span className="font-brand text-6xl sm:text-8xl leading-none -translate-y-[0.17em] text-primary select-none">K</span>
+            <div className="w-32 h-32 sm:w-48 sm:h-48 rounded-full bg-neutral-900 flex items-center justify-center flex-shrink-0">
+              <span className="font-brand text-6xl sm:text-8xl leading-none -translate-y-[0.17em] text-white select-none">K</span>
             </div>
           </FadeIn>
         </div>
