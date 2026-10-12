@@ -29,6 +29,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
   const { addItem } = useCart()
 
   const isSoldOut = product.stock === 0
+  const isPostcard = product.category === 'postcard'
   const canHandwrite = offersHandwritten(product)
   const price = product.price + (handwritten ? product.handwritten_price ?? 0 : 0)
 
@@ -40,7 +41,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
   }, [addItem, product, quantity, handwritten, message])
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-12 pb-8 sm:pb-12">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
 
         {/* Image Gallery */}
@@ -218,15 +219,22 @@ export default function ProductDetail({ product }: ProductDetailProps) {
             </Button>
           </div>
 
-          {/* Long description */}
-          {product.long_description && (
+          {/* Long description, plus a print crop note on every postcard */}
+          {(product.long_description || isPostcard) && (
             <div className="mt-10 pt-8 border-t border-border">
               <h2 className="text-sm font-semibold text-text-primary uppercase tracking-wider mb-4">
                 Details
               </h2>
-              <div className="text-text-secondary leading-relaxed whitespace-pre-line text-sm">
-                {product.long_description}
-              </div>
+              {product.long_description && (
+                <div className="text-text-secondary leading-relaxed whitespace-pre-line text-sm">
+                  {product.long_description}
+                </div>
+              )}
+              {isPostcard && (
+                <p className={`text-xs text-text-secondary leading-relaxed ${product.long_description ? 'mt-4' : ''}`}>
+                  A note on cropping: each card is trimmed to size after printing, so the edges may be cropped slightly differently than the photos shown here.
+                </p>
+              )}
             </div>
           )}
         </div>
