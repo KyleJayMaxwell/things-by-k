@@ -8,7 +8,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Shop',
-  description: 'Shop original postcards and designs by K.',
+  description: 'Shop original designs by K.',
 }
 
 export default async function ShopPage() {

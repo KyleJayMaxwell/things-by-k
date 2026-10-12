@@ -33,10 +33,10 @@ export const metadata: Metadata = {
     default: 'Things by K',
     template: '%s | Things by K',
   },
-  description: 'Original postcards and designs by K.',
+  description: 'Original designs by K.',
   openGraph: {
     title: 'Things by K',
-    description: 'Original postcards and designs by K.',
+    description: 'Original designs by K.',
     type: 'website',
   },
 }
