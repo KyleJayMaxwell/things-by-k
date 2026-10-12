@@ -11,7 +11,7 @@ import { Product } from '@/types'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Things by K — Handmade goods & original photography',
+  title: 'Things by K — Original postcards & designs',
 }
 
 export default async function HomePage() {
