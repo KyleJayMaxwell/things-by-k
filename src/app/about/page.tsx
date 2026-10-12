@@ -10,8 +10,8 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
-      <div className="grid grid-cols-1 md:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] gap-12 md:gap-16 items-start">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-10 pb-12 sm:py-24">
+      <div className="grid grid-cols-1 md:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] gap-8 md:gap-16 items-start">
 
         {/* Placeholder photo (to be replaced with a scanned polaroid) */}
         <div className="w-full max-w-sm mx-auto md:mx-0 aspect-[3/4] bg-primary-light relative overflow-hidden rounded-sm flex items-center justify-center">
@@ -36,7 +36,7 @@ export default function AboutPage() {
             </p>
           </div>
 
-          <div className="mt-10 pt-6 border-t border-border">
+          <div className="mt-8 pt-5 md:mt-10 md:pt-6 border-t border-border">
             <p className="text-xs text-text-secondary tracking-widest uppercase mb-2">Get in touch</p>
             <a
               href={`mailto:${CONTACT_EMAIL}`}
