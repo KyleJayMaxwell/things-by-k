@@ -88,19 +88,18 @@ export default async function HomePage() {
       <section className="bg-surface border-t border-border">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-20 flex flex-col sm:flex-row items-center gap-10">
           <FadeIn className="flex-1">
-            <h2 className="text-2xl font-semibold text-text-primary mb-3">Made by K</h2>
+            <h2 className="font-brand text-4xl text-text-primary mb-3">Things by K</h2>
             <p className="text-text-secondary leading-relaxed max-w-lg">
-              Things by K is a small shop for handmade goods and original photography.
-              Every item is made with intention — from the photo framed just right to the
-              jewelry assembled piece by piece.
+              A small shop of original designs. Every piece is designed with
+              intention and thought.
             </p>
             <Link href="/about" className="inline-block mt-6">
-              <Button variant="secondary" size="md">Learn More</Button>
+              <Button variant="black" size="md">Learn More</Button>
             </Link>
           </FadeIn>
           <FadeIn delay={100}>
-            <div className="w-32 h-32 sm:w-48 sm:h-48 rounded-full bg-primary-light flex items-center justify-center flex-shrink-0">
-              <span className="text-5xl sm:text-7xl font-semibold text-primary select-none">K</span>
+            <div className="w-32 h-32 sm:w-48 sm:h-48 rounded-full bg-neutral-900 flex items-center justify-center flex-shrink-0">
+              <span className="font-brand text-6xl sm:text-8xl leading-none -translate-y-[0.17em] text-white select-none">K</span>
             </div>
           </FadeIn>
         </div>
