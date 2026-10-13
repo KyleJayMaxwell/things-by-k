@@ -18,26 +18,28 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <div className="min-h-screen bg-gray-50 md:flex">
-      {/* Sidebar on desktop, top bar on phones */}
-      <aside className="bg-white border-b border-border md:border-b-0 md:border-r md:w-56 md:fixed md:h-full md:flex md:flex-col z-20">
-        <div className="px-5 py-4 md:py-5 md:border-b border-border">
-          <Link href="/" className="text-xs text-text-secondary hover:text-primary transition-colors">
-            ← Things by K
-          </Link>
-          <p className="text-sm font-semibold text-text-primary mt-1">Admin</p>
-        </div>
-        <nav className="flex gap-1 px-3 pb-3 md:flex-1 md:block md:py-4 md:pb-4 md:space-y-1">
-          <AdminNavLink href="/admin" label="Overview" />
-          <AdminNavLink href="/admin/orders" label="Orders" />
-          <AdminNavLink href="/admin/products" label="Products" />
-        </nav>
-        <div className="hidden md:block px-5 py-4 border-t border-border">
-          <p className="text-xs text-text-secondary truncate">{user.email}</p>
+      {/* Sidebar on desktop (its links stick below the navbar; the column ends above the footer), top bar on phones */}
+      <aside className="bg-white border-b border-border md:border-b-0 md:border-r md:w-56 md:shrink-0">
+        <div className="md:sticky md:top-16">
+          <div className="px-5 py-4 md:py-5 md:border-b border-border">
+            <Link href="/" className="text-xs text-text-secondary hover:text-primary transition-colors">
+              ← Things by K
+            </Link>
+            <p className="text-sm font-semibold text-text-primary mt-1">Admin</p>
+          </div>
+          <nav className="flex gap-1 px-3 pb-3 md:block md:py-4 md:pb-4 md:space-y-1">
+            <AdminNavLink href="/admin" label="Overview" />
+            <AdminNavLink href="/admin/orders" label="Orders" />
+            <AdminNavLink href="/admin/products" label="Products" />
+          </nav>
+          <div className="hidden md:block px-5 py-4 border-t border-border">
+            <p className="text-xs text-text-secondary truncate">{user.email}</p>
+          </div>
         </div>
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 min-w-0 md:ml-56 p-4 md:p-8">
+      <main className="flex-1 min-w-0 p-4 md:p-8">
         {children}
       </main>
     </div>
