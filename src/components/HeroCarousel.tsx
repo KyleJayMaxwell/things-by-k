@@ -7,7 +7,7 @@ import Link from 'next/link'
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react'
 import type { HeroSlide } from '@/lib/heroSlides'
 
-const AUTOPLAY_MS = 6000
+const AUTOPLAY_MS = 5000
 const REDUCED_MOTION = '(prefers-reduced-motion: reduce)'
 
 function subscribeReducedMotion(cb: () => void) {
@@ -73,22 +73,31 @@ export default function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
             aria-roledescription="slide"
             aria-label={`${i + 1} of ${count}`}
             aria-hidden={!active}
-            className={`absolute inset-0 transition-opacity duration-700 motion-reduce:transition-none ${
+            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out motion-reduce:transition-none ${
               active ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
             }`}
           >
-            <Image
-              src={slide.image}
-              alt={slide.alt}
-              fill
-              priority={i === 0}
-              placeholder="blur"
-              quality={90}
-              // Portrait screens fill the height, so a 3:2 photo renders ~1.5x the viewport height wide
-              sizes="(max-aspect-ratio: 3/2) 150vh, 100vw"
-              className="object-cover"
-              style={{ objectPosition: slide.position ?? 'center' }}
-            />
+            {/* Slow zoom while a slide is showing; snaps back only after it has faded out */}
+            <div
+              className={`absolute inset-0 motion-reduce:scale-100 motion-reduce:transition-none ${
+                active
+                  ? 'scale-105 transition-transform duration-[6000ms] ease-linear'
+                  : 'scale-100 transition-transform duration-0 delay-1000'
+              }`}
+            >
+              <Image
+                src={slide.image}
+                alt={slide.alt}
+                fill
+                priority={i === 0}
+                placeholder="blur"
+                quality={90}
+                // Portrait screens fill the height, so a 3:2 photo renders ~1.5x the viewport height wide
+                sizes="(max-aspect-ratio: 3/2) 150vh, 100vw"
+                className="object-cover"
+                style={{ objectPosition: slide.position ?? 'center' }}
+              />
+            </div>
             <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/5 to-transparent" />
             <div className="absolute inset-x-0 bottom-20 sm:bottom-24 flex flex-col items-center gap-5 px-4 text-center">
               {slide.heading && (
