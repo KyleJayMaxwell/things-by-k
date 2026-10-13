@@ -9,12 +9,18 @@ import Link from 'next/link'
 import Button from '@/components/Button'
 import PasswordInput from '@/components/PasswordInput'
 import TextField from '@/components/TextField'
+import GoogleIcon from '@/components/icons/GoogleIcon'
 import { passwordError, confirmPasswordError } from '@/lib/password'
 import { safeRedirectPath } from '@/lib/redirect'
 import { isValidEmail, authErrorMessage } from '@/lib/validation'
 import { errorMessage } from '@/lib/errors'
 
 type Tab = 'signin' | 'register'
+
+const LINK_ERRORS: Record<string, string> = {
+  link: 'That link has expired or was already used. If you were confirming your email, try signing in. Otherwise request a new link.',
+  social: 'Google sign-in didn’t finish. Please try again, or use your email instead.',
+}
 
 function LoginForm() {
   const router = useRouter()
@@ -24,7 +30,7 @@ function LoginForm() {
   const [tab, setTab] = useState<Tab>('signin')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(
-    searchParams.get('error') === 'link' ? 'That link has expired or was already used. If you were confirming your email, try signing in. Otherwise request a new link.' : null
+    LINK_ERRORS[searchParams.get('error') ?? ''] ?? null
   )
   const [success, setSuccess] = useState<string | null>(null)
 
@@ -40,6 +46,8 @@ function LoginForm() {
 
   const [needsConfirmation, setNeedsConfirmation] = useState(false)
   const [resending, setResending] = useState(false)
+  const [googleLoading, setGoogleLoading] = useState(false)
+  const [sendingLink, setSendingLink] = useState(false)
 
   const supabase = createClient()
 
@@ -89,6 +97,49 @@ function LoginForm() {
       setError(authErrorMessage(errorMessage(err, 'Sign in failed. Please try again.')))
       setLoading(false)
     }
+  }
+
+  // Sends the customer to Google, which returns them to /auth/callback signed in.
+  // New customers get an account automatically.
+  const handleGoogle = async () => {
+    setError(null)
+    setSuccess(null)
+    setGoogleLoading(true)
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`,
+      },
+    })
+    // On success the browser is already leaving the page
+    if (error) {
+      setError(authErrorMessage(error.message))
+      setGoogleLoading(false)
+    }
+  }
+
+  // Magic link: a one-time sign-in link by email, no password needed.
+  // Creates the account if this email is new.
+  const handleSendLink = async () => {
+    if (signInErrors.email) return
+    setError(null)
+    setSuccess(null)
+    setNeedsConfirmation(false)
+    setSendingLink(true)
+    try {
+      const email = signInEmail.trim()
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`,
+        },
+      })
+      if (error) setError(authErrorMessage(error.message))
+      else setSuccess(`Check your inbox. We sent a sign-in link to ${email}.`)
+    } catch (err) {
+      setError(authErrorMessage(errorMessage(err, 'We couldn’t send the link. Please try again.')))
+    }
+    setSendingLink(false)
   }
 
   const handleResendConfirmation = async () => {
@@ -147,6 +198,26 @@ function LoginForm() {
         <h1 className="text-2xl font-semibold text-text-primary text-center mb-8">
           {tab === 'signin' ? 'Welcome back' : 'Create an account'}
         </h1>
+
+        <Button
+          type="button"
+          variant="primary"
+          size="lg"
+          fullWidth
+          loading={googleLoading}
+          onClick={handleGoogle}
+        >
+          <span className="flex items-center justify-center w-6 h-6 rounded-full bg-white">
+            <GoogleIcon className="w-4 h-4" />
+          </span>
+          Continue with Google
+        </Button>
+
+        <div className="flex items-center gap-3 my-6 text-xs text-text-secondary">
+          <span className="flex-1 h-px bg-border" />
+          or use your email
+          <span className="flex-1 h-px bg-border" />
+        </div>
 
         {/* Tab toggle */}
         <div role="tablist" className="flex border border-border rounded-lg overflow-hidden mb-8">
@@ -224,6 +295,21 @@ function LoginForm() {
             <Button type="submit" variant="primary" size="lg" fullWidth loading={loading} disabled={!canSignIn}>
               Sign In
             </Button>
+
+            <Button
+              type="button"
+              variant="secondary"
+              size="lg"
+              fullWidth
+              loading={sendingLink}
+              disabled={!!signInErrors.email}
+              onClick={handleSendLink}
+            >
+              Email me a sign-in link
+            </Button>
+            <p className="text-xs text-text-secondary text-center -mt-1">
+              No password needed. We’ll email you a link that signs you in.
+            </p>
 
             <Link
               href="/account/forgot-password"
