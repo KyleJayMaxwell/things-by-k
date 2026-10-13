@@ -82,7 +82,13 @@ begin
   insert into public.profiles (id, first_name)
   values (
     new.id,
-    coalesce(new.raw_user_meta_data->>'first_name', '')
+    -- Email sign-up sends first_name; Google sends given_name / full_name
+    coalesce(
+      nullif(new.raw_user_meta_data->>'first_name', ''),
+      nullif(new.raw_user_meta_data->>'given_name', ''),
+      nullif(split_part(coalesce(new.raw_user_meta_data->>'full_name', new.raw_user_meta_data->>'name', ''), ' ', 1), ''),
+      ''
+    )
   );
   return new;
 end;
