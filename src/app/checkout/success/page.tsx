@@ -7,6 +7,7 @@ import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useCart } from '@/context/CartContext'
 import Button from '@/components/Button'
+import Spinner from '@/components/Spinner'
 import { formatPrice } from '@/lib/format'
 
 interface OrderDetails {
@@ -75,7 +76,10 @@ function SuccessContent() {
       <p className="text-text-secondary mb-10">We’ll get it packed up and on its way soon.</p>
 
       {loading ? (
-        <div className="text-text-secondary">Loading order details...</div>
+        <div role="status" className="inline-flex items-center gap-2 text-text-secondary">
+          <Spinner />
+          Loading order details...
+        </div>
       ) : order && !('error' in order) ? (
         <div className="bg-surface border border-border rounded-xl p-6 text-left space-y-6">
           <div className="flex flex-wrap justify-between gap-x-4 gap-y-1 text-sm">

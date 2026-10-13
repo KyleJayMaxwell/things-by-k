@@ -9,6 +9,7 @@ import { errorMessage } from '@/lib/errors'
 import { SLUG_PATTERN, slugify, isValidDollarAmount, isWholeNumber } from '@/lib/validation'
 import { FieldMessage, inputClass as baseInputClass, inputBorder } from '@/components/TextField'
 import Image from 'next/image'
+import Spinner from '@/components/Spinner'
 
 interface ProductFormProps {
   initialData?: {
@@ -418,8 +419,9 @@ export default function ProductForm({ initialData }: ProductFormProps) {
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={uploading}
-              className="px-4 py-2 border border-border rounded-lg text-sm text-text-secondary hover:text-text-primary hover:border-primary/40 transition-colors disabled:opacity-50"
+              className="inline-flex items-center gap-2 px-4 py-2 border border-border rounded-lg text-sm text-text-secondary hover:text-text-primary hover:border-primary/40 transition-colors disabled:opacity-50"
             >
+              {uploading && <Spinner />}
               {uploading ? 'Uploading...' : '+ Upload Image'}
             </button>
             <p className="text-xs text-text-secondary">First image is used as the main product photo. Drag photos to reorder them, then save.</p>
@@ -455,8 +457,9 @@ export default function ProductForm({ initialData }: ProductFormProps) {
         <button
           type="submit"
           disabled={saving || uploading || !isValid}
-          className="px-6 py-2.5 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-hover transition-colors disabled:opacity-50"
+          className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-hover transition-colors disabled:opacity-50"
         >
+          {saving && <Spinner />}
           {saving ? 'Saving...' : isEdit ? 'Save Changes' : 'Create Product'}
         </button>
         {!isValid && !saving && (
@@ -468,8 +471,9 @@ export default function ProductForm({ initialData }: ProductFormProps) {
             type="button"
             onClick={handleDelete}
             disabled={deleting}
-            className="px-4 py-2.5 text-sm text-error hover:text-red-700 transition-colors disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-4 py-2.5 text-sm text-error hover:text-red-700 transition-colors disabled:opacity-50"
           >
+            {deleting && <Spinner />}
             {deleting ? 'Deleting...' : 'Delete Product'}
           </button>
         )}
