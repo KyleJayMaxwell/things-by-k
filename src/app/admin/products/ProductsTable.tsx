@@ -81,7 +81,7 @@ export default function ProductsTable({ rows, header }: ProductsTableProps) {
         <div role="alert" className="px-5 py-2.5 bg-red-50 border-b border-red-200 text-sm text-error">{error}</div>
       )}
 
-      <div className="overflow-x-auto">
+      <div className="relative overflow-x-auto">
         <table className="w-full min-w-[760px] text-sm">
           <thead className="text-xs text-text-secondary border-b border-border">
             <tr>
