@@ -35,6 +35,7 @@ export default function CartPage() {
             quantity: i.quantity,
             handwritten: !!i.handwritten,
             message: i.handwritten ? i.message ?? '' : undefined,
+            surprise: i.surprise,
           })),
           destination,
         }),

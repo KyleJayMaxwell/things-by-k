@@ -4,7 +4,7 @@
 // Global cart state. Persists to localStorage for guests.
 
 import { createContext, useContext, useEffect, useState, useCallback } from 'react'
-import { CartItem, Product } from '@/types'
+import { CartItem, Product, SurpriseOptions } from '@/types'
 import { cartLineKey, unitPrice } from '@/lib/cart'
 
 interface CartContextValue {
@@ -20,6 +20,7 @@ interface CartContextValue {
 interface AddItemOptions {
   handwritten?: boolean
   message?: string
+  surprise?: SurpriseOptions
 }
 
 const CartContext = createContext<CartContextValue | null>(null)
@@ -50,6 +51,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     const line: CartItem = options.handwritten
       ? { product, quantity, handwritten: true, message: options.message?.trim() ?? '' }
       : { product, quantity }
+    if (product.is_surprise && options.surprise) {
+      line.surprise = { ...options.surprise, preference: options.surprise.preference.trim() }
+    }
     const key = cartLineKey(line)
 
     setItems(prev => {

@@ -18,6 +18,7 @@ export interface Product {
   stock: number
   is_active: boolean
   handwritten_price: number | null  // extra cents for a handwritten postcard; null = no extra
+  is_surprise?: boolean  // the Surprise me listing: the admin picks the design when packing
   created_at: string
   updated_at: string
 }
@@ -64,6 +65,18 @@ export interface OrderItem {
   price: number          // snapshot in cents
   quantity: number
   handwritten_message: string | null
+  surprise_preference?: string | null  // Surprise me: optional "any preference?" note
+  is_gift?: boolean                    // Surprise me: shipped email names the design
+  same_design?: boolean                // Surprise me: every card in this line is one design
+}
+
+// The design sent for one card of a Surprise me item (admin-only table)
+export interface SurprisePick {
+  id: string
+  order_item_id: string
+  slot: number           // 0 .. quantity - 1
+  product_id: string
+  product_name: string   // snapshot
 }
 
 export interface OrderWithItems extends Order {
@@ -85,6 +98,13 @@ export interface CartItem {
   quantity: number
   handwritten?: boolean
   message?: string       // what to write on a handwritten card
+  surprise?: SurpriseOptions  // only on a Surprise me card
+}
+
+export interface SurpriseOptions {
+  preference: string     // optional; '' for none
+  gift: boolean
+  sameDesign: boolean    // only meaningful when quantity > 1
 }
 
 export interface Cart {

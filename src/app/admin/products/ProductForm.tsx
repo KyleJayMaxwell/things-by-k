@@ -27,6 +27,7 @@ interface ProductFormProps {
     is_active: boolean
     images: string[]
     handwritten_price?: number | null
+    is_surprise?: boolean
   }
 }
 
@@ -50,6 +51,7 @@ export default function ProductForm({ initialData }: ProductFormProps) {
     stock: initialData?.stock?.toString() ?? '',
     is_active: initialData?.is_active ?? true,
     images: initialData?.images ?? [] as string[],
+    is_surprise: initialData?.is_surprise ?? false,
     handwritten_price: initialData?.handwritten_price != null ? (initialData.handwritten_price / 100).toFixed(2) : '0.00',
   })
 
@@ -204,6 +206,10 @@ export default function ProductForm({ initialData }: ProductFormProps) {
       handwritten_price: form.category === 'postcard'
         ? Math.round((parseFloat(form.handwritten_price) || 0) * 100)
         : null,
+      // Only sent once it matters, so saving still works before surprise-me.sql is run
+      ...(form.is_surprise || initialData?.is_surprise !== undefined
+        ? { is_surprise: form.category === 'postcard' && form.is_surprise }
+        : {}),
     }
 
     try {
@@ -482,6 +488,30 @@ export default function ProductForm({ initialData }: ProductFormProps) {
             </button>
             <p className="text-xs text-text-secondary">Drop photos anywhere in this box, or click Upload to pick several at once. First image is used as the main product photo. Drag photos to reorder them, then save.</p>
           </div>
+
+          {/* Surprise me listing */}
+          {form.category === 'postcard' && (
+            <div className="bg-white border border-border rounded-xl p-6">
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  id="is_surprise"
+                  name="is_surprise"
+                  checked={form.is_surprise}
+                  onChange={handleChange}
+                  className="mt-0.5 w-4 h-4 accent-primary"
+                />
+                <span>
+                  <span className="block font-medium text-text-primary">Surprise me listing</span>
+                  <span className="block text-sm text-text-secondary mt-1">
+                    Buyers don&apos;t pick a design. They can leave a preference and mark it a gift, and each order
+                    gets a &quot;Design sent&quot; picker. Stock here is how many you&apos;re willing to sell; each pick
+                    also takes 1 from that design. Leave it out of location and orientation tags.
+                  </span>
+                </span>
+              </label>
+            </div>
+          )}
 
           {/* Handwritten option */}
           {form.category === 'postcard' && (
