@@ -11,6 +11,9 @@ import { FieldMessage, inputClass as baseInputClass, inputBorder } from '@/compo
 import Image from 'next/image'
 import Spinner from '@/components/Spinner'
 
+// New postcards start at this price; other categories start blank
+const DEFAULT_POSTCARD_PRICE = '3.00'
+
 interface ProductFormProps {
   initialData?: {
     id: string
@@ -42,7 +45,7 @@ export default function ProductForm({ initialData }: ProductFormProps) {
     slug: initialData?.slug ?? '',
     description: initialData?.description ?? '',
     long_description: initialData?.long_description ?? '',
-    price: initialData ? (initialData.price / 100).toFixed(2) : '',
+    price: initialData ? (initialData.price / 100).toFixed(2) : DEFAULT_POSTCARD_PRICE,
     category: initialData?.category ?? 'postcard',
     stock: initialData?.stock?.toString() ?? '',
     is_active: initialData?.is_active ?? true,
@@ -69,6 +72,16 @@ export default function ProductForm({ initialData }: ProductFormProps) {
         name: value,
         slug: slugify(value),
       }))
+    }
+
+    // New products: fill in the postcard price when switching to postcard,
+    // and clear it when switching away if it was never changed
+    if (name === 'category' && !isEdit) {
+      setForm(prev => {
+        if (value === 'postcard' && prev.price === '') return { ...prev, price: DEFAULT_POSTCARD_PRICE }
+        if (value !== 'postcard' && prev.price === DEFAULT_POSTCARD_PRICE) return { ...prev, price: '' }
+        return prev
+      })
     }
   }
 
