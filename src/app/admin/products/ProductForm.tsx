@@ -51,6 +51,8 @@ export default function ProductForm({ initialData }: ProductFormProps) {
   })
 
   const [uploading, setUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState<string | null>(null)
+  const [fileDragOver, setFileDragOver] = useState(false)
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -72,44 +74,61 @@ export default function ProductForm({ initialData }: ProductFormProps) {
     }
   }
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    e.target.value = ''  // lets the same file be picked again after an error
-    if (!file) return
-    if (!file.type.startsWith('image/')) {
-      setError('That file isn’t an image. Upload a JPG, PNG or WebP.')
+  // Uploads in the order the files were picked or dropped, so the first one becomes the main photo
+  const uploadImages = async (files: File[]) => {
+    if (files.length === 0) return
+    const bad = files.find(f => !f.type.startsWith('image/'))
+    if (bad) {
+      setError(`${bad.name} isn’t an image. Upload JPG, PNG or WebP files.`)
       return
     }
-    if (file.size > MAX_IMAGE_MB * 1024 * 1024) {
-      setError(`That image is over ${MAX_IMAGE_MB} MB. Please upload a smaller one.`)
+    const tooBig = files.find(f => f.size > MAX_IMAGE_MB * 1024 * 1024)
+    if (tooBig) {
+      setError(`${tooBig.name} is over ${MAX_IMAGE_MB} MB. Please upload a smaller one.`)
       return
     }
 
     setUploading(true)
     setError(null)
 
+    const slug = form.slug || 'product'
+    const batch = Date.now()
+
     try {
-      const slug = form.slug || 'product'
-      const ext = file.name.split('.').pop()
-      const path = `${slug}/${Date.now()}.${ext}`
+      for (const [i, file] of files.entries()) {
+        setUploadProgress(files.length > 1 ? `${i + 1} of ${files.length}` : null)
+        const ext = file.name.split('.').pop()
+        const path = `${slug}/${batch}-${i}.${ext}`
 
-      const { error: uploadError } = await supabase.storage
-        .from('product-images')
-        .upload(path, file, { upsert: true })
+        const { error: uploadError } = await supabase.storage
+          .from('product-images')
+          .upload(path, file, { upsert: true })
 
-      if (uploadError) throw uploadError
+        if (uploadError) throw uploadError
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('product-images')
-        .getPublicUrl(path)
+        const { data: { publicUrl } } = supabase.storage
+          .from('product-images')
+          .getPublicUrl(path)
 
-      setForm(prev => ({ ...prev, images: [...prev.images, publicUrl] }))
+        // Added one at a time so photos that finished stay if a later one fails
+        setForm(prev => ({ ...prev, images: [...prev.images, publicUrl] }))
+      }
     } catch (err) {
       setError(errorMessage(err, 'Upload failed'))
     } finally {
       setUploading(false)
+      setUploadProgress(null)
     }
   }
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? [])
+    e.target.value = ''  // lets the same file be picked again after an error
+    uploadImages(files)
+  }
+
+  // Only file drags from the computer count; reordering thumbnails is a drag too
+  const isFileDrag = (e: React.DragEvent) => e.dataTransfer.types.includes('Files')
 
   const removeImage = (index: number) => {
     setForm(prev => ({ ...prev, images: prev.images.filter((_, i) => i !== index) }))
@@ -335,7 +354,27 @@ export default function ProductForm({ initialData }: ProductFormProps) {
 
         <div className="lg:col-span-2 space-y-6">
           {/* Images */}
-          <div className="bg-white border border-border rounded-xl p-6 space-y-4">
+          <div
+            onDragOver={(e) => {
+              if (!isFileDrag(e)) return
+              e.preventDefault()
+              e.dataTransfer.dropEffect = 'copy'
+              if (!fileDragOver) setFileDragOver(true)
+            }}
+            onDragLeave={(e) => {
+              // Ignore leaving into a child element of the card
+              if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setFileDragOver(false)
+            }}
+            onDrop={(e) => {
+              if (!isFileDrag(e)) return
+              e.preventDefault()
+              setFileDragOver(false)
+              if (!uploading) uploadImages(Array.from(e.dataTransfer.files))
+            }}
+            className={`bg-white border rounded-xl p-6 space-y-4 transition-colors ${
+              fileDragOver ? 'border-primary border-dashed bg-primary/5' : 'border-border'
+            }`}
+          >
             <h2 className="font-medium text-text-primary">Images</h2>
 
             {form.images.length > 0 && (
@@ -349,12 +388,15 @@ export default function ProductForm({ initialData }: ProductFormProps) {
                       e.dataTransfer.effectAllowed = 'move'
                     }}
                     onDragOver={(e) => {
+                      if (dragIndex === null) return  // a file drag from the computer; the card handles it
                       e.preventDefault()
                       if (dragOverIndex !== i) setDragOverIndex(i)
                     }}
                     onDrop={(e) => {
+                      if (dragIndex === null) return
                       e.preventDefault()
-                      if (dragIndex !== null) moveImage(dragIndex, i)
+                      e.stopPropagation()
+                      moveImage(dragIndex, i)
                       setDragIndex(null)
                       setDragOverIndex(null)
                     }}
@@ -412,6 +454,7 @@ export default function ProductForm({ initialData }: ProductFormProps) {
               ref={fileInputRef}
               type="file"
               accept="image/*"
+              multiple
               onChange={handleImageUpload}
               className="hidden"
             />
@@ -422,9 +465,9 @@ export default function ProductForm({ initialData }: ProductFormProps) {
               className="inline-flex items-center gap-2 px-4 py-2 border border-border rounded-lg text-sm text-text-secondary hover:text-text-primary hover:border-primary/40 transition-colors disabled:opacity-50"
             >
               {uploading && <Spinner />}
-              {uploading ? 'Uploading...' : '+ Upload Image'}
+              {uploading ? `Uploading${uploadProgress ? ` ${uploadProgress}` : ''}...` : '+ Upload Images'}
             </button>
-            <p className="text-xs text-text-secondary">First image is used as the main product photo. Drag photos to reorder them, then save.</p>
+            <p className="text-xs text-text-secondary">Drop photos anywhere in this box, or click Upload to pick several at once. First image is used as the main product photo. Drag photos to reorder them, then save.</p>
           </div>
 
           {/* Handwritten option */}
