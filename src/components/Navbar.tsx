@@ -8,6 +8,13 @@ import { useState, useEffect, useRef } from 'react'
 import CartIcon from './icons/CartIcon'
 import AccountIcon from './icons/AccountIcon'
 import { useCart } from '@/context/CartContext'
+import { SHOP_SECTIONS } from '@/lib/shopSections'
+
+// Links in the Shop menu; new sections show up here automatically
+const SHOP_LINKS = [
+  { href: '/shop', label: 'Shop All' },
+  ...SHOP_SECTIONS.map(s => ({ href: `/shop/${s.slug}`, label: s.label })),
+]
 
 export default function Navbar() {
   const pathname = usePathname()
@@ -39,11 +46,17 @@ export default function Navbar() {
     setMenuOpen(false)
   }
 
+  // The Shop menu stays open while a link inside it has focus, so let go of focus after navigating
+  useEffect(() => {
+    const el = document.activeElement
+    if (el instanceof HTMLElement && el.closest('[data-shop-menu]')) el.blur()
+  }, [pathname])
+
   // Active on the page itself and anything under it (e.g. /shop/some-product)
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`)
 
-  const navLink = (href: string, label: string) => {
-    const active = isActive(href)
+  const navLink = (href: string, label: string, { exact = false } = {}) => {
+    const active = exact ? pathname === href : isActive(href)
     return (
       <Link
         href={href}
@@ -71,7 +84,30 @@ export default function Navbar() {
         <div className="flex items-center">
           {/* Desktop nav links */}
           <nav aria-label="Main navigation" className="hidden sm:flex items-center gap-8">
-            {navLink('/shop', 'Shop')}
+            {/* Shop opens a menu on hover or keyboard focus; clicking Shop still goes to Shop All */}
+            <div data-shop-menu className="relative group">
+              {navLink('/shop', 'Shop')}
+              <div className="absolute left-0 top-full pt-3 invisible opacity-0 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100 transition-opacity duration-150">
+                <ul className="min-w-44 bg-white rounded-lg shadow-lg border border-border py-2">
+                  {SHOP_LINKS.map(link => {
+                    const current = pathname === link.href || (link.href !== '/shop' && pathname.startsWith(`${link.href}/`))
+                    return (
+                      <li key={link.href}>
+                        <Link
+                          href={link.href}
+                          aria-current={current ? 'page' : undefined}
+                          className={`block px-4 py-2 text-sm hover:bg-neutral-100 focus:bg-neutral-100 focus:outline-none ${
+                            current ? 'font-medium text-text-primary' : 'text-text-secondary hover:text-text-primary'
+                          }`}
+                        >
+                          {link.label}
+                        </Link>
+                      </li>
+                    )
+                  })}
+                </ul>
+              </div>
+            </div>
             {navLink('/about', 'About')}
           </nav>
 
@@ -133,11 +169,13 @@ export default function Navbar() {
       <div
         id="mobile-menu"
         className={`sm:hidden overflow-hidden transition-[max-height,opacity] duration-200 ease-in-out ${
-          menuOpen ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'
+          menuOpen ? 'max-h-64 opacity-100' : 'max-h-0 opacity-0'
         }`}
       >
         <nav aria-label="Mobile navigation" className="border-t border-white/15 bg-brand px-4 py-4 flex flex-col gap-4">
-          {navLink('/shop', 'Shop')}
+          {SHOP_LINKS.map(link => (
+            <div key={link.href}>{navLink(link.href, link.href === '/shop' ? 'Shop All' : link.label, { exact: link.href === '/shop' })}</div>
+          ))}
           {navLink('/about', 'About')}
         </nav>
       </div>

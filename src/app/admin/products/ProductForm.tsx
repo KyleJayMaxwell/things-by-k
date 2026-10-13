@@ -2,7 +2,7 @@
 
 // src/app/admin/products/ProductForm.tsx
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { errorMessage } from '@/lib/errors'
@@ -10,6 +10,7 @@ import { SLUG_PATTERN, slugify, isValidDollarAmount, isWholeNumber } from '@/lib
 import { FieldMessage, inputClass as baseInputClass, inputBorder } from '@/components/TextField'
 import Image from 'next/image'
 import Spinner from '@/components/Spinner'
+import { isReservedSlug } from '@/lib/shopSections'
 
 interface ProductFormProps {
   initialData?: {
@@ -24,11 +25,37 @@ interface ProductFormProps {
     is_active: boolean
     images: string[]
     handwritten_price?: number | null
+    locations?: string[] | null
+    orientation?: string | null
   }
 }
 
 const CATEGORIES = ['postcard', 'necklace', 'zine']
 const MAX_IMAGE_MB = 20
+
+// "San Francisco, bay area ,  " → ['San Francisco', 'bay area'], dropping repeats regardless of case
+function parseLocations(value: string): string[] {
+  const seen = new Set<string>()
+  return value.split(',').map(l => l.trim().replace(/\s+/g, ' ')).filter(l => {
+    const key = l.toLowerCase()
+    if (!l || seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+}
+
+// Reads a photo's shape; square or nearly square photos (like padded mockups) give no answer
+function detectOrientation(url: string): Promise<'horizontal' | 'vertical' | null> {
+  return new Promise(resolve => {
+    const img = new window.Image()
+    img.onload = () => {
+      const ratio = img.naturalWidth / img.naturalHeight
+      resolve(ratio > 1.05 ? 'horizontal' : ratio < 0.95 ? 'vertical' : null)
+    }
+    img.onerror = () => resolve(null)
+    img.src = url
+  })
+}
 
 export default function ProductForm({ initialData }: ProductFormProps) {
   const router = useRouter()
@@ -48,7 +75,26 @@ export default function ProductForm({ initialData }: ProductFormProps) {
     is_active: initialData?.is_active ?? true,
     images: initialData?.images ?? [] as string[],
     handwritten_price: initialData?.handwritten_price != null ? (initialData.handwritten_price / 100).toFixed(2) : '0.00',
+    locations: (initialData?.locations ?? []).join(', '),
+    orientation: initialData?.orientation ?? '',
   })
+
+  // Location tags already used on other products, offered as one-click suggestions
+  const [knownLocations, setKnownLocations] = useState<string[]>([])
+  useEffect(() => {
+    supabase.from('products').select('locations').then(({ data }) => {
+      const all = new Set<string>()
+      for (const row of data ?? []) for (const loc of (row.locations as string[] | null) ?? []) all.add(loc)
+      setKnownLocations([...all].sort((a, b) => a.localeCompare(b)))
+    })
+  }, [supabase])
+  const currentLocations = parseLocations(form.locations)
+  const suggestedLocations = knownLocations.filter(
+    loc => !currentLocations.some(c => c.toLowerCase() === loc.toLowerCase())
+  )
+  const addLocation = (loc: string) => {
+    setForm(prev => ({ ...prev, locations: [...parseLocations(prev.locations), loc].join(', ') }))
+  }
 
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState<string | null>(null)
@@ -112,6 +158,13 @@ export default function ProductForm({ initialData }: ProductFormProps) {
 
         // Added one at a time so photos that finished stay if a later one fails
         setForm(prev => ({ ...prev, images: [...prev.images, publicUrl] }))
+
+        // Guess a postcard's orientation from its first photo; the admin can change it
+        if (i === 0 && form.images.length === 0 && form.category === 'postcard' && !form.orientation) {
+          detectOrientation(publicUrl).then(o => {
+            if (o) setForm(prev => (prev.orientation ? prev : { ...prev, orientation: o }))
+          })
+        }
       }
     } catch (err) {
       setError(errorMessage(err, 'Upload failed'))
@@ -158,7 +211,9 @@ export default function ProductForm({ initialData }: ProductFormProps) {
 
   const errors: Record<string, string | null> = {
     name: form.name.trim() ? null : 'Enter a name.',
-    slug: SLUG_PATTERN.test(form.slug) ? null : 'Use lowercase letters, numbers and single dashes, like foggy-golden-gate.',
+    slug: !SLUG_PATTERN.test(form.slug)
+      ? 'Use lowercase letters, numbers and single dashes, like foggy-golden-gate.'
+      : isReservedSlug(form.slug) ? 'That name is used by a shop page. Pick a different slug.' : null,
     price: isValidDollarAmount(form.price) ? null : 'Enter a price above $0, like 5.00.',
     stock: isWholeNumber(form.stock) ? null : 'Enter a whole number, 0 or more.',
     handwritten_price: form.category !== 'postcard' || isValidDollarAmount(form.handwritten_price, { allowZero: true })
@@ -191,6 +246,8 @@ export default function ProductForm({ initialData }: ProductFormProps) {
       handwritten_price: form.category === 'postcard'
         ? Math.round((parseFloat(form.handwritten_price) || 0) * 100)
         : null,
+      locations: parseLocations(form.locations),
+      orientation: form.category === 'postcard' && form.orientation ? form.orientation : null,
     }
 
     try {
@@ -348,6 +405,50 @@ export default function ProductForm({ initialData }: ProductFormProps) {
                 placeholder="Full product details, materials, dimensions..."
               />
             </Field>
+          </div>
+
+          {/* Shop filters */}
+          <div className="bg-white border border-border rounded-xl p-6 space-y-4">
+            <div>
+              <h2 className="font-medium text-text-primary">Shop filters</h2>
+              <p className="text-sm text-text-secondary mt-1">Shoppers can filter by these, and search matches location tags too.</p>
+            </div>
+
+            <Field label="Location tags" hint="Separate with commas; add every place that fits" htmlFor="locations">
+              <input
+                id="locations"
+                name="locations"
+                value={form.locations}
+                onChange={handleChange}
+                className={inputClass('locations')}
+                placeholder="San Francisco, Bay Area, North Beach"
+              />
+            </Field>
+            {suggestedLocations.length > 0 && (
+              <div className="flex flex-wrap items-center gap-2 -mt-2">
+                <span className="text-xs text-text-secondary">Used before:</span>
+                {suggestedLocations.map(loc => (
+                  <button
+                    key={loc}
+                    type="button"
+                    onClick={() => addLocation(loc)}
+                    className="px-2.5 py-0.5 rounded-full border border-border text-xs text-text-secondary hover:text-text-primary hover:border-neutral-400 transition-colors"
+                  >
+                    + {loc}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {form.category === 'postcard' && (
+              <Field label="Orientation" hint="Filled in from the first photo when it can tell" htmlFor="orientation">
+                <select id="orientation" name="orientation" value={form.orientation} onChange={handleChange} className={inputClass('orientation')}>
+                  <option value="">Not set</option>
+                  <option value="horizontal">Horizontal</option>
+                  <option value="vertical">Vertical</option>
+                </select>
+              </Field>
+            )}
           </div>
 
         </div>

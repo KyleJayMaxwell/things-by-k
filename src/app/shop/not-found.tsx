@@ -1,4 +1,4 @@
-// src/app/shop/[slug]/not-found.tsx
+// src/app/shop/not-found.tsx
 
 import Link from 'next/link'
 import Button from '@/components/Button'
