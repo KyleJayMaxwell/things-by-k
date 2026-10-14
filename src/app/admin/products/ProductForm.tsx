@@ -6,6 +6,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { errorMessage } from '@/lib/errors'
+import { dbFieldError } from '@/lib/fieldErrors'
 import { SLUG_PATTERN, slugify, isValidDollarAmount, isWholeNumber } from '@/lib/validation'
 import { FieldMessage, inputClass as baseInputClass, inputBorder } from '@/components/TextField'
 import Image from 'next/image'
@@ -38,6 +39,21 @@ interface ProductFormProps {
 }
 
 const CATEGORIES = ['postcard', 'necklace', 'zine']
+
+// Names used in the error banner when a save fails on one field
+const FIELD_LABELS: Record<string, string> = {
+  name: 'Name',
+  slug: 'Slug',
+  price: 'Price',
+  stock: 'Stock',
+  category: 'Category',
+  description: 'Short description',
+  long_description: 'Long description',
+  locations: 'Location tags',
+  orientation: 'Orientation',
+  images: 'Images',
+  handwritten_price: 'Extra for handwritten',
+}
 const MAX_IMAGE_MB = 20
 
 // "San Francisco, bay area ,  " → ['San Francisco', 'bay area'], dropping repeats regardless of case
@@ -119,8 +135,20 @@ export default function ProductForm({ initialData, copyFrom }: ProductFormProps)
   const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // Errors the database gave on the last save, by field; editing a field clears its own
+  const [serverErrors, setServerErrors] = useState<Record<string, string>>({})
+  const clearServerError = (name: string) => {
+    if (!serverErrors[name]) return
+    setServerErrors(prev => {
+      const next = { ...prev }
+      delete next[name]
+      return next
+    })
+  }
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target
+    clearServerError(name)
     setForm(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
@@ -184,6 +212,7 @@ export default function ProductForm({ initialData, copyFrom }: ProductFormProps)
 
         // Added one at a time so photos that finished stay if a later one fails
         setForm(prev => ({ ...prev, images: [...prev.images, publicUrl] }))
+        clearServerError('images')
 
         // Guess a postcard's orientation from its first photo; the admin can change it
         if (i === 0 && form.images.length === 0 && form.category === 'postcard' && !form.orientation) {
@@ -210,6 +239,7 @@ export default function ProductForm({ initialData, copyFrom }: ProductFormProps)
   const isFileDrag = (e: React.DragEvent) => e.dataTransfer.types.includes('Files')
 
   const removeImage = (index: number) => {
+    clearServerError('images')
     setForm(prev => ({ ...prev, images: prev.images.filter((_, i) => i !== index) }))
   }
 
@@ -249,14 +279,38 @@ export default function ProductForm({ initialData, copyFrom }: ProductFormProps)
     long_description: form.long_description.trim() ? null : 'Enter a long description.',
   }
   const isValid = Object.values(errors).every(e => !e)
-  const fieldError = (name: string) => (touched.has(name) ? errors[name] : null)
-  const inputClass = (name: string) => `${baseInputClass} ${inputBorder(!!fieldError(name))}`
+  const fieldError = (name: string) => serverErrors[name] ?? (touched.has(name) ? errors[name] : null)
+  // Red border, plus the error read out by screen readers
+  const fieldAttrs = (name: string) => {
+    const invalid = !!fieldError(name)
+    return {
+      className: `${baseInputClass} ${inputBorder(invalid)}`,
+      'aria-invalid': invalid,
+      'aria-describedby': invalid ? `${name}-message` : undefined,
+    }
+  }
+
+  // Moves to the first highlighted field after a save attempt, once it has rendered red
+  const formRef = useRef<HTMLFormElement>(null)
+  const [focusRequest, setFocusRequest] = useState(0)
+  useEffect(() => {
+    if (!focusRequest) return
+    const first = formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]')
+    first?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    first?.focus({ preventScroll: true })
+  }, [focusRequest])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!isValid) return
+    if (!isValid) {
+      // Show every field's problem at once, not just the ones already visited
+      setTouched(new Set(Object.keys(errors)))
+      setFocusRequest(n => n + 1)
+      return
+    }
     setSaving(true)
     setError(null)
+    setServerErrors({})
 
     const payload = {
       name: form.name.trim(),
@@ -292,9 +346,20 @@ export default function ProductForm({ initialData, copyFrom }: ProductFormProps)
       router.push('/admin/products')
       router.refresh()
     } catch (err) {
-      // 23505 is Postgres's "duplicate value" error; the slug is the only unique field here
-      const duplicate = typeof err === 'object' && err !== null && 'code' in err && err.code === '23505'
-      setError(duplicate ? 'Another product already uses that slug. Pick a different one.' : errorMessage(err, 'Save failed'))
+      // Point at the field the database complained about when it names one
+      // and that field is on screen (orientation is hidden for non-postcards)
+      const fieldErr = dbFieldError(err, 'products')
+      const label = fieldErr && FIELD_LABELS[fieldErr.column]
+      const onScreen = fieldErr && (fieldErr.column === 'images' || !!formRef.current?.querySelector(`[name="${fieldErr.column}"]`))
+      if (fieldErr && label && onScreen) {
+        setServerErrors({
+          [fieldErr.column]: fieldErr.column === 'slug' ? 'Another product already uses that slug. Pick a different one.' : fieldErr.message,
+        })
+        setError(`Couldn’t save. Check ${label} below.`)
+        setFocusRequest(n => n + 1)
+      } else {
+        setError(errorMessage(err, 'Save failed'))
+      }
       setSaving(false)
     }
   }
@@ -317,7 +382,7 @@ export default function ProductForm({ initialData, copyFrom }: ProductFormProps)
   }
 
   return (
-    <form onSubmit={handleSubmit} onBlur={markTouched} noValidate className="max-w-7xl space-y-6">
+    <form ref={formRef} onSubmit={handleSubmit} onBlur={markTouched} noValidate className="max-w-7xl space-y-6">
       {error && (
         <div role="alert" className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-error">
           {error}
@@ -337,7 +402,7 @@ export default function ProductForm({ initialData, copyFrom }: ProductFormProps)
                 name="name"
                 value={form.name}
                 onChange={handleChange}
-                className={inputClass('name')}
+                {...fieldAttrs('name')}
                 placeholder="Seoul Hanok Postcard"
               />
             </Field>
@@ -348,7 +413,7 @@ export default function ProductForm({ initialData, copyFrom }: ProductFormProps)
                 name="slug"
                 value={form.slug}
                 onChange={handleChange}
-                className={inputClass('slug')}
+                {...fieldAttrs('slug')}
                 placeholder="seoul-hanok-postcard"
               />
             </Field>
@@ -363,7 +428,7 @@ export default function ProductForm({ initialData, copyFrom }: ProductFormProps)
                   type="number"
                   step="0.01"
                   min="0"
-                  className={inputClass('price')}
+                  {...fieldAttrs('price')}
                   placeholder="5.00"
                 />
               </Field>
@@ -375,14 +440,14 @@ export default function ProductForm({ initialData, copyFrom }: ProductFormProps)
                   onChange={handleChange}
                   type="number"
                   min="0"
-                  className={inputClass('stock')}
+                  {...fieldAttrs('stock')}
                   placeholder="25"
                 />
               </Field>
             </div>
 
-            <Field label="Category" htmlFor="category">
-              <select id="category" name="category" value={form.category} onChange={handleChange} className={inputClass('category')}>
+            <Field label="Category" htmlFor="category" error={fieldError('category')}>
+              <select id="category" name="category" value={form.category} onChange={handleChange} {...fieldAttrs('category')}>
                 {CATEGORIES.map(c => (
                   <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>
                 ))}
@@ -415,7 +480,7 @@ export default function ProductForm({ initialData, copyFrom }: ProductFormProps)
                 value={form.description}
                 onChange={handleChange}
                 rows={2}
-                className={inputClass('description')}
+                {...fieldAttrs('description')}
                 placeholder="An original photograph printed on premium postcard stock."
               />
             </Field>
@@ -427,7 +492,7 @@ export default function ProductForm({ initialData, copyFrom }: ProductFormProps)
                 value={form.long_description}
                 onChange={handleChange}
                 rows={8}
-                className={inputClass('long_description')}
+                {...fieldAttrs('long_description')}
                 placeholder="Full product details, materials, dimensions..."
               />
             </Field>
@@ -440,13 +505,13 @@ export default function ProductForm({ initialData, copyFrom }: ProductFormProps)
               <p className="text-sm text-text-secondary mt-1">Shoppers can filter by these, and search matches location tags too.</p>
             </div>
 
-            <Field label="Location tags" hint="Separate with commas; city and region only, no neighborhoods" htmlFor="locations">
+            <Field label="Location tags" hint="Separate with commas; city and region only, no neighborhoods" htmlFor="locations" error={fieldError('locations')}>
               <input
                 id="locations"
                 name="locations"
                 value={form.locations}
                 onChange={handleChange}
-                className={inputClass('locations')}
+                {...fieldAttrs('locations')}
                 placeholder="San Francisco, Bay Area"
               />
             </Field>
@@ -467,8 +532,8 @@ export default function ProductForm({ initialData, copyFrom }: ProductFormProps)
             )}
 
             {form.category === 'postcard' && (
-              <Field label="Orientation" hint="Filled in from the first photo when it can tell" htmlFor="orientation">
-                <select id="orientation" name="orientation" value={form.orientation} onChange={handleChange} className={inputClass('orientation')}>
+              <Field label="Orientation" hint="Filled in from the first photo when it can tell" htmlFor="orientation" error={fieldError('orientation')}>
+                <select id="orientation" name="orientation" value={form.orientation} onChange={handleChange} {...fieldAttrs('orientation')}>
                   <option value="">Not set</option>
                   <option value="horizontal">Horizontal</option>
                   <option value="vertical">Vertical</option>
@@ -499,7 +564,7 @@ export default function ProductForm({ initialData, copyFrom }: ProductFormProps)
               if (!uploading) uploadImages(Array.from(e.dataTransfer.files))
             }}
             className={`bg-white border rounded-xl p-6 space-y-4 transition-colors ${
-              fileDragOver ? 'border-primary border-dashed bg-primary/5' : 'border-border'
+              fileDragOver ? 'border-primary border-dashed bg-primary/5' : fieldError('images') ? 'border-error' : 'border-border'
             }`}
           >
             <h2 className="font-medium text-text-primary">Images</h2>
@@ -594,6 +659,7 @@ export default function ProductForm({ initialData, copyFrom }: ProductFormProps)
               {uploading && <Spinner />}
               {uploading ? `Uploading${uploadProgress ? ` ${uploadProgress}` : ''}...` : '+ Upload Images'}
             </button>
+            <FieldMessage id="images-message" error={fieldError('images')} />
             <p className="text-xs text-text-secondary">Drop photos anywhere in this box, or click Upload to pick several at once. First image is used as the main product photo. Drag photos to reorder them, then save.</p>
           </div>
 
@@ -613,7 +679,7 @@ export default function ProductForm({ initialData, copyFrom }: ProductFormProps)
                   onChange={handleChange}
                   min="0"
                   step="0.01"
-                  className={inputClass('handwritten_price')}
+                  {...fieldAttrs('handwritten_price')}
                 />
               </Field>
             </div>
@@ -626,14 +692,14 @@ export default function ProductForm({ initialData, copyFrom }: ProductFormProps)
       <div className="flex items-center justify-between">
         <button
           type="submit"
-          disabled={saving || uploading || !isValid}
+          disabled={saving || uploading}
           className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-hover transition-colors disabled:opacity-50"
         >
           {saving && <Spinner />}
           {saving ? 'Saving...' : isEdit ? 'Save Changes' : 'Create Product'}
         </button>
         {!isValid && !saving && (
-          <p className="text-xs text-text-secondary mr-auto ml-4">Fill in every field above to save.</p>
+          <p className="text-xs text-text-secondary mr-auto ml-4">Some fields still need filling in. Saving will highlight them.</p>
         )}
 
         {isEdit && (

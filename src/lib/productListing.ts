@@ -69,6 +69,8 @@ export interface ListingResult {
   products: Product[]
   total: number
   totalPages: number
+  // True when the products couldn't be loaded, so the page doesn't claim there are none
+  failed: boolean
 }
 
 export async function fetchProductPage(
@@ -103,13 +105,15 @@ export async function fetchProductPage(
   const { data, count, error } = await query.range(from, from + params.per - 1)
 
   // Asking for a page past the end comes back as a range error; treat it as empty
-  if (error && error.code !== 'PGRST103') console.error('Failed to fetch products:', error)
+  const failed = !!error && error.code !== 'PGRST103'
+  if (failed) console.error('Failed to fetch products:', error)
 
   const total = count ?? 0
   return {
     products: (data as Product[] | null) ?? [],
     total,
     totalPages: pageCount(total, params.per),
+    failed,
   }
 }
 

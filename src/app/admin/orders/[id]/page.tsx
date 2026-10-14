@@ -14,10 +14,16 @@ import { DELIVERY_WEEKS, destinationForCountry } from '@/lib/shipping'
 import type { OrderStatus, OrderWithItems } from '@/types'
 import { formatPrice, formatDate } from '@/lib/format'
 import { errorMessage } from '@/lib/errors'
+import LoadError from '@/components/LoadError'
 
 const STATUS_OPTIONS = ['processing', 'shipped', 'delivered'] as const
 
 const CARRIER_OPTIONS = Object.entries(CARRIER_NAMES) as [Carrier, string][]
+
+// Fields a failed save can point at, with the names shown in the error message
+const TRACKING_FIELDS: Record<string, string> = { carrier: 'Carrier', tracking_number: 'Tracking number' }
+
+const fieldBorder = (invalid: boolean) => (invalid ? 'border-error focus:border-error' : 'border-border focus:border-primary')
 
 export default function AdminOrderDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -31,17 +37,24 @@ export default function AdminOrderDetailPage() {
   const [trackingNumber, setTrackingNumber] = useState('')
   const [notify, setNotify] = useState(true)
   const [message, setMessage] = useState<{ tone: 'ok' | 'error'; text: string } | null>(null)
+  // The carrier or tracking number field a failed save was about
+  const [fieldError, setFieldError] = useState<{ field: string; text: string } | null>(null)
   const [refunding, setRefunding] = useState(false)
   const [refundError, setRefundError] = useState<string | null>(null)
+  const [loadFailed, setLoadFailed] = useState(false)
+  const [reloadKey, setReloadKey] = useState(0)  // bumped by Try again
 
   useEffect(() => {
     const supabase = createClient()
     async function load() {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('orders')
         .select(`*, order_items(*)`)
         .eq('id', id)
         .single()
+
+      // PGRST116 means no such order; any other error is a failed load
+      setLoadFailed(!!error && error.code !== 'PGRST116')
 
       if (data) {
         setOrder(data as OrderWithItems)
@@ -52,11 +65,12 @@ export default function AdminOrderDetailPage() {
       setLoading(false)
     }
     load()
-  }, [id])
+  }, [id, reloadKey])
 
   const handleSave = async () => {
     setSaving(true)
     setMessage(null)
+    setFieldError(null)
     try {
       const res = await fetch(`/api/admin/orders/${id}`, {
         method: 'PATCH',
@@ -64,6 +78,11 @@ export default function AdminOrderDetailPage() {
         body: JSON.stringify({ status, carrier, trackingNumber, notify }),
       })
       const json = await res.json()
+      if (!res.ok && TRACKING_FIELDS[json.field] && status === 'shipped') {
+        setFieldError({ field: json.field, text: json.error })
+        setMessage({ tone: 'error', text: `Couldn’t save. Check ${TRACKING_FIELDS[json.field]} above.` })
+        return
+      }
       if (!res.ok) throw new Error(json.error ?? 'Save failed')
 
       setOrder(prev => prev && { ...prev, ...json.order })
@@ -111,6 +130,14 @@ export default function AdminOrderDetailPage() {
         <Skeleton className="h-24 rounded-xl" />
         <Skeleton className="h-64 rounded-xl" />
       </LoadingRegion>
+    )
+  }
+  if (loadFailed) {
+    return (
+      <LoadError
+        message="Couldn’t load this order. Please try again."
+        onRetry={() => { setLoading(true); setReloadKey(k => k + 1) }}
+      />
     )
   }
   if (!order) return <div className="text-text-secondary text-sm">Order not found.</div>
@@ -176,23 +203,27 @@ export default function AdminOrderDetailPage() {
                 <span className="block text-xs font-medium text-text-secondary mb-1.5">Carrier</span>
                 <select
                   value={carrier}
-                  onChange={e => setCarrier(e.target.value as Carrier)}
-                  className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-white focus:outline-none focus:border-primary"
+                  onChange={e => { setCarrier(e.target.value as Carrier); setFieldError(null) }}
+                  aria-invalid={fieldError?.field === 'carrier'}
+                  className={`w-full px-3 py-2 rounded-lg border text-sm bg-white focus:outline-none ${fieldBorder(fieldError?.field === 'carrier')}`}
                 >
                   {CARRIER_OPTIONS.map(([value, label]) => (
                     <option key={value} value={value}>{label}</option>
                   ))}
                 </select>
+                {fieldError?.field === 'carrier' && <p className="mt-1.5 text-xs text-error">{fieldError.text}</p>}
               </label>
               <label className="block sm:col-span-2">
                 <span className="block text-xs font-medium text-text-secondary mb-1.5">Tracking number (optional)</span>
                 <input
                   type="text"
                   value={trackingNumber}
-                  onChange={e => setTrackingNumber(e.target.value)}
+                  onChange={e => { setTrackingNumber(e.target.value); setFieldError(null) }}
                   placeholder="9400 1000 0000 0000 0000 00"
-                  className="w-full px-3 py-2 rounded-lg border border-border text-sm focus:outline-none focus:border-primary"
+                  aria-invalid={fieldError?.field === 'tracking_number'}
+                  className={`w-full px-3 py-2 rounded-lg border text-sm focus:outline-none ${fieldBorder(fieldError?.field === 'tracking_number')}`}
                 />
+                {fieldError?.field === 'tracking_number' && <p className="mt-1.5 text-xs text-error">{fieldError.text}</p>}
               </label>
             </div>
             {isNewlyShipped && (
