@@ -18,7 +18,7 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
       message={
         <>
           It’s on our end, not yours. Try again, and if it keeps happening email{' '}
-          <a href="mailto:hello@things-by-k.com" className="text-brand underline underline-offset-2 whitespace-nowrap">hello@things-by-k.com</a>.
+          <a href="mailto:hello@things-by-k.com" className="text-text-primary underline underline-offset-2 whitespace-nowrap">hello@things-by-k.com</a>.
         </>
       }
       action={<button type="button" onClick={reset} className={statusButtonClass}>Try again</button>}
