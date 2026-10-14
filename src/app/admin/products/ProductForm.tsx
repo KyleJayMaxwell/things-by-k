@@ -12,22 +12,29 @@ import Image from 'next/image'
 import Spinner from '@/components/Spinner'
 import { isReservedSlug } from '@/lib/shopSections'
 
+// New postcards start at this price; other categories start blank
+const DEFAULT_POSTCARD_PRICE = '3.00'
+
+interface ProductFields {
+  name: string
+  slug: string
+  description: string
+  long_description: string
+  price: number
+  category: string
+  stock: number
+  is_active: boolean
+  images: string[]
+  handwritten_price?: number | null
+  locations?: string[] | null
+  orientation?: string | null
+}
+
 interface ProductFormProps {
-  initialData?: {
-    id: string
-    name: string
-    slug: string
-    description: string
-    long_description: string
-    price: number
-    category: string
-    stock: number
-    is_active: boolean
-    images: string[]
-    handwritten_price?: number | null
-    locations?: string[] | null
-    orientation?: string | null
-  }
+  // Editing an existing product
+  initialData?: ProductFields & { id: string }
+  // Creating a new product pre-filled from another one ("Duplicate")
+  copyFrom?: ProductFields
 }
 
 const CATEGORIES = ['postcard', 'necklace', 'zine']
@@ -57,26 +64,35 @@ function detectOrientation(url: string): Promise<'horizontal' | 'vertical' | nul
   })
 }
 
-export default function ProductForm({ initialData }: ProductFormProps) {
+export default function ProductForm({ initialData, copyFrom }: ProductFormProps) {
   const router = useRouter()
   const supabase = createClient()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const isEdit = !!initialData
 
+  // A duplicate keeps the details but gets its own name, slug and photos, and starts hidden
+  const source: ProductFields | undefined = initialData ?? (copyFrom && {
+    ...copyFrom,
+    name: `${copyFrom.name} (copy)`,
+    slug: slugify(`${copyFrom.name} copy`),
+    images: [],
+    is_active: false,
+  })
+
   const [form, setForm] = useState({
-    name: initialData?.name ?? '',
-    slug: initialData?.slug ?? '',
-    description: initialData?.description ?? '',
-    long_description: initialData?.long_description ?? '',
-    price: initialData ? (initialData.price / 100).toFixed(2) : '',
-    category: initialData?.category ?? 'postcard',
-    stock: initialData?.stock?.toString() ?? '',
-    is_active: initialData?.is_active ?? true,
-    images: initialData?.images ?? [] as string[],
-    handwritten_price: initialData?.handwritten_price != null ? (initialData.handwritten_price / 100).toFixed(2) : '0.00',
-    locations: (initialData?.locations ?? []).join(', '),
-    orientation: initialData?.orientation ?? '',
+    name: source?.name ?? '',
+    slug: source?.slug ?? '',
+    description: source?.description ?? '',
+    long_description: source?.long_description ?? '',
+    price: source ? (source.price / 100).toFixed(2) : DEFAULT_POSTCARD_PRICE,
+    category: source?.category ?? 'postcard',
+    stock: source?.stock?.toString() ?? '',
+    is_active: source?.is_active ?? true,
+    images: source?.images ?? [] as string[],
+    handwritten_price: source?.handwritten_price != null ? (source.handwritten_price / 100).toFixed(2) : '0.00',
+    locations: (source?.locations ?? []).join(', '),
+    orientation: source?.orientation ?? '',
   })
 
   // Location tags already used on other products, offered as one-click suggestions
@@ -117,6 +133,16 @@ export default function ProductForm({ initialData }: ProductFormProps) {
         name: value,
         slug: slugify(value),
       }))
+    }
+
+    // New products: fill in the postcard price when switching to postcard,
+    // and clear it when switching away if it was never changed
+    if (name === 'category' && !isEdit) {
+      setForm(prev => {
+        if (value === 'postcard' && prev.price === '') return { ...prev, price: DEFAULT_POSTCARD_PRICE }
+        if (value !== 'postcard' && prev.price === DEFAULT_POSTCARD_PRICE) return { ...prev, price: '' }
+        return prev
+      })
     }
   }
 

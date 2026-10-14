@@ -14,8 +14,6 @@ interface OrderDetails {
   orderNumber?: string | null
   customerEmail?: string
   shippingAddress?: {
-    line1: string
-    line2?: string
     city: string
     state: string
     postal_code: string
@@ -133,13 +131,13 @@ function SuccessContent() {
             <div className="border-t border-border pt-4">
               <h2 className="text-sm font-semibold text-text-primary uppercase tracking-wider mb-2">Shipping to</h2>
               <address className="text-sm text-text-secondary not-italic">
-                {order.shippingAddress.line1}<br />
-                {order.shippingAddress.line2 && <>{order.shippingAddress.line2}<br /></>}
                 {order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.postal_code}
               </address>
             </div>
           )}
         </div>
+      ) : sessionId ? (
+        <p className="text-text-secondary">Your order details are in your confirmation email.</p>
       ) : null}
 
       <div className="mt-10 flex flex-col sm:flex-row gap-3 justify-center">

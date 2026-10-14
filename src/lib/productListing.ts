@@ -4,6 +4,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Product, ProductCategory, ProductOrientation } from '@/types'
+import { readParam, readEnum, pageCount, type SearchParams } from '@/lib/listParams'
 
 export const PAGE_SIZES = [12, 24, 48] as const
 export const DEFAULT_PAGE_SIZE = 24
@@ -31,24 +32,19 @@ export interface ListingParams {
   type: ProductCategory | null   // Shop All only
 }
 
-export type RawSearchParams = Record<string, string | string[] | undefined>
-
-const first = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) ?? ''
+export type RawSearchParams = SearchParams
 
 export function parseListingParams(raw: RawSearchParams, categories: readonly ProductCategory[] = []): ListingParams {
-  const page = parseInt(first(raw.page), 10)
-  const per = parseInt(first(raw.per), 10)
-  const sort = first(raw.sort)
-  const orientation = first(raw.orientation)
-  const type = first(raw.type)
+  const page = Number(readParam(raw, 'page'))
+  const per = Number(readParam(raw, 'per'))
   return {
-    page: Number.isFinite(page) && page > 0 ? page : 1,
+    page: Number.isInteger(page) && page > 0 ? page : 1,
     per: (PAGE_SIZES as readonly number[]).includes(per) ? per : DEFAULT_PAGE_SIZE,
-    sort: sort in SORTS ? (sort as SortKey) : 'newest',
-    q: first(raw.q).trim().slice(0, 100),
-    location: first(raw.location).trim() || null,
-    orientation: orientation in ORIENTATIONS ? (orientation as ProductOrientation) : null,
-    type: (categories as readonly string[]).includes(type) ? (type as ProductCategory) : null,
+    sort: readEnum(raw, 'sort', Object.keys(SORTS) as SortKey[]) ?? 'newest',
+    q: (readParam(raw, 'q') ?? '').trim().slice(0, 100),
+    location: readParam(raw, 'location')?.trim() || null,
+    orientation: readEnum(raw, 'orientation', Object.keys(ORIENTATIONS) as ProductOrientation[]) ?? null,
+    type: readEnum(raw, 'type', categories) ?? null,
   }
 }
 
@@ -113,7 +109,7 @@ export async function fetchProductPage(
   return {
     products: (data as Product[] | null) ?? [],
     total,
-    totalPages: Math.max(1, Math.ceil(total / params.per)),
+    totalPages: pageCount(total, params.per),
   }
 }
 
