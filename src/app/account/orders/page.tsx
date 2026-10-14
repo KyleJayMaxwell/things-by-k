@@ -5,6 +5,7 @@ import { claimGuestOrders } from '@/lib/orders'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import Badge from '@/components/Badge'
+import LoadError from '@/components/LoadError'
 import type { Metadata } from 'next'
 import { formatPrice, formatDate } from '@/lib/format'
 
@@ -18,7 +19,7 @@ export default async function OrdersPage() {
 
   await claimGuestOrders(user)
 
-  const { data: orders } = await supabase
+  const { data: orders, error } = await supabase
     .from('orders')
     .select('id, order_number, status, total, created_at, order_items(id)')
     .eq('user_id', user.id)
@@ -33,7 +34,9 @@ export default async function OrdersPage() {
         <h1 className="text-3xl font-semibold text-text-primary">Order History</h1>
       </div>
 
-      {!orders || orders.length === 0 ? (
+      {error ? (
+        <LoadError message="We couldn’t load your orders just now. Please try again." />
+      ) : !orders || orders.length === 0 ? (
         <div className="text-center py-20">
           <p className="text-text-secondary mb-6">You haven’t placed any orders yet.</p>
           <Link href="/shop" className="inline-flex items-center px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors font-medium">

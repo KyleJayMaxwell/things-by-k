@@ -8,6 +8,7 @@ import { sendShippingUpdate } from '@/lib/email'
 import type { Carrier } from '@/lib/tracking'
 import { destinationForCountry } from '@/lib/shipping'
 import type { OrderItem } from '@/types'
+import { dbFieldError } from '@/lib/fieldErrors'
 
 const STATUSES = ['processing', 'shipped', 'delivered'] as const
 const CARRIERS: Carrier[] = ['usps', 'ups', 'fedex', 'other']
@@ -64,7 +65,12 @@ export async function PATCH(
     .single()
 
   if (updateError) {
-    return NextResponse.json({ error: updateError.message }, { status: 500 })
+    // Tells the page which field to highlight when the database names one
+    const fieldErr = dbFieldError(updateError, 'orders')
+    return NextResponse.json(
+      fieldErr ? { error: fieldErr.message, field: fieldErr.column } : { error: updateError.message },
+      { status: 500 }
+    )
   }
 
   // The status change is saved either way; report email problems separately

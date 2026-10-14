@@ -3,6 +3,7 @@
 import { createServiceClient, getAdminUser } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
+import LoadError from '@/components/LoadError'
 import ProductForm from '../ProductForm'
 import type { Metadata } from 'next'
 
@@ -17,12 +18,14 @@ export default async function EditProductPage({ params }: Props) {
   if (!(await getAdminUser())) redirect('/')
 
   const serviceClient = createServiceClient()
-  const { data: product } = await serviceClient
+  const { data: product, error } = await serviceClient
     .from('products')
     .select('*')
     .eq('id', id)
     .single()
 
+  // PGRST116 means no such row; any other error is a failed load, not a missing product
+  if (error && error.code !== 'PGRST116') return <LoadError message="Couldn’t load this product. Please try again." />
   if (!product) notFound()
 
   return (

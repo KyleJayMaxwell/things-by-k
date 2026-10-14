@@ -13,6 +13,7 @@ import Badge, { STATUS_CHART_COLORS } from '@/components/Badge'
 import Skeleton, { LoadingRegion } from '@/components/Skeleton'
 import type { OrderStatus } from '@/types'
 import { formatPrice, formatDate } from '@/lib/format'
+import LoadError from '@/components/LoadError'
 import DateRangeFilter, { rangeBounds, toDayString, type DateRange } from './DateRangeFilter'
 
 interface OverviewOrder {
@@ -53,6 +54,8 @@ export default function AdminPage() {
   const [orders, setOrders] = useState<OverviewOrder[]>([])
   const [products, setProducts] = useState<OverviewProduct[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadFailed, setLoadFailed] = useState(false)
+  const [reloadKey, setReloadKey] = useState(0)  // bumped by Try again
   const [range, setRange] = useState<DateRange>(defaultRange)
 
   useEffect(() => {
@@ -73,13 +76,15 @@ export default function AdminPage() {
       ])
       if (cancelled) return
 
+      // Zeros would look like a quiet week, so say the numbers couldn't load instead
+      setLoadFailed(!!(ordersRes.error || productsRes.error))
       setOrders((ordersRes.data as OverviewOrder[] | null) ?? [])
       setProducts(productsRes.data ?? [])
       setLoading(false)
     }
     load()
     return () => { cancelled = true }
-  }, [range])
+  }, [range, reloadKey])
 
   // Group charts by month once the range is longer than about two months
   const { start, end } = rangeBounds(range)
@@ -127,6 +132,15 @@ export default function AdminPage() {
           <Skeleton className="h-72 rounded-xl" />
         </div>
       </LoadingRegion>
+    )
+  }
+
+  if (loadFailed) {
+    return (
+      <LoadError
+        message="Couldn’t load the dashboard numbers. Please try again."
+        onRetry={() => { setLoading(true); setReloadKey(k => k + 1) }}
+      />
     )
   }
 
