@@ -61,7 +61,7 @@ export default function AdminOrderDetailPage() {
     // A warning, not a block: the design can still be filled in later
     if (
       status === 'shipped' && order?.status !== 'shipped' && unpickedSurprises > 0 &&
-      !confirm(`${unpickedSurprises} Surprise me card${unpickedSurprises === 1 ? ' has' : 's have'} no design picked yet. Mark shipped anyway?`)
+      !confirm(`${unpickedSurprises} Mystery card${unpickedSurprises === 1 ? ' has' : 's have'} no design picked yet. Mark shipped anyway?`)
     ) return
     setSaving(true)
     setMessage(null)
@@ -235,7 +235,7 @@ export default function AdminOrderDetailPage() {
       </div>
       )}
 
-      {/* Surprise me designs */}
+      {/* Mystery designs */}
       {order.status !== 'refunded' && (
         <SurprisePicker order={order} onUnpickedChange={handleUnpickedChange} />
       )}

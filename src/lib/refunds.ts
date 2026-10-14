@@ -50,7 +50,7 @@ export async function markOrderRefunded(match: OrderMatch, refundAmount: number)
         .eq('id', item.product_id)
       if (stockError) console.error('Failed to restock after refund:', stockError.message)
     }
-    // Designs already picked for Surprise me cards go back too
+    // Designs already picked for Mystery cards go back too
     await restockSurprisePicks(supabase, (existing.order_items ?? []).map(i => i.id))
   }
 

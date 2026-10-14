@@ -10,7 +10,7 @@ export const HANDWRITTEN_MESSAGE_MAX = 300
 // the cart blank and handwritten (or with two different notes) at once
 export function cartLineKey(item: Pick<CartItem, 'product' | 'handwritten' | 'message' | 'surprise'>): string {
   let key = item.handwritten ? `${item.product.id}:hw:${item.message ?? ''}` : item.product.id
-  // Surprise me cards with different gift/preference choices stay separate lines
+  // Mystery cards with different gift/preference choices stay separate lines
   if (item.surprise) {
     const { gift, sameDesign, preference } = item.surprise
     key += `:sm:${gift ? 'g' : ''}${sameDesign ? 's' : ''}:${preference}`

@@ -1,5 +1,5 @@
 // src/app/api/admin/orders/[id]/surprise/route.ts
-// Admin-only: save which design was sent for each Surprise me card on an order.
+// Admin-only: save which design was sent for each Mystery card on an order.
 // Each pick takes 1 off that design's stock; changing or clearing a pick puts it back.
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -48,7 +48,7 @@ export async function PUT(
     return NextResponse.json({ error: 'Refunded orders can’t change' }, { status: 400 })
   }
 
-  // Only Surprise me items take picks, one per card
+  // Only Mystery items take picks, one per card
   const surpriseItems = new Map<string, number>()
   for (const item of order.order_items ?? []) {
     const product = item.products as unknown as { is_surprise?: boolean } | null
@@ -58,12 +58,12 @@ export async function PUT(
   for (const pick of picks) {
     const quantity = surpriseItems.get(pick.itemId)
     if (quantity === undefined || pick.slot >= quantity || seen.has(`${pick.itemId}:${pick.slot}`)) {
-      return NextResponse.json({ error: 'A pick doesn’t match a Surprise me card on this order' }, { status: 400 })
+      return NextResponse.json({ error: 'A pick doesn’t match a Mystery card on this order' }, { status: 400 })
     }
     seen.add(`${pick.itemId}:${pick.slot}`)
   }
 
-  // Designs must be real postcards, not the Surprise me listing itself
+  // Designs must be real postcards, not the Mystery listing itself
   const productIds = [...new Set(picks.map(p => p.productId))]
   const { data: designs } = productIds.length
     ? await service
@@ -84,7 +84,7 @@ export async function PUT(
     .select('product_id')
     .in('order_item_id', itemIds)
   if (previousError) {
-    return NextResponse.json({ error: `Couldn’t load picks: ${previousError.message}. Has surprise-me.sql been run?` }, { status: 500 })
+    return NextResponse.json({ error: `Couldn’t load picks: ${previousError.message}. Has mystery-postcard.sql been run?` }, { status: 500 })
   }
 
   // Replace this order's picks with the new set

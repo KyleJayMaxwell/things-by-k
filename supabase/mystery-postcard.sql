@@ -1,5 +1,5 @@
 -- ─────────────────────────────────────────────
--- Things by K — Surprise Me Postcard
+-- Things by K — Mystery Postcard
 -- Supabase Dashboard → SQL Editor
 -- Run AFTER schema.sql, handwritten-option.sql and admin-policies.sql
 -- (safe to run more than once)
@@ -10,13 +10,13 @@
 alter table public.products
   add column if not exists is_surprise boolean not null default false;
 
--- What the buyer chose on the Surprise me card
+-- What the buyer chose on the Mystery card
 alter table public.order_items
   add column if not exists surprise_preference text,              -- optional "any preference?" note
   add column if not exists is_gift             boolean not null default false,  -- gift: shipped email names the design
   add column if not exists same_design         boolean not null default false;  -- qty > 1: every card the same design
 
--- The design actually sent for each card of a Surprise me item (slot 0, 1, 2...
+-- The design actually sent for each card of a Mystery item (slot 0, 1, 2...
 -- up to quantity - 1). Its own table, readable only by the admin, so a buyer
 -- can't look up their design before it arrives.
 create table if not exists public.surprise_picks (

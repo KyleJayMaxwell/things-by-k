@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
 
     const { data: products, error } = await serviceClient
       .from('products')
-      // '*' so checkout keeps working if surprise-me.sql (is_surprise) hasn't been run yet
+      // '*' so checkout keeps working if mystery-postcard.sql (is_surprise) hasn't been run yet
       .select('*')
       .in('id', productIds)
       .eq('is_active', true)
@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
     const lineItems = items.map((item): Stripe.Checkout.SessionCreateParams.LineItem => {
       const product = products.find(p => p.id === item.productId)!
 
-      // Surprise me choices ride along in the Stripe metadata for the webhook
+      // Mystery choices ride along in the Stripe metadata for the webhook
       let surpriseMetadata: Record<string, string> = {}
       let surpriseNote = ''
       if (product.is_surprise) {

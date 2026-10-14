@@ -1,7 +1,7 @@
 'use client'
 
 // src/app/admin/orders/[id]/SurprisePicker.tsx
-// "Design sent" picker for an order's Surprise me cards. Designs this address
+// "Design sent" picker for an order's Mystery cards. Designs this address
 // already got (bought or surprised) are greyed out so nobody gets a repeat.
 
 import { useEffect, useMemo, useState } from 'react'
@@ -20,7 +20,7 @@ interface Design {
 
 interface Props {
   order: OrderWithItems
-  // How many Surprise me cards still have no saved design
+  // How many Mystery cards still have no saved design
   onUnpickedChange: (count: number) => void
 }
 
@@ -38,7 +38,7 @@ export default function SurprisePicker({ order, onUnpickedChange }: Props) {
   useEffect(() => {
     const supabase = createClient()
     async function load() {
-      // Errors (e.g. surprise-me.sql not run yet) just mean no Surprise me items
+      // Errors (e.g. mystery-postcard.sql not run yet) just mean no Mystery items
       const { data: surpriseProducts } = await supabase.from('products').select('id').eq('is_surprise', true)
       const surpriseIds = new Set((surpriseProducts ?? []).map(p => p.id))
       const items = order.order_items.filter(i => surpriseIds.has(i.product_id))
@@ -141,7 +141,7 @@ export default function SurprisePicker({ order, onUnpickedChange }: Props) {
   return (
     <div className="bg-white border border-border rounded-xl p-5 mb-6">
       <div className="flex items-center justify-between gap-4 mb-4">
-        <h2 className="font-medium text-text-primary">Surprise me: design sent</h2>
+        <h2 className="font-medium text-text-primary">Mystery postcard: design sent</h2>
         <button
           onClick={handleSave}
           disabled={saving || !changed}

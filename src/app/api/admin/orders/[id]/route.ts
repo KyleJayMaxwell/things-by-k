@@ -79,7 +79,7 @@ export async function PATCH(
         to: existing.email,
         orderNumber: existing.order_number,
         recipientName: existing.shipping_address?.name,
-        // Surprise me designs stay secret unless the buyer marked it a gift
+        // Mystery designs stay secret unless the buyer marked it a gift
         items: items.map(i => ({
           name: revealed.has(i.id) ? `${i.product_name} (${revealed.get(i.id)})` : i.product_name,
           price: i.price,
@@ -98,7 +98,7 @@ export async function PATCH(
   return NextResponse.json({ order, emailSent, emailError })
 }
 
-// Design names sent for gift Surprise me items, by order item id
+// Design names sent for gift Mystery items, by order item id
 async function giftDesigns(service: ReturnType<typeof createServiceClient>, items: OrderItem[]) {
   const giftIds = items.filter(i => i.is_gift).map(i => i.id)
   const revealed = new Map<string, string>()

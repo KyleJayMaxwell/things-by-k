@@ -20,7 +20,7 @@ export interface Product {
   stock: number
   is_active: boolean
   handwritten_price: number | null  // extra cents for a handwritten postcard; null = no extra
-  is_surprise?: boolean  // the Surprise me listing: the admin picks the design when packing
+  is_surprise?: boolean  // the Mystery listing: the admin picks the design when packing
   locations: string[]    // places it's from or shows, e.g. ['San Francisco', 'Bay Area']
   orientation: ProductOrientation | null  // postcards only
   created_at: string
@@ -69,12 +69,12 @@ export interface OrderItem {
   price: number          // snapshot in cents
   quantity: number
   handwritten_message: string | null
-  surprise_preference?: string | null  // Surprise me: optional "any preference?" note
-  is_gift?: boolean                    // Surprise me: shipped email names the design
-  same_design?: boolean                // Surprise me: every card in this line is one design
+  surprise_preference?: string | null  // Mystery: optional "any preference?" note
+  is_gift?: boolean                    // Mystery: shipped email names the design
+  same_design?: boolean                // Mystery: every card in this line is one design
 }
 
-// The design sent for one card of a Surprise me item (admin-only table)
+// The design sent for one card of a Mystery item (admin-only table)
 export interface SurprisePick {
   id: string
   order_item_id: string
@@ -102,7 +102,7 @@ export interface CartItem {
   quantity: number
   handwritten?: boolean
   message?: string       // what to write on a handwritten card
-  surprise?: SurpriseOptions  // only on a Surprise me card
+  surprise?: SurpriseOptions  // only on a Mystery card
 }
 
 export interface SurpriseOptions {

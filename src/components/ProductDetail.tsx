@@ -201,7 +201,7 @@ export default function ProductDetail({ product, breadcrumbs }: ProductDetailPro
             </fieldset>
           )}
 
-          {/* Surprise me choices */}
+          {/* Mystery choices */}
           {isSurprise && !isSoldOut && (
             <div className="mt-8 space-y-4">
               <div>

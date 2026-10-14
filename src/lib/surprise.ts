@@ -1,5 +1,5 @@
 // src/lib/surprise.ts
-// Helpers for the Surprise me postcard: the buyer gets one of the shop's
+// Helpers for the Mystery postcard: the buyer gets one of the shop's
 // designs without knowing which, and the admin picks it when packing.
 
 import type { ShippingAddress } from '@/types'
