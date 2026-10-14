@@ -19,6 +19,7 @@ export default function StatusTabs({ tabs, pathname, params }: { tabs: StatusTab
           key={tab.label}
           href={listHref(pathname, params, tab.changes)}
           scroll={false}
+        prefetch={false}
           aria-current={tab.active ? 'page' : undefined}
           className={`whitespace-nowrap px-3 py-2 -mb-px text-sm border-b-2 transition-colors ${
             tab.active
