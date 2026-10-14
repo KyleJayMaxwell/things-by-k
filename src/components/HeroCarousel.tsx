@@ -7,7 +7,7 @@ import Link from 'next/link'
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react'
 import type { HeroSlide } from '@/lib/heroSlides'
 
-const AUTOPLAY_MS = 5000
+const AUTOPLAY_MS = 10000
 const REDUCED_MOTION = '(prefers-reduced-motion: reduce)'
 
 function subscribeReducedMotion(cb: () => void) {
@@ -81,7 +81,7 @@ export default function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
             <div
               className={`absolute inset-0 motion-reduce:scale-100 motion-reduce:transition-none ${
                 active
-                  ? 'scale-105 transition-transform duration-[6000ms] ease-linear'
+                  ? 'scale-105 transition-transform duration-[11000ms] ease-linear'
                   : 'scale-100 transition-transform duration-0 delay-1000'
               }`}
             >
