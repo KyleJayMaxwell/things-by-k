@@ -14,43 +14,56 @@ import Spinner from '@/components/Spinner'
 // New postcards start at this price; other categories start blank
 const DEFAULT_POSTCARD_PRICE = '3.00'
 
+interface ProductFields {
+  name: string
+  slug: string
+  description: string
+  long_description: string
+  price: number
+  category: string
+  stock: number
+  is_active: boolean
+  images: string[]
+  handwritten_price?: number | null
+}
+
 interface ProductFormProps {
-  initialData?: {
-    id: string
-    name: string
-    slug: string
-    description: string
-    long_description: string
-    price: number
-    category: string
-    stock: number
-    is_active: boolean
-    images: string[]
-    handwritten_price?: number | null
-  }
+  // Editing an existing product
+  initialData?: ProductFields & { id: string }
+  // Creating a new product pre-filled from another one ("Duplicate")
+  copyFrom?: ProductFields
 }
 
 const CATEGORIES = ['postcard', 'necklace', 'zine']
 const MAX_IMAGE_MB = 20
 
-export default function ProductForm({ initialData }: ProductFormProps) {
+export default function ProductForm({ initialData, copyFrom }: ProductFormProps) {
   const router = useRouter()
   const supabase = createClient()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const isEdit = !!initialData
 
+  // A duplicate keeps the details but gets its own name, slug and photos, and starts hidden
+  const source: ProductFields | undefined = initialData ?? (copyFrom && {
+    ...copyFrom,
+    name: `${copyFrom.name} (copy)`,
+    slug: slugify(`${copyFrom.name} copy`),
+    images: [],
+    is_active: false,
+  })
+
   const [form, setForm] = useState({
-    name: initialData?.name ?? '',
-    slug: initialData?.slug ?? '',
-    description: initialData?.description ?? '',
-    long_description: initialData?.long_description ?? '',
-    price: initialData ? (initialData.price / 100).toFixed(2) : DEFAULT_POSTCARD_PRICE,
-    category: initialData?.category ?? 'postcard',
-    stock: initialData?.stock?.toString() ?? '',
-    is_active: initialData?.is_active ?? true,
-    images: initialData?.images ?? [] as string[],
-    handwritten_price: initialData?.handwritten_price != null ? (initialData.handwritten_price / 100).toFixed(2) : '0.00',
+    name: source?.name ?? '',
+    slug: source?.slug ?? '',
+    description: source?.description ?? '',
+    long_description: source?.long_description ?? '',
+    price: source ? (source.price / 100).toFixed(2) : DEFAULT_POSTCARD_PRICE,
+    category: source?.category ?? 'postcard',
+    stock: source?.stock?.toString() ?? '',
+    is_active: source?.is_active ?? true,
+    images: source?.images ?? [] as string[],
+    handwritten_price: source?.handwritten_price != null ? (source.handwritten_price / 100).toFixed(2) : '0.00',
   })
 
   const [uploading, setUploading] = useState(false)
