@@ -8,12 +8,6 @@ import FadeIn from '@/components/FadeIn'
 import HeroCarousel from '@/components/HeroCarousel'
 import { heroSlides } from '@/lib/heroSlides'
 import { Product } from '@/types'
-import type { Metadata } from 'next'
-
-export const metadata: Metadata = {
-  title: 'Things by K — Original designs',
-}
-
 export default async function HomePage() {
   const supabase = await createClient()
 
