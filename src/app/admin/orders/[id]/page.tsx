@@ -14,6 +14,7 @@ import { DELIVERY_WEEKS, destinationForCountry } from '@/lib/shipping'
 import type { OrderStatus, OrderWithItems } from '@/types'
 import { formatPrice, formatDate } from '@/lib/format'
 import { errorMessage } from '@/lib/errors'
+import LoadError from '@/components/LoadError'
 
 const STATUS_OPTIONS = ['processing', 'shipped', 'delivered'] as const
 
@@ -40,15 +41,20 @@ export default function AdminOrderDetailPage() {
   const [fieldError, setFieldError] = useState<{ field: string; text: string } | null>(null)
   const [refunding, setRefunding] = useState(false)
   const [refundError, setRefundError] = useState<string | null>(null)
+  const [loadFailed, setLoadFailed] = useState(false)
+  const [reloadKey, setReloadKey] = useState(0)  // bumped by Try again
 
   useEffect(() => {
     const supabase = createClient()
     async function load() {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('orders')
         .select(`*, order_items(*)`)
         .eq('id', id)
         .single()
+
+      // PGRST116 means no such order; any other error is a failed load
+      setLoadFailed(!!error && error.code !== 'PGRST116')
 
       if (data) {
         setOrder(data as OrderWithItems)
@@ -59,7 +65,7 @@ export default function AdminOrderDetailPage() {
       setLoading(false)
     }
     load()
-  }, [id])
+  }, [id, reloadKey])
 
   const handleSave = async () => {
     setSaving(true)
@@ -124,6 +130,14 @@ export default function AdminOrderDetailPage() {
         <Skeleton className="h-24 rounded-xl" />
         <Skeleton className="h-64 rounded-xl" />
       </LoadingRegion>
+    )
+  }
+  if (loadFailed) {
+    return (
+      <LoadError
+        message="Couldn’t load this order. Please try again."
+        onRetry={() => { setLoading(true); setReloadKey(k => k + 1) }}
+      />
     )
   }
   if (!order) return <div className="text-text-secondary text-sm">Order not found.</div>

@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
+import LoadError from '@/components/LoadError'
 import Image from 'next/image'
 import Badge from '@/components/Badge'
 import { CARRIER_NAMES, trackingUrl, type Carrier } from '@/lib/tracking'
@@ -22,7 +23,7 @@ export default async function OrderDetailPage({ params }: Props) {
 
   if (!user) redirect('/account/login')
 
-  const { data: order } = await supabase
+  const { data: order, error } = await supabase
     .from('orders')
     .select(`
       *,
@@ -35,6 +36,8 @@ export default async function OrderDetailPage({ params }: Props) {
     .eq('user_id', user.id)
     .single()
 
+  // PGRST116 means no such row; any other error is a failed load, not a missing order
+  if (error && error.code !== 'PGRST116') return <LoadError message="We couldn’t load this order just now. Please try again." />
   if (!order) notFound()
 
   const address = order.shipping_address

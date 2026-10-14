@@ -7,6 +7,7 @@ import ProductCard from '@/components/ProductCard'
 import FadeIn from '@/components/FadeIn'
 import Breadcrumbs, { type Crumb } from '@/components/Breadcrumbs'
 import ListSelect from './ListSelect'
+import LoadError from '@/components/LoadError'
 import {
   PAGE_SIZES, DEFAULT_PAGE_SIZE, SORTS, ORIENTATIONS, listingHref,
   type ListingParams, type ListingResult, type SortKey,
@@ -29,7 +30,7 @@ export default function ProductListing({
   title, basePath, params, result, breadcrumbs, types, locations, showOrientation, searchPlaceholder = 'Search',
 }: ProductListingProps) {
   const href = (changes: Partial<ListingParams>) => listingHref(basePath, params, changes)
-  const { products, total, totalPages } = result
+  const { products, total, totalPages, failed } = result
   const hasFilters = !!(params.q || params.type || params.location || params.orientation)
 
   return (
@@ -91,7 +92,8 @@ export default function ProductListing({
 
       {/* Count, sort and page size */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-6 pb-4 border-b border-border">
-        <p className="text-sm text-text-secondary">
+        {/* The count is unknown when loading failed */}
+        <p className={`text-sm text-text-secondary ${failed ? 'invisible' : ''}`}>
           {total} {total === 1 ? 'product' : 'products'}
           {hasFilters && (
             <>
@@ -115,7 +117,9 @@ export default function ProductListing({
       </div>
 
       {/* Grid */}
-      {products.length === 0 ? (
+      {failed ? (
+        <LoadError message="We couldn’t load products just now. Please try again." />
+      ) : products.length === 0 ? (
         <FadeIn>
           <div className="text-center py-20 text-text-secondary">
             {total > 0 ? (

@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
+import LoadError from '@/components/LoadError'
 import ProductCard from '@/components/ProductCard'
 import Button from '@/components/Button'
 import FadeIn from '@/components/FadeIn'
@@ -17,7 +18,7 @@ export const metadata: Metadata = {
 export default async function HomePage() {
   const supabase = await createClient()
 
-  const { data: products } = await supabase
+  const { data: products, error: productsError } = await supabase
     .from('products')
     .select('*')
     .eq('is_active', true)
@@ -42,7 +43,9 @@ export default async function HomePage() {
           </Link>
         </FadeIn>
 
-        {featured.length === 0 ? (
+        {productsError ? (
+          <LoadError message="We couldn’t load products just now. Please try again." className="py-16" />
+        ) : featured.length === 0 ? (
           <FadeIn>
             <div className="text-center py-16 text-text-secondary">
               <p>Products coming soon — check back shortly!</p>
