@@ -5,6 +5,8 @@
 
 export type ProductCategory = 'postcard' | 'necklace' | 'zine'
 
+export type ProductOrientation = 'horizontal' | 'vertical'
+
 export interface Product {
   id: string
   name: string
@@ -19,6 +21,8 @@ export interface Product {
   is_active: boolean
   handwritten_price: number | null  // extra cents for a handwritten postcard; null = no extra
   is_surprise?: boolean  // the Surprise me listing: the admin picks the design when packing
+  locations: string[]    // places it's from or shows, e.g. ['San Francisco', 'Bay Area']
+  orientation: ProductOrientation | null  // postcards only
   created_at: string
   updated_at: string
 }

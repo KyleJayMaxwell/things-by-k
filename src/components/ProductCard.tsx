@@ -6,6 +6,7 @@ import Link from 'next/link'
 import FadeImage from '@/components/FadeImage'
 import { Product } from '@/types'
 import { formatPrice } from '@/lib/format'
+import { productHref } from '@/lib/shopSections'
 
 interface ProductCardProps {
   product: Product
@@ -16,7 +17,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   return (
     <Link
-      href={`/shop/${product.slug}`}
+      href={productHref(product)}
       className="group flex flex-col h-full bg-surface rounded-xl overflow-hidden border border-border hover:border-primary/30 hover:shadow-lg hover:-translate-y-1 transition-[transform,box-shadow,border-color] duration-200"
     >
       {/* Image */}
