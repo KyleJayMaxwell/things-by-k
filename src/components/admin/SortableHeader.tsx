@@ -33,6 +33,7 @@ export default function SortableHeader({
       <Link
         href={href}
         scroll={false}
+        prefetch={false}
         className={`inline-flex items-center gap-1 uppercase tracking-wider hover:text-text-primary transition-colors ${
           active ? 'text-text-primary font-medium' : ''
         }`}

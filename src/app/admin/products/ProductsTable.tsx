@@ -113,7 +113,7 @@ export default function ProductsTable({ rows, header }: ProductsTableProps) {
                     />
                   </td>
                   <td className="px-3 py-3">
-                    <Link href={`/admin/products/${product.id}`} className="flex items-center gap-3 min-w-0">
+                    <Link href={`/admin/products/${product.id}`} prefetch={false} className="flex items-center gap-3 min-w-0">
                       {product.images?.[0] ? (
                         <Image
                           src={product.images[0]}
@@ -160,6 +160,7 @@ export default function ProductsTable({ rows, header }: ProductsTableProps) {
                   <td className="px-3 py-3 pr-5 text-right">
                     <Link
                       href={`/admin/products/new?copy=${product.id}`}
+                      prefetch={false}
                       className="text-xs text-text-secondary hover:text-primary whitespace-nowrap"
                     >
                       Duplicate
