@@ -20,7 +20,7 @@ export default async function NewProductPage({ searchParams }: Props) {
   const { data: source } = copy
     ? await createServiceClient()
         .from('products')
-        .select('name, slug, description, long_description, price, category, stock, is_active, images, handwritten_price')
+        .select('name, slug, description, long_description, price, category, stock, is_active, images, handwritten_price, locations, orientation')
         .eq('id', copy)
         .maybeSingle()
     : { data: null }

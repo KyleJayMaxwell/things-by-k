@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient, getAdminUser } from '@/lib/supabase/server'
 import { applyProductFilters, parseProductParams } from '@/lib/adminProducts'
 import { csvResponse, toCsv } from '@/lib/csv'
+import { productHref } from '@/lib/shopSections'
 
 const MAX_ROWS = 5000
 
@@ -39,7 +40,7 @@ export async function GET(request: NextRequest) {
       product.images.length,
       product.created_at.slice(0, 10),
       product.updated_at.slice(0, 10),
-      `${site}/shop/${product.slug}`,
+      `${site}${productHref(product)}`,
     ])
   )
 

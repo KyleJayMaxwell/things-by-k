@@ -9,6 +9,7 @@ import { CartItem as CartItemType } from '@/types'
 import { useCart } from '@/context/CartContext'
 import QuantitySelector from './QuantitySelector'
 import { formatPrice } from '@/lib/format'
+import { productHref } from '@/lib/shopSections'
 import { cartLineKey, offersHandwritten, unitPrice } from '@/lib/cart'
 
 interface CartItemProps {
@@ -35,7 +36,7 @@ export default function CartItem({ item }: CartItemProps) {
       }`}
     >
       {/* Thumbnail */}
-      <Link href={`/shop/${product.slug}`} className="flex-shrink-0">
+      <Link href={productHref(product)} className="flex-shrink-0">
         <div className="w-20 h-20 sm:w-24 sm:h-24 relative rounded-lg overflow-hidden bg-gray-50 border border-border">
           {product.images[0] ? (
             <FadeImage
@@ -54,7 +55,7 @@ export default function CartItem({ item }: CartItemProps) {
       {/* Info */}
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2">
-          <Link href={`/shop/${product.slug}`} className="font-medium text-text-primary hover:text-primary transition-colors truncate">
+          <Link href={productHref(product)} className="font-medium text-text-primary hover:text-primary transition-colors truncate">
             {product.name}
           </Link>
           <span className="font-medium text-text-primary flex-shrink-0">

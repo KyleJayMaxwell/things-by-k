@@ -1,6 +1,6 @@
 'use client'
 
-// src/app/shop/[slug]/ProductDetail.tsx
+// src/components/ProductDetail.tsx
 
 import FadeImage from '@/components/FadeImage'
 import { useState, useCallback } from 'react'
@@ -13,12 +13,14 @@ import ImageLightbox from '@/components/ImageLightbox'
 import { formatPrice } from '@/lib/format'
 import { HANDWRITTEN_MESSAGE_MAX, offersHandwritten } from '@/lib/cart'
 import { HANDWRITTEN_POSTCARD_RATES } from '@/lib/shipping'
+import Breadcrumbs, { type Crumb } from '@/components/Breadcrumbs'
 
 interface ProductDetailProps {
   product: Product
+  breadcrumbs: Crumb[]
 }
 
-export default function ProductDetail({ product }: ProductDetailProps) {
+export default function ProductDetail({ product, breadcrumbs }: ProductDetailProps) {
   const [selectedImage, setSelectedImage] = useState(0)
   const [quantity, setQuantity] = useState(1)
   const [showToast, setShowToast] = useState(false)
@@ -42,6 +44,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-12 pb-8 sm:pb-12">
+      <Breadcrumbs items={breadcrumbs} />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
 
         {/* Image Gallery */}

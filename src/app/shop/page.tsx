@@ -1,9 +1,10 @@
 // src/app/shop/page.tsx
 
 import { createClient } from '@/lib/supabase/server'
-import ProductCard from '@/components/ProductCard'
-import FadeIn from '@/components/FadeIn'
-import { Product } from '@/types'
+import ProductListing from '@/components/shop/ProductListing'
+import { fetchActiveCategories, fetchProductPage, parseListingParams, type RawSearchParams } from '@/lib/productListing'
+import { CATEGORY_LABELS } from '@/lib/shopSections'
+import type { ProductCategory } from '@/types'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -11,44 +12,28 @@ export const metadata: Metadata = {
   description: 'Shop original designs by K.',
 }
 
-export default async function ShopPage() {
+const ALL_CATEGORIES = Object.keys(CATEGORY_LABELS) as ProductCategory[]
+
+export default async function ShopPage({ searchParams }: { searchParams: Promise<RawSearchParams> }) {
+  const params = parseListingParams(await searchParams, ALL_CATEGORIES)
   const supabase = await createClient()
 
-  const { data: products, error } = await supabase
-    .from('products')
-    .select('*')
-    .eq('is_active', true)
-    .order('created_at', { ascending: false })
+  const [result, categories] = await Promise.all([
+    fetchProductPage(supabase, params),
+    fetchActiveCategories(supabase),
+  ])
 
-  if (error) {
-    console.error('Failed to fetch products:', error)
-  }
-
-  const items: Product[] = products ?? []
+  // Only types that have something on sale
+  const types = ALL_CATEGORIES.filter(c => categories.includes(c)).map(c => ({ value: c, label: CATEGORY_LABELS[c] }))
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
-      {/* Header */}
-      <div className="mb-10 animate-fade-up">
-        <h1 className="text-3xl font-semibold text-text-primary">Shop All Products</h1>
-      </div>
-
-      {/* Grid */}
-      {items.length === 0 ? (
-        <FadeIn>
-          <div className="text-center py-20 text-text-secondary">
-            <p>No products available yet. Check back soon!</p>
-          </div>
-        </FadeIn>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {items.map((product, i) => (
-            <FadeIn key={product.id} delay={i * 50}>
-              <ProductCard product={product} />
-            </FadeIn>
-          ))}
-        </div>
-      )}
-    </div>
+    <ProductListing
+      title="Shop All Products"
+      basePath="/shop"
+      params={params}
+      result={result}
+      types={types}
+      searchPlaceholder="Search all products"
+    />
   )
 }
