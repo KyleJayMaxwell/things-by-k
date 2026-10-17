@@ -138,6 +138,19 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
       if (messageError) console.error('Failed to save handwritten message:', messageError.message)
     }
 
+    // Mystery choices, saved the same way so a missing column can't drop the item
+    if (orderItem && stripeProduct.metadata?.surprise === 'true') {
+      const { error: surpriseError } = await supabase
+        .from('order_items')
+        .update({
+          surprise_preference: stripeProduct.metadata.preference || null,
+          is_gift: stripeProduct.metadata.gift === 'true',
+          same_design: stripeProduct.metadata.same_design === 'true',
+        })
+        .eq('id', orderItem.id)
+      if (surpriseError) console.error('Failed to save Mystery options:', surpriseError.message)
+    }
+
     // Decrement stock
     await supabase.rpc('decrement_stock', {
       p_product_id: productId,

@@ -7,6 +7,7 @@ import { createServiceClient, getAdminUser } from '@/lib/supabase/server'
 import { sendShippingUpdate } from '@/lib/email'
 import type { Carrier } from '@/lib/tracking'
 import { destinationForCountry } from '@/lib/shipping'
+import type { OrderItem } from '@/types'
 import { dbFieldError } from '@/lib/fieldErrors'
 
 const STATUSES = ['processing', 'shipped', 'delivered'] as const
@@ -37,7 +38,7 @@ export async function PATCH(
   const service = createServiceClient()
   const { data: existing, error: fetchError } = await service
     .from('orders')
-    .select('id, status, email, order_number, shipping_address, shipped_at, order_items(product_name, price, quantity)')
+    .select('id, status, email, order_number, shipping_address, shipped_at, order_items(*)')
     .eq('id', id)
     .single()
 
@@ -78,12 +79,15 @@ export async function PATCH(
 
   if (isNewlyShipped && notify && existing.email) {
     try {
+      const items = (existing.order_items ?? []) as OrderItem[]
+      const revealed = await giftDesigns(service, items)
       await sendShippingUpdate({
         to: existing.email,
         orderNumber: existing.order_number,
         recipientName: existing.shipping_address?.name,
-        items: (existing.order_items ?? []).map((i: { product_name: string; price: number; quantity: number }) => ({
-          name: i.product_name,
+        // Mystery designs stay secret unless the buyer marked it a gift
+        items: items.map(i => ({
+          name: revealed.has(i.id) ? `${i.product_name} (${revealed.get(i.id)})` : i.product_name,
           price: i.price,
           quantity: i.quantity,
         })),
@@ -98,4 +102,22 @@ export async function PATCH(
   }
 
   return NextResponse.json({ order, emailSent, emailError })
+}
+
+// Design names sent for gift Mystery items, by order item id
+async function giftDesigns(service: ReturnType<typeof createServiceClient>, items: OrderItem[]) {
+  const giftIds = items.filter(i => i.is_gift).map(i => i.id)
+  const revealed = new Map<string, string>()
+  if (giftIds.length === 0) return revealed
+
+  const { data: picks } = await service
+    .from('surprise_picks')
+    .select('order_item_id, product_name, slot')
+    .in('order_item_id', giftIds)
+    .order('slot')
+  for (const id of giftIds) {
+    const names = [...new Set((picks ?? []).filter(p => p.order_item_id === id).map(p => p.product_name))]
+    if (names.length) revealed.set(id, names.join(', '))
+  }
+  return revealed
 }

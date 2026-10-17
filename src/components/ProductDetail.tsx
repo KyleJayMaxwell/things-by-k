@@ -12,6 +12,7 @@ import Toast from '@/components/Toast'
 import ImageLightbox from '@/components/ImageLightbox'
 import { formatPrice } from '@/lib/format'
 import { HANDWRITTEN_MESSAGE_MAX, offersHandwritten } from '@/lib/cart'
+import { SURPRISE_PREFERENCE_MAX } from '@/lib/surprise'
 import { HANDWRITTEN_POSTCARD_RATES } from '@/lib/shipping'
 import Breadcrumbs, { type Crumb } from '@/components/Breadcrumbs'
 
@@ -28,19 +29,29 @@ export default function ProductDetail({ product, breadcrumbs }: ProductDetailPro
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [handwritten, setHandwritten] = useState(false)
   const [message, setMessage] = useState('')
+  const [preference, setPreference] = useState('')
+  const [gift, setGift] = useState(false)
+  const [sameDesign, setSameDesign] = useState(false)
   const { addItem } = useCart()
 
   const isSoldOut = product.stock === 0
   const isPostcard = product.category === 'postcard'
   const canHandwrite = offersHandwritten(product)
+  const isSurprise = !!product.is_surprise
   const price = product.price + (handwritten ? product.handwritten_price ?? 0 : 0)
 
   const handleAddToCart = useCallback(() => {
-    addItem(product, quantity, { handwritten, message })
+    addItem(product, quantity, {
+      handwritten,
+      message,
+      surprise: isSurprise
+        ? { preference, gift, sameDesign: quantity > 1 && sameDesign }
+        : undefined,
+    })
     setShowToast(true)
     setAdded(true)
     setTimeout(() => setAdded(false), 1800)
-  }, [addItem, product, quantity, handwritten, message])
+  }, [addItem, product, quantity, handwritten, message, isSurprise, preference, gift, sameDesign])
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-12 pb-8 sm:pb-12">
@@ -188,6 +199,61 @@ export default function ProductDetail({ product, breadcrumbs }: ProductDetailPro
                 </div>
               )}
             </fieldset>
+          )}
+
+          {/* Mystery choices */}
+          {isSurprise && !isSoldOut && (
+            <div className="mt-8 space-y-4">
+              <div>
+                <label htmlFor="surprise-preference" className="block text-sm font-medium text-text-primary mb-1.5">
+                  Any preference? <span className="font-normal text-text-secondary">(optional)</span>
+                </label>
+                <textarea
+                  id="surprise-preference"
+                  value={preference}
+                  onChange={e => setPreference(e.target.value.slice(0, SURPRISE_PREFERENCE_MAX))}
+                  rows={3}
+                  placeholder="More city, less water. Something from Tokyo. Anything but bridges."
+                  className="w-full px-3 py-2.5 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors bg-white"
+                />
+                <p className="mt-1.5 flex justify-between text-xs text-text-secondary">
+                  <span>I’ll keep it in mind when I pick. An address never gets the same design twice.</span>
+                  <span className="flex-shrink-0 ml-3">{preference.length}/{SURPRISE_PREFERENCE_MAX}</span>
+                </p>
+              </div>
+
+              <label className="flex items-start gap-3 text-sm cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={gift}
+                  onChange={e => setGift(e.target.checked)}
+                  className="mt-0.5 accent-primary"
+                />
+                <span>
+                  <span className="block font-medium text-text-primary">This is a gift</span>
+                  <span className="block text-xs text-text-secondary leading-relaxed">
+                    Your shipping email will say which design was sent, so you know what they got. Otherwise it stays a surprise.
+                  </span>
+                </span>
+              </label>
+
+              {quantity > 1 && (
+                <label className="flex items-start gap-3 text-sm cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={sameDesign}
+                    onChange={e => setSameDesign(e.target.checked)}
+                    className="mt-0.5 accent-primary"
+                  />
+                  <span>
+                    <span className="block font-medium text-text-primary">Make them all the same design</span>
+                    <span className="block text-xs text-text-secondary leading-relaxed">
+                      Otherwise each card is a different design.
+                    </span>
+                  </span>
+                </label>
+              )}
+            </div>
           )}
 
           {/* Quantity + Add to Cart */}

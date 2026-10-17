@@ -7,6 +7,7 @@ import type Stripe from 'stripe'
 import { createServiceClient } from '@/lib/supabase/server'
 import { createClient } from '@/lib/supabase/server'
 import { HANDWRITTEN_MESSAGE_MAX } from '@/lib/cart'
+import { SURPRISE_PREFERENCE_MAX, surpriseSummary } from '@/lib/surprise'
 import { shippingQuote, INTERNATIONAL_COUNTRIES, type Destination } from '@/lib/shipping'
 
 interface CheckoutItem {
@@ -14,6 +15,7 @@ interface CheckoutItem {
   quantity: number
   handwritten?: boolean
   message?: string
+  surprise?: { preference?: string; gift?: boolean; sameDesign?: boolean }
 }
 
 const MAX_LINES = 50
@@ -24,11 +26,20 @@ class CartError extends Error {}
 
 function isValidItem(item: unknown): item is CheckoutItem {
   if (!item || typeof item !== 'object') return false
-  const { productId, quantity, handwritten, message } = item as Record<string, unknown>
+  const { productId, quantity, handwritten, message, surprise } = item as Record<string, unknown>
   return typeof productId === 'string' && productId.length > 0
     && Number.isInteger(quantity) && (quantity as number) >= 1 && (quantity as number) <= MAX_QUANTITY
     && (handwritten === undefined || typeof handwritten === 'boolean')
     && (message === undefined || typeof message === 'string')
+    && (surprise === undefined || isValidSurprise(surprise))
+}
+
+function isValidSurprise(surprise: unknown): boolean {
+  if (!surprise || typeof surprise !== 'object') return false
+  const { preference, gift, sameDesign } = surprise as Record<string, unknown>
+  return (preference === undefined || typeof preference === 'string')
+    && (gift === undefined || typeof gift === 'boolean')
+    && (sameDesign === undefined || typeof sameDesign === 'boolean')
 }
 
 // Simple in-memory rate limiter — max 5 checkout attempts per IP per minute
@@ -78,7 +89,8 @@ export async function POST(request: NextRequest) {
 
     const { data: products, error } = await serviceClient
       .from('products')
-      .select('id, name, description, price, images, stock, category, handwritten_price')
+      // '*' so checkout keeps working if mystery-postcard.sql (is_surprise) hasn't been run yet
+      .select('*')
       .in('id', productIds)
       .eq('is_active', true)
 
@@ -103,6 +115,25 @@ export async function POST(request: NextRequest) {
     const lineItems = items.map((item): Stripe.Checkout.SessionCreateParams.LineItem => {
       const product = products.find(p => p.id === item.productId)!
 
+      // Mystery choices ride along in the Stripe metadata for the webhook
+      let surpriseMetadata: Record<string, string> = {}
+      let surpriseNote = ''
+      if (product.is_surprise) {
+        const preference = (item.surprise?.preference ?? '').trim()
+        if (preference.length > SURPRISE_PREFERENCE_MAX) {
+          throw new CartError(`Preferences can be up to ${SURPRISE_PREFERENCE_MAX} characters`)
+        }
+        const gift = item.surprise?.gift === true
+        const sameDesign = item.quantity > 1 && item.surprise?.sameDesign === true
+        surpriseMetadata = {
+          surprise: 'true',
+          preference,
+          gift: gift ? 'true' : 'false',
+          same_design: sameDesign ? 'true' : 'false',
+        }
+        surpriseNote = surpriseSummary({ preference, gift, sameDesign })
+      }
+
       if (item.handwritten) {
         if (product.category !== 'postcard') {
           throw new CartError(`${product.name} isn’t available handwritten`)
@@ -119,9 +150,10 @@ export async function POST(request: NextRequest) {
             currency: 'usd',
             product_data: {
               name: `${product.name} (Handwritten)`,
-              description: message ? `Your note: ${message}` : 'No note given: K will freestyle it',
+              description: [message ? `Your note: ${message}` : 'No note given: K will freestyle it', surpriseNote]
+                .filter(Boolean).join(' · '),
               images: product.images.slice(0, 1),
-              metadata: { product_id: product.id, handwritten: 'true', message },
+              metadata: { product_id: product.id, handwritten: 'true', message, ...surpriseMetadata },
             },
             unit_amount: product.price + (product.handwritten_price ?? 0),
           },
@@ -135,9 +167,9 @@ export async function POST(request: NextRequest) {
           currency: 'usd',
           product_data: {
             name: product.name,
-            description: product.description,
+            description: surpriseNote || product.description,
             images: product.images.slice(0, 1), // Stripe allows up to 8
-            metadata: { product_id: product.id },
+            metadata: { product_id: product.id, ...surpriseMetadata },
           },
           unit_amount: product.price, // already in cents
         },

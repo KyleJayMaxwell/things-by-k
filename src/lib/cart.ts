@@ -8,8 +8,14 @@ export const HANDWRITTEN_MESSAGE_MAX = 300
 
 // A cart line is one product + option + note, so the same postcard can be in
 // the cart blank and handwritten (or with two different notes) at once
-export function cartLineKey(item: Pick<CartItem, 'product' | 'handwritten' | 'message'>): string {
-  return item.handwritten ? `${item.product.id}:hw:${item.message ?? ''}` : item.product.id
+export function cartLineKey(item: Pick<CartItem, 'product' | 'handwritten' | 'message' | 'surprise'>): string {
+  let key = item.handwritten ? `${item.product.id}:hw:${item.message ?? ''}` : item.product.id
+  // Mystery cards with different gift/preference choices stay separate lines
+  if (item.surprise) {
+    const { gift, sameDesign, preference } = item.surprise
+    key += `:sm:${gift ? 'g' : ''}${sameDesign ? 's' : ''}:${preference}`
+  }
+  return key
 }
 
 // Every postcard can be ordered handwritten

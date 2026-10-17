@@ -4,6 +4,7 @@
 
 import { createServiceClient } from '@/lib/supabase/server'
 import { sendRefundNotice } from '@/lib/email'
+import { restockSurprisePicks } from '@/lib/surprise-picks'
 
 type OrderMatch = { id: string } | { paymentIntent: string }
 
@@ -12,7 +13,7 @@ export async function markOrderRefunded(match: OrderMatch, refundAmount: number)
 
   let query = supabase
     .from('orders')
-    .select('id, status, email, order_number, shipping_address, order_items(product_id, quantity)')
+    .select('id, status, email, order_number, shipping_address, order_items(id, product_id, quantity)')
   query = 'id' in match ? query.eq('id', match.id) : query.eq('stripe_payment_intent', match.paymentIntent)
   const { data: existing } = await query.maybeSingle()
   if (!existing) return null
@@ -49,6 +50,8 @@ export async function markOrderRefunded(match: OrderMatch, refundAmount: number)
         .eq('id', item.product_id)
       if (stockError) console.error('Failed to restock after refund:', stockError.message)
     }
+    // Designs already picked for Mystery cards go back too
+    await restockSurprisePicks(supabase, (existing.order_items ?? []).map(i => i.id))
   }
 
   // The refund is saved either way; a failed email shouldn't undo it

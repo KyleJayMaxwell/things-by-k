@@ -2,7 +2,7 @@
 
 // src/app/admin/orders/[id]/page.tsx
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import Badge from '@/components/Badge'
@@ -14,6 +14,7 @@ import { DELIVERY_WEEKS, destinationForCountry } from '@/lib/shipping'
 import type { OrderStatus, OrderWithItems } from '@/types'
 import { formatPrice, formatDate } from '@/lib/format'
 import { errorMessage } from '@/lib/errors'
+import SurprisePicker from './SurprisePicker'
 import LoadError from '@/components/LoadError'
 
 const STATUS_OPTIONS = ['processing', 'shipped', 'delivered'] as const
@@ -41,6 +42,8 @@ export default function AdminOrderDetailPage() {
   const [fieldError, setFieldError] = useState<{ field: string; text: string } | null>(null)
   const [refunding, setRefunding] = useState(false)
   const [refundError, setRefundError] = useState<string | null>(null)
+  const [unpickedSurprises, setUnpickedSurprises] = useState(0)
+  const handleUnpickedChange = useCallback((count: number) => setUnpickedSurprises(count), [])
   const [loadFailed, setLoadFailed] = useState(false)
   const [reloadKey, setReloadKey] = useState(0)  // bumped by Try again
 
@@ -68,6 +71,11 @@ export default function AdminOrderDetailPage() {
   }, [id, reloadKey])
 
   const handleSave = async () => {
+    // A warning, not a block: the design can still be filled in later
+    if (
+      status === 'shipped' && order?.status !== 'shipped' && unpickedSurprises > 0 &&
+      !confirm(`${unpickedSurprises} Mystery card${unpickedSurprises === 1 ? ' has' : 's have'} no design picked yet. Mark shipped anyway?`)
+    ) return
     setSaving(true)
     setMessage(null)
     setFieldError(null)
@@ -258,6 +266,11 @@ export default function AdminOrderDetailPage() {
       </div>
       )}
 
+      {/* Mystery designs */}
+      {order.status !== 'refunded' && (
+        <SurprisePicker order={order} onUnpickedChange={handleUnpickedChange} />
+      )}
+
       {/* Items */}
       <div className="bg-white border border-border rounded-xl overflow-hidden mb-6">
         <div className="px-5 py-4 border-b border-border">
@@ -273,6 +286,11 @@ export default function AdminOrderDetailPage() {
                   <p className="text-sm text-text-primary mt-2 px-3 py-2 bg-primary-light rounded-lg whitespace-pre-line">
                     <span className="block text-xs text-text-secondary mb-0.5">Write on the card:</span>
                     {item.handwritten_message}
+                  </p>
+                )}
+                {(item.is_gift || item.surprise_preference) && (
+                  <p className="text-xs text-text-secondary mt-1">
+                    {[item.is_gift && 'Gift', item.same_design && 'Same design', item.surprise_preference && `Preference: ${item.surprise_preference}`].filter(Boolean).join(' · ')}
                   </p>
                 )}
               </div>

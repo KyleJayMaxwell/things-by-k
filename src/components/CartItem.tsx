@@ -11,6 +11,7 @@ import QuantitySelector from './QuantitySelector'
 import { formatPrice } from '@/lib/format'
 import { productHref } from '@/lib/shopSections'
 import { cartLineKey, offersHandwritten, unitPrice } from '@/lib/cart'
+import { surpriseSummary } from '@/lib/surprise'
 
 interface CartItemProps {
   item: CartItemType
@@ -22,6 +23,9 @@ export default function CartItem({ item }: CartItemProps) {
   const lineKey = cartLineKey(item)
   const price = unitPrice(item)
   const lineTotal = price * quantity
+  const surpriseNote = item.surprise
+    ? surpriseSummary({ ...item.surprise, sameDesign: quantity > 1 && item.surprise.sameDesign })
+    : ''
   const [removing, setRemoving] = useState(false)
 
   const handleRemove = () => {
@@ -71,6 +75,9 @@ export default function CartItem({ item }: CartItemProps) {
           <p className="mt-1 text-sm text-text-secondary italic break-words">
             {item.message ? `“${item.message}”` : 'No note: K will freestyle it'}
           </p>
+        )}
+        {surpriseNote && (
+          <p className="mt-1 text-sm text-text-secondary break-words">{surpriseNote}</p>
         )}
 
         <div className="mt-3 flex items-center gap-4">
