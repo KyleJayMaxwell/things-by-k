@@ -505,14 +505,14 @@ export default function ProductForm({ initialData, copyFrom }: ProductFormProps)
               <p className="text-sm text-text-secondary mt-1">Shoppers can filter by these, and search matches location tags too.</p>
             </div>
 
-            <Field label="Location tags" hint="Separate with commas; city and region only, no neighborhoods" htmlFor="locations" error={fieldError('locations')}>
+            <Field label="Location tags" hint="One tag per place: San Francisco Bay Area, or the country abroad (Taiwan, Japan)" htmlFor="locations" error={fieldError('locations')}>
               <input
                 id="locations"
                 name="locations"
                 value={form.locations}
                 onChange={handleChange}
                 {...fieldAttrs('locations')}
-                placeholder="San Francisco, Bay Area"
+                placeholder="San Francisco Bay Area"
               />
             </Field>
             {suggestedLocations.length > 0 && (
