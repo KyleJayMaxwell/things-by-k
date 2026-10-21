@@ -23,6 +23,9 @@ export default function Navbar() {
   // Phone menu: the Shop group folds open under its heading
   const [shopOpen, setShopOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  // Esc hides the desktop Shop menu until focus or the pointer leaves it
+  const [shopDismissed, setShopDismissed] = useState(false)
+  const menuButtonRef = useRef<HTMLButtonElement>(null)
   const { itemCount } = useCart()
 
   // Badge pop: replay animation each time itemCount increases
@@ -54,6 +57,18 @@ export default function Navbar() {
     const el = document.activeElement
     if (el instanceof HTMLElement && el.closest('[data-shop-menu]')) el.blur()
   }, [pathname])
+
+  // Esc closes the phone menu and puts focus back on its button
+  useEffect(() => {
+    if (!menuOpen) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return
+      setMenuOpen(false)
+      menuButtonRef.current?.focus()
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [menuOpen])
 
   // Active on the page itself and anything under it (e.g. /shop/some-product)
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`)
@@ -104,9 +119,27 @@ export default function Navbar() {
           {/* Desktop nav links */}
           <nav aria-label="Main navigation" className="hidden sm:flex items-center gap-8">
             {/* Shop opens a menu on hover or keyboard focus; clicking Shop still goes to Shop All */}
-            <div data-shop-menu className="relative group">
+            <div
+              data-shop-menu
+              className="relative group"
+              onKeyDown={e => {
+                if (e.key !== 'Escape') return
+                setShopDismissed(true)
+                e.currentTarget.querySelector('a')?.focus()
+              }}
+              onBlur={e => {
+                if (!e.currentTarget.contains(e.relatedTarget)) setShopDismissed(false)
+              }}
+              onMouseLeave={() => setShopDismissed(false)}
+            >
               {navLink('/shop', 'Shop')}
-              <div className="absolute left-0 top-full pt-3 invisible opacity-0 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100 transition-opacity duration-150">
+              <div
+                className={`absolute left-0 top-full pt-3 transition-opacity duration-150 ${
+                  shopDismissed
+                    ? 'invisible opacity-0'
+                    : 'invisible opacity-0 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100'
+                }`}
+              >
                 <ul className="min-w-44 bg-surface rounded-lg shadow-lg border border-border py-2">
                   {SHOP_LINKS.map(link => {
                     const current = pathname === link.href || (link.href !== '/shop' && pathname.startsWith(`${link.href}/`))
@@ -132,6 +165,7 @@ export default function Navbar() {
 
           {/* Mobile hamburger */}
           <button
+            ref={menuButtonRef}
             className="sm:hidden min-w-[44px] min-h-[44px] flex items-center justify-center text-white/80 hover:text-white transition-colors focus-ring-light rounded-md"
             onClick={() => {
               // Opening on a shop page starts with the Shop group unfolded
@@ -191,8 +225,10 @@ export default function Navbar() {
       </div>
 
       {/* Mobile menu — always rendered, animated via max-height */}
+      {/* inert keeps the closed menu's links out of the tab order */}
       <div
         id="mobile-menu"
+        inert={!menuOpen}
         className={`sm:hidden overflow-hidden transition-[max-height,opacity] duration-200 ease-in-out ${
           menuOpen ? 'max-h-80 opacity-100' : 'max-h-0 opacity-0'
         }`}

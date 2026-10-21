@@ -6,7 +6,7 @@ import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useCart } from '@/context/CartContext'
-import Button from '@/components/Button'
+import { buttonClasses } from '@/components/Button'
 import Spinner from '@/components/Spinner'
 import { formatPrice } from '@/lib/format'
 
@@ -141,11 +141,11 @@ function SuccessContent() {
       ) : null}
 
       <div className="mt-10 flex flex-col sm:flex-row gap-3 justify-center">
-        <Link href="/account/orders">
-          <Button variant="secondary" size="lg">View Orders</Button>
+        <Link href="/account/orders" className={buttonClasses({ variant: 'secondary', size: 'lg' })}>
+          View Orders
         </Link>
-        <Link href="/shop">
-          <Button variant="primary" size="lg">Continue Shopping</Button>
+        <Link href="/shop" className={buttonClasses({ size: 'lg' })}>
+          Continue Shopping
         </Link>
       </div>
     </div>

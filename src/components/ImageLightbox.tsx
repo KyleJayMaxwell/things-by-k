@@ -3,7 +3,7 @@
 // src/components/ImageLightbox.tsx
 
 import Image from 'next/image'
-import { useEffect, useState, useCallback, MouseEvent } from 'react'
+import { useEffect, useRef, useState, useCallback, MouseEvent } from 'react'
 
 interface ImageLightboxProps {
   images: string[]
@@ -25,6 +25,8 @@ export default function ImageLightbox({
   const [zoomed, setZoomed] = useState(false)
   const [origin, setOrigin] = useState('50% 50%')
   const hasMultiple = images.length > 1
+  const dialogRef = useRef<HTMLDivElement>(null)
+  const closeRef = useRef<HTMLButtonElement>(null)
 
   const go = useCallback(
     (step: number) => {
@@ -34,12 +36,35 @@ export default function ImageLightbox({
     [index, images.length, onIndexChange]
   )
 
+  // Move focus into the viewer while it's open, and back to whatever opened it on close
+  useEffect(() => {
+    const opener = document.activeElement
+    closeRef.current?.focus()
+    return () => {
+      if (opener instanceof HTMLElement) opener.focus()
+    }
+  }, [])
+
   // Keyboard controls + lock page scroll while open
   useEffect(() => {
     function handleKey(e: KeyboardEvent) {
       if (e.key === 'Escape') onClose()
       if (hasMultiple && e.key === 'ArrowRight') go(1)
       if (hasMultiple && e.key === 'ArrowLeft') go(-1)
+      // Keep Tab cycling through the viewer's buttons instead of the page behind it
+      if (e.key === 'Tab' && dialogRef.current) {
+        const buttons = Array.from(dialogRef.current.querySelectorAll('button'))
+        const first = buttons[0]
+        const last = buttons[buttons.length - 1]
+        const inside = dialogRef.current.contains(document.activeElement)
+        if (e.shiftKey && (document.activeElement === first || !inside)) {
+          e.preventDefault()
+          last?.focus()
+        } else if (!e.shiftKey && (document.activeElement === last || !inside)) {
+          e.preventDefault()
+          first?.focus()
+        }
+      }
     }
     window.addEventListener('keydown', handleKey)
     const prevOverflow = document.body.style.overflow
@@ -60,6 +85,7 @@ export default function ImageLightbox({
 
   return (
     <div
+      ref={dialogRef}
       role="dialog"
       aria-modal="true"
       aria-label={`${alt} image viewer`}
@@ -96,9 +122,10 @@ export default function ImageLightbox({
       {/* Close */}
       <button
         type="button"
+        ref={closeRef}
         onClick={onClose}
         aria-label="Close image viewer"
-        className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-black/50 hover:bg-black/70 text-white flex items-center justify-center transition-colors"
+        className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-black/50 hover:bg-black/70 text-white flex items-center justify-center transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
       >
         <svg className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
           <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -112,7 +139,7 @@ export default function ImageLightbox({
             type="button"
             onClick={(e) => { e.stopPropagation(); go(-1) }}
             aria-label="Previous image"
-            className="absolute left-4 top-1/2 z-10 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 hover:bg-black/70 text-white flex items-center justify-center transition-colors"
+            className="absolute left-4 top-1/2 z-10 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 hover:bg-black/70 text-white flex items-center justify-center transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
           >
             <svg className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
               <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -122,7 +149,7 @@ export default function ImageLightbox({
             type="button"
             onClick={(e) => { e.stopPropagation(); go(1) }}
             aria-label="Next image"
-            className="absolute right-4 top-1/2 z-10 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 hover:bg-black/70 text-white flex items-center justify-center transition-colors"
+            className="absolute right-4 top-1/2 z-10 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 hover:bg-black/70 text-white flex items-center justify-center transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
           >
             <svg className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
               <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
