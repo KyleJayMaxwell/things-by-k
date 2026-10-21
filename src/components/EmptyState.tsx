@@ -1,6 +1,6 @@
 // src/components/EmptyState.tsx
 
-import Button from './Button'
+import { buttonClasses } from './Button'
 import Link from 'next/link'
 
 interface EmptyStateProps {
@@ -18,10 +18,8 @@ export default function EmptyState({ message, ctaLabel, ctaHref }: EmptyStatePro
         </svg>
       </div>
       <p className="text-text-secondary">{message}</p>
-      <Link href={ctaHref}>
-        <Button variant="primary" size="md">
-          {ctaLabel}
-        </Button>
+      <Link href={ctaHref} className={buttonClasses()}>
+        {ctaLabel}
       </Link>
     </div>
   )

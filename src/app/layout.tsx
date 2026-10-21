@@ -58,7 +58,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             Skip to content
           </a>
           <Navbar />
-          <main id="main-content" className="flex-1">
+          {/* tabIndex lets the skip link move keyboard focus here, not just scroll */}
+          <main id="main-content" tabIndex={-1} className="flex-1 focus:outline-none">
             {children}
           </main>
           <Footer />

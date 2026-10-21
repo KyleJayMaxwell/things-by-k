@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import LoadError from '@/components/LoadError'
 import ProductCard from '@/components/ProductCard'
-import Button from '@/components/Button'
+import { buttonClasses } from '@/components/Button'
 import FadeIn from '@/components/FadeIn'
 import HeroCarousel from '@/components/HeroCarousel'
 import { heroSlides } from '@/lib/heroSlides'
@@ -65,8 +65,8 @@ export default async function HomePage() {
               A small shop of original designs. Every piece is designed with
               intention and thought.
             </p>
-            <Link href="/about" className="inline-block mt-6">
-              <Button variant="black" size="md">Learn More</Button>
+            <Link href="/about" className={`${buttonClasses({ variant: 'black' })} mt-6`}>
+              Learn More
             </Link>
           </FadeIn>
           <FadeIn delay={100}>

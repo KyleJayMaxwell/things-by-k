@@ -5,7 +5,7 @@
 import { useState } from 'react'
 import { useCart } from '@/context/CartContext'
 import CartItem from '@/components/CartItem'
-import Button from '@/components/Button'
+import Button, { buttonClasses } from '@/components/Button'
 import AgreeToTerms from '@/components/AgreeToTerms'
 import Link from 'next/link'
 import { formatPrice } from '@/lib/format'
@@ -65,10 +65,8 @@ export default function CartPage() {
         </div>
         <h1 className="text-xl font-semibold text-text-primary mb-2">Your cart is empty</h1>
         <p className="text-text-secondary mb-8">Looks like you haven’t added anything yet.</p>
-        <Link href="/shop">
-          <Button variant="primary" size="lg">
-            Shop Now
-          </Button>
+        <Link href="/shop" className={buttonClasses({ size: 'lg' })}>
+          Shop Now
         </Link>
       </div>
     )

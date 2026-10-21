@@ -13,6 +13,33 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   loading?: boolean
 }
 
+const base =
+  'inline-flex items-center justify-center font-medium rounded-lg shadow-sm hover:shadow-md hover:-translate-y-px active:shadow-sm active:translate-y-0 transition-[color,background-color,border-color,box-shadow,transform] duration-150 focus-ring disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0'
+
+// All variants share one black style for now (Kyle's call); kept separate so they can diverge later
+const solidBlack = 'bg-primary text-on-primary hover:bg-primary-hover active:bg-primary-hover'
+const variants: Record<ButtonVariant, string> = {
+  primary: solidBlack,
+  secondary: solidBlack,
+  white: solidBlack,
+  black: solidBlack,
+}
+
+const sizes: Record<ButtonSize, string> = {
+  sm: 'text-sm px-3 py-1.5 gap-1.5',
+  md: 'text-sm px-4 py-2.5 gap-2',
+  lg: 'text-base px-6 py-3 gap-2',
+}
+
+// Button styling for a <Link>, so a link that looks like a button is one tab stop, not a button inside a link
+export function buttonClasses({
+  variant = 'primary',
+  size = 'md',
+  fullWidth = false,
+}: { variant?: ButtonVariant; size?: ButtonSize; fullWidth?: boolean } = {}) {
+  return `${base} ${variants[variant]} ${sizes[size]} ${fullWidth ? 'w-full' : ''}`
+}
+
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
   {
     variant = 'primary',
@@ -26,29 +53,11 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
   },
   ref
 ) {
-  const base =
-    'inline-flex items-center justify-center font-medium rounded-lg shadow-sm hover:shadow-md hover:-translate-y-px active:shadow-sm active:translate-y-0 transition-[color,background-color,border-color,box-shadow,transform] duration-150 focus-ring disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0'
-
-  // All variants share one black style for now (Kyle's call); kept separate so they can diverge later
-  const solidBlack = 'bg-primary text-on-primary hover:bg-primary-hover active:bg-primary-hover'
-  const variants: Record<ButtonVariant, string> = {
-    primary: solidBlack,
-    secondary: solidBlack,
-    white: solidBlack,
-    black: solidBlack,
-  }
-
-  const sizes: Record<ButtonSize, string> = {
-    sm: 'text-sm px-3 py-1.5 gap-1.5',
-    md: 'text-sm px-4 py-2.5 gap-2',
-    lg: 'text-base px-6 py-3 gap-2',
-  }
-
   return (
     <button
       ref={ref}
       disabled={disabled || loading}
-      className={`${base} ${variants[variant]} ${sizes[size]} ${fullWidth ? 'w-full' : ''} ${className}`}
+      className={`${buttonClasses({ variant, size, fullWidth })} ${className}`}
       {...props}
     >
       {loading && <Spinner />}
