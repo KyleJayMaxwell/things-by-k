@@ -6,6 +6,7 @@ import { useState } from 'react'
 import { useCart } from '@/context/CartContext'
 import CartItem from '@/components/CartItem'
 import Button from '@/components/Button'
+import AgreeToTerms from '@/components/AgreeToTerms'
 import Link from 'next/link'
 import { formatPrice } from '@/lib/format'
 import { cartLineKey } from '@/lib/cart'
@@ -140,6 +141,7 @@ export default function CartPage() {
             >
               Proceed to Checkout
             </Button>
+            <AgreeToTerms action="placing an order" className="mt-3" />
 
             {error && (
               <p role="alert" className="mt-3 text-sm text-error text-center">{error}</p>
