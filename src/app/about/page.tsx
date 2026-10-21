@@ -35,7 +35,7 @@ export default function AboutPage() {
             <p className="text-xs text-text-secondary tracking-widest uppercase mb-2">Contact</p>
             <a
               href={`mailto:${CONTACT_EMAIL}`}
-              className="text-sm text-text-primary underline underline-offset-4 hover:text-primary transition-colors"
+              className="text-sm text-text-primary underline underline-offset-4 hover:text-botan transition-colors"
             >
               {CONTACT_EMAIL}
             </a>

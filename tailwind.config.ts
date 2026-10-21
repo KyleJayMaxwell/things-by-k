@@ -11,8 +11,11 @@ const config: Config = {
     extend: {
       colors: {
         // ── Things by K color tokens ──
-        // Deep purple is reserved for the nav bar; everything else is black/neutral
-        brand: '#360F5A',
+        // Palette from a Japanese color book. Ayame-iro purple is reserved for the nav bar;
+        // everything else is black/neutral. Botan-nezumi and Fuji-nezumi are quiet accents only.
+        brand: '#5F4489',             // 菖蒲色 Ayame-iro (Red Violet) — white text 7.9:1
+        botan: '#935B66',             // 牡丹鼠 Botan-nezumi (dusty rose) — link hover, focus ring, nav seam; 5.1:1 on background
+        fuji: '#6E6A6A',              // 藤鼠 Fuji-nezumi (warm grey) — secondary text
         primary: {
           DEFAULT: '#171717', // neutral-900 (was purple #360F5A)
           light: '#F5F5F5',   // neutral-100 (was lavender #EDE6F5)
@@ -22,7 +25,7 @@ const config: Config = {
         background: '#FAF9FC',        // barely purple-tinted (was #FAFAFA)
         surface: '#FFFFFF',
         'text-primary': '#1A1A2E',
-        'text-secondary': '#6B6A80',  // purple-tinted gray — 5.2:1 on white (was #6B7280)
+        'text-secondary': '#6E6A6A',  // Fuji-nezumi warm grey — 5.1:1 on background (was #6B6A80)
         border: '#E4E0EF',            // barely purple-tinted (was #E5E7EB)
         success: '#059669',
         error: '#DC2626',

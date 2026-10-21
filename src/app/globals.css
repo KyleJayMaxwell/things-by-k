@@ -7,7 +7,9 @@
 @layer base {
   :root {
     /* Things by K — CSS custom properties (mirrors PRD Section 2) */
-    --color-brand: #360F5A;
+    --color-brand: #5F4489;
+    --color-botan: #935B66;
+    --color-fuji: #6E6A6A;
     --color-primary: #171717;
     --color-primary-light: #F5F5F5;
     --color-primary-hover: #262626;
@@ -15,7 +17,7 @@
     --color-background: #FAF9FC;
     --color-surface: #FFFFFF;
     --color-text-primary: #1A1A2E;
-    --color-text-secondary: #6B6A80;
+    --color-text-secondary: #6E6A6A;
     --color-border: #E4E0EF;
     --color-success: #059669;
     --color-error: #DC2626;
@@ -36,6 +38,11 @@
     font-family: var(--font-inter), system-ui, sans-serif;
   }
 
+  ::selection {
+    background-color: var(--color-botan);
+    color: #FFFFFF;
+  }
+
   img {
     max-width: 100%;
     height: auto;
@@ -45,7 +52,7 @@
 @layer components {
   /* Reusable focus ring for accessibility */
   .focus-ring {
-    @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2;
+    @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-botan focus-visible:ring-offset-2;
   }
   /* For controls on the purple nav bar */
   .focus-ring-light {
