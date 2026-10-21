@@ -101,8 +101,10 @@ const SECTIONS: { question: string; answer: React.ReactNode }[] = [
     question: 'What if it arrives damaged?',
     answer: (
       <p>
-        Send me a photo within 3 months of your purchase and, depending on the damage, I&apos;ll
-        replace it for free.
+        If a blank postcard or anything else I ship in an envelope or box arrives damaged, send me a
+        photo within 3 months of your purchase and, depending on the damage, I&apos;ll replace it for
+        free. Handwritten postcards travel through the mail on their own, so a little wear from
+        handling is part of the charm and isn&apos;t covered.
       </p>
     ),
   },

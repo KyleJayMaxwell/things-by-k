@@ -6,6 +6,7 @@ import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
+import AgreeToTerms from '@/components/AgreeToTerms'
 import Button from '@/components/Button'
 import PasswordInput from '@/components/PasswordInput'
 import TextField from '@/components/TextField'
@@ -280,6 +281,7 @@ function LoginForm() {
             <Button type="submit" variant="primary" size="lg" fullWidth loading={loading} disabled={!canRegister}>
               Create Account
             </Button>
+            <AgreeToTerms action="creating an account" />
           </form>
         )}
       </div>
