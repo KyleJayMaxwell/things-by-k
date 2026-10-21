@@ -98,7 +98,7 @@ export default function ProductListing({
           {hasFilters && (
             <>
               {' · '}
-              <Link href={basePath} className="underline underline-offset-2 hover:text-text-primary focus-ring rounded">Clear filters</Link>
+              <Link href={basePath} className="underline underline-offset-2 hover:text-botan focus-ring rounded">Clear filters</Link>
             </>
           )}
         </p>
@@ -123,9 +123,9 @@ export default function ProductListing({
         <FadeIn>
           <div className="text-center py-20 text-text-secondary">
             {total > 0 ? (
-              <p>There’s nothing on this page. <Link href={href({ page: 1 })} className="underline underline-offset-2 hover:text-text-primary">Go to page 1</Link></p>
+              <p>There’s nothing on this page. <Link href={href({ page: 1 })} className="underline underline-offset-2 hover:text-botan">Go to page 1</Link></p>
             ) : hasFilters ? (
-              <p>Nothing matches those filters. <Link href={basePath} className="underline underline-offset-2 hover:text-text-primary">Clear filters</Link></p>
+              <p>Nothing matches those filters. <Link href={basePath} className="underline underline-offset-2 hover:text-botan">Clear filters</Link></p>
             ) : (
               <p>No products available yet. Check back soon!</p>
             )}

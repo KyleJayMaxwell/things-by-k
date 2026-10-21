@@ -63,7 +63,7 @@ const SECTIONS: { heading: string; body: React.ReactNode }[] = [
         you, email{' '}
         <a
           href={`mailto:${CONTACT_EMAIL}`}
-          className="text-text-primary underline underline-offset-4 hover:text-primary transition-colors"
+          className="text-text-primary underline underline-offset-4 hover:text-botan transition-colors"
         >
           {CONTACT_EMAIL}
         </a>{' '}
