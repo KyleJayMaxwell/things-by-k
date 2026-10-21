@@ -20,6 +20,8 @@ const SHOP_LINKS = [
 export default function Navbar() {
   const pathname = usePathname()
   const [menuOpen, setMenuOpen] = useState(false)
+  // Phone menu: the Shop group folds open under its heading
+  const [shopOpen, setShopOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const { itemCount } = useCart()
 
@@ -131,7 +133,11 @@ export default function Navbar() {
           {/* Mobile hamburger */}
           <button
             className="sm:hidden min-w-[44px] min-h-[44px] flex items-center justify-center text-white/80 hover:text-white transition-colors focus-ring-light rounded-md"
-            onClick={() => setMenuOpen(o => !o)}
+            onClick={() => {
+              // Opening on a shop page starts with the Shop group unfolded
+              if (!menuOpen) setShopOpen(isActive('/shop'))
+              setMenuOpen(o => !o)
+            }}
             aria-label={menuOpen ? 'Close menu' : 'Open menu'}
             aria-expanded={menuOpen}
             aria-controls="mobile-menu"
@@ -192,15 +198,33 @@ export default function Navbar() {
         }`}
       >
         <nav aria-label="Mobile navigation" className="border-t border-white/15 bg-brand px-4 pt-2 pb-3">
-          {/* Shop is a heading here; its pages sit indented under it */}
-          <p id="mobile-shop-heading" className="flex items-center min-h-[44px] text-xs font-medium uppercase tracking-[0.2em] text-white/50">
+          {/* Shop folds open to show its pages, indented under it */}
+          <button
+            type="button"
+            onClick={() => setShopOpen(o => !o)}
+            aria-expanded={shopOpen}
+            aria-controls="mobile-shop-links"
+            className={`w-full flex items-center justify-between min-h-[44px] text-sm font-medium uppercase tracking-wider transition-colors duration-150 focus-ring-light rounded ${
+              isActive('/shop') ? 'text-white' : 'text-white/70 hover:text-white'
+            }`}
+          >
             Shop
-          </p>
-          <ul aria-labelledby="mobile-shop-heading" className="ml-1 pl-4 border-l border-white/15">
-            {SHOP_LINKS.map(link => (
-              <li key={link.href}>{mobileLink(link.href, link.label, { exact: link.href === '/shop' })}</li>
-            ))}
-          </ul>
+            <svg className={`w-4 h-4 transition-transform duration-200 ${shopOpen ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M5 7.5l5 5 5-5" />
+            </svg>
+          </button>
+          {/* Grid rows 0fr → 1fr animates the height; inert keeps folded links out of the tab order */}
+          <div
+            id="mobile-shop-links"
+            inert={!shopOpen}
+            className={`grid transition-[grid-template-rows,opacity] duration-200 ease-in-out ${shopOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}
+          >
+            <ul className="overflow-hidden ml-1 pl-4 border-l border-white/15">
+              {SHOP_LINKS.map(link => (
+                <li key={link.href}>{mobileLink(link.href, link.label, { exact: link.href === '/shop' })}</li>
+              ))}
+            </ul>
+          </div>
           {mobileLink('/about', 'About')}
           {/* The theme toggle lives in the menu on phones, so the top bar stays uncluttered */}
           <div className="mt-2 pt-2 border-t border-white/15">
