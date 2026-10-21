@@ -21,6 +21,8 @@ const nextConfig: NextConfig = {
   images: {
     // 90 is used by the full-screen hero photos so they stay crisp
     qualities: [75, 90],
+    // `npm run dev:mock` serves photos from localhost, which the image optimizer won't fetch
+    unoptimized: process.env.MOCK_DATA === '1',
     remotePatterns: [
       {
         protocol: 'https',

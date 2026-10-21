@@ -20,7 +20,7 @@ export interface Product {
   stock: number
   is_active: boolean
   handwritten_price: number | null  // extra cents for a handwritten postcard; null = no extra
-  locations: string[]    // places it's from or shows, e.g. ['San Francisco', 'Bay Area']
+  locations: string[]    // places it's from or shows, e.g. ['San Francisco Bay Area'] or ['Taiwan']
   orientation: ProductOrientation | null  // postcards only
   created_at: string
   updated_at: string
