@@ -7,6 +7,7 @@ import './globals.css'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { CartProvider } from '@/context/CartContext'
+import { themeInitScript } from '@/lib/theme'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -43,12 +44,16 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${amaticSC.variable} ${oldLondon.variable}`}>
+    // The theme script adds .dark before React loads, so <html>'s class can differ from the server's
+    <html lang="en" className={`${inter.variable} ${amaticSC.variable} ${oldLondon.variable}`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body className="bg-background text-text-primary antialiased min-h-screen flex flex-col">
         <CartProvider>
           <a
             href="#main-content"
-            className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[9999] focus:px-4 focus:py-2 focus:bg-primary focus:text-white focus:rounded-lg focus:text-sm focus:font-medium"
+            className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[9999] focus:px-4 focus:py-2 focus:bg-primary focus:text-on-primary focus:rounded-lg focus:text-sm focus:font-medium"
           >
             Skip to content
           </a>

@@ -30,7 +30,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
     'inline-flex items-center justify-center font-medium rounded-lg shadow-sm hover:shadow-md hover:-translate-y-px active:shadow-sm active:translate-y-0 transition-[color,background-color,border-color,box-shadow,transform] duration-150 focus-ring disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0'
 
   // All variants share one black style for now (Kyle's call); kept separate so they can diverge later
-  const solidBlack = 'bg-neutral-900 text-white hover:bg-neutral-800 active:bg-neutral-800'
+  const solidBlack = 'bg-primary text-on-primary hover:bg-primary-hover active:bg-primary-hover'
   const variants: Record<ButtonVariant, string> = {
     primary: solidBlack,
     secondary: solidBlack,

@@ -74,7 +74,7 @@ export default function DateRangeFilter({ value, onChange }: Props) {
             onClick={() => onChange({ ...value, key: preset.key })}
             className={`text-xs px-3 py-1 rounded-full transition-colors ${
               value.key === preset.key
-                ? 'bg-primary text-white'
+                ? 'bg-primary text-on-primary'
                 : 'bg-gray-100 text-text-secondary hover:text-text-primary'
             }`}
           >

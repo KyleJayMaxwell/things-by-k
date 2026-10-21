@@ -693,7 +693,7 @@ export default function ProductForm({ initialData, copyFrom }: ProductFormProps)
         <button
           type="submit"
           disabled={saving || uploading}
-          className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-hover transition-colors disabled:opacity-50"
+          className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-on-primary text-sm font-medium rounded-lg hover:bg-primary-hover transition-colors disabled:opacity-50"
         >
           {saving && <Spinner />}
           {saving ? 'Saving...' : isEdit ? 'Save Changes' : 'Create Product'}

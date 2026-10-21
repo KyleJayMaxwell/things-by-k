@@ -72,7 +72,7 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
           </a>
           <Link
             href="/admin/products/new"
-            className="px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-hover transition-colors"
+            className="px-4 py-2 bg-primary text-on-primary text-sm font-medium rounded-lg hover:bg-primary-hover transition-colors"
           >
             + Add Product
           </Link>

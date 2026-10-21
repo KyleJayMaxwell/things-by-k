@@ -179,7 +179,7 @@ export default function AdminOrderDetailPage() {
               onClick={() => setStatus(s)}
               className={`px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${
                 status === s
-                  ? 'bg-primary text-white border-primary'
+                  ? 'bg-primary text-on-primary border-primary'
                   : 'bg-white text-text-secondary border-border hover:border-primary/40 hover:text-text-primary'
               }`}
             >
@@ -189,7 +189,7 @@ export default function AdminOrderDetailPage() {
           <button
             onClick={handleSave}
             disabled={saving || (status === order.status && !trackingChanged)}
-            className="ml-auto inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-primary text-white hover:bg-primary-hover transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="ml-auto inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-primary text-on-primary hover:bg-primary-hover transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {saving && <Spinner />}
             {saving ? 'Saving...' : saved ? 'Saved ✓' : 'Save'}

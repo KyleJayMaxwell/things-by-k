@@ -76,7 +76,7 @@ export default async function OrderDetailPage({ params }: Props) {
           }) => (
             <div key={item.id} className="flex gap-4 p-5">
               {item.products?.images?.[0] && (
-                <div className="w-16 h-16 relative rounded-lg overflow-hidden bg-gray-50 border border-border flex-shrink-0">
+                <div className="w-16 h-16 relative rounded-lg overflow-hidden bg-primary-light border border-border flex-shrink-0">
                   <Image
                     src={item.products.images[0]}
                     alt={item.product_name}

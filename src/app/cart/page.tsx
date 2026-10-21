@@ -101,8 +101,8 @@ export default function CartPage() {
                     onClick={() => setDestination(d)}
                     className={`px-3 py-2 rounded-lg text-sm font-medium border transition-colors focus-ring ${
                       destination === d
-                        ? 'bg-primary text-white border-primary'
-                        : 'bg-white text-text-secondary border-border hover:border-primary/40 hover:text-text-primary'
+                        ? 'bg-primary text-on-primary border-primary'
+                        : 'bg-surface text-text-secondary border-border hover:border-primary/40 hover:text-text-primary'
                     }`}
                   >
                     {d === 'domestic' ? 'United States' : 'International'}

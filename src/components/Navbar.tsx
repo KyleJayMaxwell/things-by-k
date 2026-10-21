@@ -7,6 +7,7 @@ import { usePathname } from 'next/navigation'
 import { useState, useEffect, useRef } from 'react'
 import CartIcon from './icons/CartIcon'
 import AccountIcon from './icons/AccountIcon'
+import ThemeToggle from './ThemeToggle'
 import { useCart } from '@/context/CartContext'
 import { SHOP_SECTIONS } from '@/lib/shopSections'
 
@@ -88,7 +89,7 @@ export default function Navbar() {
             <div data-shop-menu className="relative group">
               {navLink('/shop', 'Shop')}
               <div className="absolute left-0 top-full pt-3 invisible opacity-0 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100 transition-opacity duration-150">
-                <ul className="min-w-44 bg-white rounded-lg shadow-lg border border-border py-2">
+                <ul className="min-w-44 bg-surface rounded-lg shadow-lg border border-border py-2">
                   {SHOP_LINKS.map(link => {
                     const current = pathname === link.href || (link.href !== '/shop' && pathname.startsWith(`${link.href}/`))
                     return (
@@ -96,7 +97,7 @@ export default function Navbar() {
                         <Link
                           href={link.href}
                           aria-current={current ? 'page' : undefined}
-                          className={`block px-4 py-2 text-sm hover:bg-neutral-100 focus:bg-neutral-100 focus:outline-none ${
+                          className={`block px-4 py-2 text-sm hover:bg-primary-light focus:bg-primary-light focus:outline-none ${
                             current ? 'font-medium text-text-primary' : 'text-text-secondary hover:text-text-primary'
                           }`}
                         >
@@ -110,6 +111,9 @@ export default function Navbar() {
             </div>
             {navLink('/about', 'About')}
           </nav>
+
+          {/* Phones: the theme toggle sits beside the menu button (the right side is full) */}
+          <ThemeToggle className="sm:hidden order-last" />
 
           {/* Mobile hamburger */}
           <button
@@ -134,6 +138,8 @@ export default function Navbar() {
 
         {/* Right icons */}
         <div className="flex items-center justify-end gap-1">
+          <ThemeToggle className="hidden sm:flex" />
+
           {/* Cart */}
           <Link
             href="/cart"

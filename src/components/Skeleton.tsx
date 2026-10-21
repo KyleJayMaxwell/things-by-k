@@ -6,7 +6,7 @@ interface SkeletonProps {
 
 // Neutral pulsing block used as a placeholder while content loads
 export default function Skeleton({ className = '' }: SkeletonProps) {
-  return <div className={`animate-pulse motion-reduce:animate-none rounded-md bg-neutral-200/70 ${className}`} aria-hidden="true" />
+  return <div className={`animate-pulse motion-reduce:animate-none rounded-md bg-muted/70 ${className}`} aria-hidden="true" />
 }
 
 // Wraps a page's skeleton so screen readers hear one "Loading" instead of empty blocks

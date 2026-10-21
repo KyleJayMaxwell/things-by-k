@@ -14,7 +14,7 @@ export default function FadeImage({ alt, className = '', onLoad, ...props }: Ima
 
   return (
     <>
-      {!loaded && <span className="absolute inset-0 animate-pulse motion-reduce:animate-none bg-neutral-200/70" aria-hidden="true" />}
+      {!loaded && <span className="absolute inset-0 animate-pulse motion-reduce:animate-none bg-muted/70" aria-hidden="true" />}
       <Image
         {...props}
         alt={alt}

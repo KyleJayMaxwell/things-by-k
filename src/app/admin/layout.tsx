@@ -17,7 +17,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 md:flex">
+    <div className="theme-light min-h-screen bg-gray-50 text-text-primary md:flex">
       {/* Sidebar on desktop (its links stick below the navbar; the column ends above the footer), top bar on phones */}
       <aside className="bg-white border-b border-border md:border-b-0 md:border-r md:w-56 md:shrink-0">
         <div className="md:sticky md:top-16">

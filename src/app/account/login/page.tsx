@@ -156,7 +156,7 @@ function LoginForm() {
             onClick={() => switchTab('signin')}
             className={`flex-1 py-2.5 text-sm font-medium transition-colors ${
               tab === 'signin'
-                ? 'bg-primary text-white'
+                ? 'bg-primary text-on-primary'
                 : 'bg-surface text-text-secondary hover:text-text-primary'
             }`}
           >
@@ -168,7 +168,7 @@ function LoginForm() {
             onClick={() => switchTab('register')}
             className={`flex-1 py-2.5 text-sm font-medium transition-colors ${
               tab === 'register'
-                ? 'bg-primary text-white'
+                ? 'bg-primary text-on-primary'
                 : 'bg-surface text-text-secondary hover:text-text-primary'
             }`}
           >
@@ -178,7 +178,7 @@ function LoginForm() {
 
         {/* Error / success messages */}
         {error && (
-          <div role="alert" className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-error">
+          <div role="alert" className="mb-4 p-3 bg-red-50 border border-red-200 dark:bg-red-950/40 dark:border-red-900 rounded-lg text-sm text-error">
             {error}
             {needsConfirmation && (
               <button
@@ -193,7 +193,7 @@ function LoginForm() {
           </div>
         )}
         {success && (
-          <div role="status" className="mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-sm text-success">
+          <div role="status" className="mb-4 p-3 bg-emerald-50 border border-emerald-200 dark:bg-emerald-950/40 dark:border-emerald-900 rounded-lg text-sm text-success">
             {success}
           </div>
         )}

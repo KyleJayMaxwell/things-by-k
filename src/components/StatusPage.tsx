@@ -6,7 +6,7 @@ import Link from 'next/link'
 
 // Same look as <Button>, for links and plain buttons on these pages
 export const statusButtonClass =
-  'inline-flex items-center justify-center px-6 py-3 rounded-lg bg-neutral-900 text-white text-sm font-medium shadow-sm hover:bg-neutral-800 hover:shadow-md hover:-translate-y-px transition-[background-color,box-shadow,transform] duration-150 focus-ring'
+  'inline-flex items-center justify-center px-6 py-3 rounded-lg bg-primary text-on-primary text-sm font-medium shadow-sm hover:bg-primary-hover hover:shadow-md hover:-translate-y-px transition-[background-color,box-shadow,transform] duration-150 focus-ring'
 
 interface StatusPageProps {
   eyebrow: string
@@ -21,7 +21,7 @@ export default function StatusPage({ eyebrow, title, message, action }: StatusPa
     <div className="max-w-xl mx-auto px-4 sm:px-6 py-20 sm:py-28 flex flex-col items-center text-center animate-fade-up">
       {/* The site icon: the K already optically centered in a black circle */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/icon.svg" alt="" aria-hidden="true" className="w-28 h-28 rounded-full shadow-lg shadow-black/20 mb-8" />
+      <img src="/icon.svg" alt="" aria-hidden="true" className="w-28 h-28 rounded-full shadow-lg shadow-black/20 dark:ring-1 dark:ring-border mb-8" />
       <p className="text-xs font-semibold tracking-[0.2em] uppercase text-text-secondary mb-3">{eyebrow}</p>
       <h1 className="text-3xl font-semibold text-text-primary mb-3">{title}</h1>
       <div className="text-text-secondary mb-10 max-w-md">{message}</div>

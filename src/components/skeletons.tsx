@@ -38,7 +38,7 @@ export function AdminTableSkeleton({ title = true, rows = 6 }: { title?: boolean
   return (
     <LoadingRegion>
       {title && <Skeleton className="h-8 w-40 mb-8" />}
-      <div className="bg-white border border-border rounded-xl overflow-hidden divide-y divide-border">
+      <div className="bg-surface border border-border rounded-xl overflow-hidden divide-y divide-border">
         <div className="px-5 py-3">
           <Skeleton className="h-3 w-1/2" />
         </div>

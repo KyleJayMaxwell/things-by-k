@@ -10,22 +10,22 @@ interface BadgeProps {
 const config: Record<OrderStatus, { label: string; className: string; dot: string }> = {
   processing: {
     label: 'Processing',
-    className: 'bg-amber-50 text-amber-800 ring-amber-200',
+    className: 'bg-amber-50 text-amber-800 ring-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:ring-amber-900',
     dot: 'bg-amber-500',
   },
   shipped: {
     label: 'Shipped',
-    className: 'bg-sky-50 text-sky-800 ring-sky-200',
+    className: 'bg-sky-50 text-sky-800 ring-sky-200 dark:bg-sky-950/40 dark:text-sky-300 dark:ring-sky-900',
     dot: 'bg-sky-500',
   },
   delivered: {
     label: 'Delivered',
-    className: 'bg-emerald-50 text-emerald-800 ring-emerald-200',
+    className: 'bg-emerald-50 text-emerald-800 ring-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:ring-emerald-900',
     dot: 'bg-emerald-500',
   },
   refunded: {
     label: 'Refunded',
-    className: 'bg-red-50 text-red-700 ring-red-200',
+    className: 'bg-red-50 text-red-700 ring-red-200 dark:bg-red-950/40 dark:text-red-300 dark:ring-red-900',
     dot: 'bg-red-500',
   },
 }

@@ -54,7 +54,7 @@ export default function ResetPasswordPage() {
         <h1 className="text-2xl font-semibold text-text-primary text-center mb-8">Choose a new password</h1>
 
         {error && (
-          <div role="alert" className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-error">
+          <div role="alert" className="mb-4 p-3 bg-red-50 border border-red-200 dark:bg-red-950/40 dark:border-red-900 rounded-lg text-sm text-error">
             {error}
             {linkExpired && (
               <Link href="/account/forgot-password" className="block mt-2 font-medium underline hover:no-underline">
