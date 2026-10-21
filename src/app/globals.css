@@ -6,8 +6,7 @@
 
 @layer base {
   /* Things by K — theme colors as RGB channels (see tailwind.config.ts) */
-  :root,
-  .theme-light {
+  :root {
     --c-botan: 147 91 102;          /* #935B66 — 5.1:1 on background */
     --c-primary: 23 23 23;          /* #171717 */
     --c-primary-light: 245 245 245; /* #F5F5F5 */
@@ -21,7 +20,7 @@
     --c-border: 228 224 239;        /* #E4E0EF */
     --c-success: 5 150 105;         /* #059669 */
     --c-error: 220 38 38;           /* #DC2626 */
-    color-scheme: light;  /* .theme-light keeps the admin light whatever the visitor picks */
+    color-scheme: light;
   }
 
   /* Dark theme: warm near-black, soft white text, solid buttons flip to light */

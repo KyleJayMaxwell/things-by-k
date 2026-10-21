@@ -17,9 +17,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   }
 
   return (
-    <div className="theme-light min-h-screen bg-gray-50 text-text-primary md:flex">
+    <div className="min-h-screen bg-background md:flex">
       {/* Sidebar on desktop (its links stick below the navbar; the column ends above the footer), top bar on phones */}
-      <aside className="bg-white border-b border-border md:border-b-0 md:border-r md:w-56 md:shrink-0">
+      <aside className="bg-surface border-b border-border md:border-b-0 md:border-r md:w-56 md:shrink-0">
         <div className="md:sticky md:top-16">
           <div className="px-5 py-4 md:py-5 md:border-b border-border">
             <Link href="/" className="text-xs text-text-secondary hover:text-primary transition-colors">
@@ -51,7 +51,7 @@ function AdminNavLink({ href, label }: { href: string; label: string }) {
   return (
     <Link
       href={href}
-      className="block px-3 py-2 rounded-lg text-sm text-text-secondary hover:text-text-primary hover:bg-gray-50 transition-colors"
+      className="block px-3 py-2 rounded-lg text-sm text-text-secondary hover:text-text-primary hover:bg-primary-light transition-colors"
     >
       {label}
     </Link>

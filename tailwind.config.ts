@@ -5,8 +5,8 @@ import type { Config } from 'tailwindcss'
 const token = (name: string) => `rgb(var(--c-${name}) / <alpha-value>)`
 
 const config: Config = {
-  // .dark on <html> switches themes; .theme-light keeps a subtree (the admin) light either way
-  darkMode: ['variant', '&:is(.dark *):not(:is(.theme-light *))'],
+  // .dark on <html> switches themes (set by src/lib/theme.ts)
+  darkMode: 'class',
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',

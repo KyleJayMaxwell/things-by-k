@@ -161,7 +161,7 @@ export default function AdminOrderDetailPage() {
       </div>
 
       {order.status === 'refunded' && (
-        <div className="bg-gray-50 border border-border rounded-xl p-5 mb-6 text-sm text-text-secondary">
+        <div className="bg-primary-light border border-border rounded-xl p-5 mb-6 text-sm text-text-secondary">
           Refunded {formatPrice(order.refund_amount ?? order.total)}
           {order.refunded_at && <> on {formatDate(order.refunded_at)}</>}. Stripe returns it to the
           customer&apos;s card in 5–10 business days.
@@ -170,7 +170,7 @@ export default function AdminOrderDetailPage() {
 
       {/* Status update */}
       {order.status !== 'refunded' && (
-      <div className="bg-white border border-border rounded-xl p-5 mb-6">
+      <div className="bg-surface border border-border rounded-xl p-5 mb-6">
         <h2 className="font-medium text-text-primary mb-4">Update Status</h2>
         <div className="flex items-center gap-3">
           {STATUS_OPTIONS.map(s => (
@@ -180,7 +180,7 @@ export default function AdminOrderDetailPage() {
               className={`px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${
                 status === s
                   ? 'bg-primary text-on-primary border-primary'
-                  : 'bg-white text-text-secondary border-border hover:border-primary/40 hover:text-text-primary'
+                  : 'bg-surface text-text-secondary border-border hover:border-primary/40 hover:text-text-primary'
               }`}
             >
               {s.charAt(0).toUpperCase() + s.slice(1)}
@@ -205,7 +205,7 @@ export default function AdminOrderDetailPage() {
                   value={carrier}
                   onChange={e => { setCarrier(e.target.value as Carrier); setFieldError(null) }}
                   aria-invalid={fieldError?.field === 'carrier'}
-                  className={`w-full px-3 py-2 rounded-lg border text-sm bg-white focus:outline-none ${fieldBorder(fieldError?.field === 'carrier')}`}
+                  className={`w-full px-3 py-2 rounded-lg border text-sm bg-surface focus:outline-none ${fieldBorder(fieldError?.field === 'carrier')}`}
                 >
                   {CARRIER_OPTIONS.map(([value, label]) => (
                     <option key={value} value={value}>{label}</option>
@@ -251,7 +251,7 @@ export default function AdminOrderDetailPage() {
         )}
 
         {message && (
-          <p className={`mt-4 text-sm ${message.tone === 'ok' ? 'text-emerald-700' : 'text-error'}`}>
+          <p className={`mt-4 text-sm ${message.tone === 'ok' ? 'text-success' : 'text-error'}`}>
             {message.text}
           </p>
         )}
@@ -259,7 +259,7 @@ export default function AdminOrderDetailPage() {
       )}
 
       {/* Items */}
-      <div className="bg-white border border-border rounded-xl overflow-hidden mb-6">
+      <div className="bg-surface border border-border rounded-xl overflow-hidden mb-6">
         <div className="px-5 py-4 border-b border-border">
           <h2 className="font-medium text-text-primary">Items</h2>
         </div>
@@ -284,7 +284,7 @@ export default function AdminOrderDetailPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         {/* Payment summary */}
-        <div className="bg-white border border-border rounded-xl p-5">
+        <div className="bg-surface border border-border rounded-xl p-5">
           <h2 className="font-medium text-text-primary mb-4">Payment</h2>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
@@ -303,7 +303,7 @@ export default function AdminOrderDetailPage() {
         </div>
 
         {/* Shipping address */}
-        <div className="bg-white border border-border rounded-xl p-5">
+        <div className="bg-surface border border-border rounded-xl p-5">
           <h2 className="font-medium text-text-primary mb-4">Ship To</h2>
           {address ? (
             <address className="text-sm text-text-secondary not-italic leading-relaxed">
@@ -321,7 +321,7 @@ export default function AdminOrderDetailPage() {
 
       {/* Refund */}
       {order.status !== 'refunded' && (
-        <div className="bg-white border border-border rounded-xl p-5 mt-6">
+        <div className="bg-surface border border-border rounded-xl p-5 mt-6">
           <div className="flex items-center justify-between gap-4">
             <div>
               <h2 className="font-medium text-text-primary">Refund</h2>
@@ -333,7 +333,7 @@ export default function AdminOrderDetailPage() {
             <button
               onClick={handleRefund}
               disabled={refunding}
-              className="flex-shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border border-error text-error hover:bg-red-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="flex-shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border border-error text-error hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {refunding && <Spinner />}
               {refunding ? 'Refunding...' : 'Refund order'}

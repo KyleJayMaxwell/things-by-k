@@ -75,7 +75,7 @@ export default function DateRangeFilter({ value, onChange }: Props) {
             className={`text-xs px-3 py-1 rounded-full transition-colors ${
               value.key === preset.key
                 ? 'bg-primary text-on-primary'
-                : 'bg-gray-100 text-text-secondary hover:text-text-primary'
+                : 'bg-primary-light text-text-secondary hover:text-text-primary'
             }`}
           >
             {preset.label}
@@ -90,7 +90,7 @@ export default function DateRangeFilter({ value, onChange }: Props) {
             value={value.from}
             max={value.to}
             onChange={e => e.target.value && e.target.value <= value.to && onChange({ ...value, from: e.target.value })}
-            className="px-2 py-1 border border-border rounded-lg bg-white"
+            className="px-2 py-1 border border-border rounded-lg bg-surface"
           />
           <span>to</span>
           <input
@@ -100,7 +100,7 @@ export default function DateRangeFilter({ value, onChange }: Props) {
             min={value.from}
             max={today}
             onChange={e => e.target.value && e.target.value >= value.from && e.target.value <= today && onChange({ ...value, to: e.target.value })}
-            className="px-2 py-1 border border-border rounded-lg bg-white"
+            className="px-2 py-1 border border-border rounded-lg bg-surface"
           />
         </div>
       )}

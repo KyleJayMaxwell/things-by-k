@@ -384,7 +384,7 @@ export default function ProductForm({ initialData, copyFrom }: ProductFormProps)
   return (
     <form ref={formRef} onSubmit={handleSubmit} onBlur={markTouched} noValidate className="max-w-7xl space-y-6">
       {error && (
-        <div role="alert" className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-error">
+        <div role="alert" className="p-3 bg-red-50 border border-red-200 dark:bg-red-950/40 dark:border-red-900 rounded-lg text-sm text-error">
           {error}
         </div>
       )}
@@ -393,7 +393,7 @@ export default function ProductForm({ initialData, copyFrom }: ProductFormProps)
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
         <div className="lg:col-span-3 space-y-6">
           {/* Basic info */}
-          <div className="bg-white border border-border rounded-xl p-6 space-y-4">
+          <div className="bg-surface border border-border rounded-xl p-6 space-y-4">
             <h2 className="font-medium text-text-primary">Basic Info</h2>
 
             <Field label="Name" htmlFor="name" error={fieldError('name')}>
@@ -470,7 +470,7 @@ export default function ProductForm({ initialData, copyFrom }: ProductFormProps)
           </div>
 
           {/* Descriptions */}
-          <div className="bg-white border border-border rounded-xl p-6 space-y-4">
+          <div className="bg-surface border border-border rounded-xl p-6 space-y-4">
             <h2 className="font-medium text-text-primary">Descriptions</h2>
 
             <Field label="Short description" hint="Shown on product card" htmlFor="description" error={fieldError('description')}>
@@ -499,7 +499,7 @@ export default function ProductForm({ initialData, copyFrom }: ProductFormProps)
           </div>
 
           {/* Shop filters */}
-          <div className="bg-white border border-border rounded-xl p-6 space-y-4">
+          <div className="bg-surface border border-border rounded-xl p-6 space-y-4">
             <div>
               <h2 className="font-medium text-text-primary">Shop filters</h2>
               <p className="text-sm text-text-secondary mt-1">Shoppers can filter by these, and search matches location tags too.</p>
@@ -523,7 +523,7 @@ export default function ProductForm({ initialData, copyFrom }: ProductFormProps)
                     key={loc}
                     type="button"
                     onClick={() => addLocation(loc)}
-                    className="px-2.5 py-0.5 rounded-full border border-border text-xs text-text-secondary hover:text-text-primary hover:border-neutral-400 transition-colors"
+                    className="px-2.5 py-0.5 rounded-full border border-border text-xs text-text-secondary hover:text-text-primary hover:border-text-secondary transition-colors"
                   >
                     + {loc}
                   </button>
@@ -563,7 +563,7 @@ export default function ProductForm({ initialData, copyFrom }: ProductFormProps)
               setFileDragOver(false)
               if (!uploading) uploadImages(Array.from(e.dataTransfer.files))
             }}
-            className={`bg-white border rounded-xl p-6 space-y-4 transition-colors ${
+            className={`bg-surface border rounded-xl p-6 space-y-4 transition-colors ${
               fileDragOver ? 'border-primary border-dashed bg-primary/5' : fieldError('images') ? 'border-error' : 'border-border'
             }`}
           >
@@ -665,7 +665,7 @@ export default function ProductForm({ initialData, copyFrom }: ProductFormProps)
 
           {/* Handwritten option */}
           {form.category === 'postcard' && (
-            <div className="bg-white border border-border rounded-xl p-6 space-y-4">
+            <div className="bg-surface border border-border rounded-xl p-6 space-y-4">
               <h2 className="font-medium text-text-primary">Handwritten option</h2>
               <p className="text-sm text-text-secondary">
                 Every postcard can be bought handwritten: the customer writes a note and you mail it as a postcard.
@@ -707,7 +707,7 @@ export default function ProductForm({ initialData, copyFrom }: ProductFormProps)
             type="button"
             onClick={handleDelete}
             disabled={deleting}
-            className="inline-flex items-center gap-2 px-4 py-2.5 text-sm text-error hover:text-red-700 transition-colors disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-4 py-2.5 text-sm text-error hover:text-red-700 dark:hover:text-red-300 transition-colors disabled:opacity-50"
           >
             {deleting && <Spinner />}
             {deleting ? 'Deleting...' : 'Delete Product'}

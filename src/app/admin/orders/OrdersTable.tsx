@@ -38,13 +38,13 @@ export default function OrdersTable({ rows, header }: OrdersTableProps) {
         </thead>
         <tbody className="divide-y divide-border">
           {rows.map(order => (
-            <tr key={order.id} className="hover:bg-gray-50 transition-colors">
+            <tr key={order.id} className="hover:bg-primary-light transition-colors">
               <td className="pl-5 pr-3 py-3 whitespace-nowrap">
                 <Link href={`/admin/orders/${order.id}`} prefetch={false} className="font-medium text-text-primary hover:text-primary hover:underline">
                   {order.orderNumber}
                 </Link>
                 {order.handwritten && (
-                  <span title="Includes a handwritten note" className="ml-2 text-xs font-medium px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-700">
+                  <span title="Includes a handwritten note" className="ml-2 text-xs font-medium px-1.5 py-0.5 rounded bg-primary-light text-text-primary">
                     ✎ Note
                   </span>
                 )}
