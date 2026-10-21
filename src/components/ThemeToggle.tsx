@@ -32,7 +32,7 @@ function subscribe(onChange: () => void) {
   }
 }
 
-export default function ThemeToggle({ className = '' }: { className?: string }) {
+export default function ThemeToggle({ className = '', showLabel = false }: { className?: string; showLabel?: boolean }) {
   // Only used for the label; null on the server, which can't know the theme
   const theme = useSyncExternalStore<Theme | null>(subscribe, currentTheme, () => null)
   // The nav renders one toggle for desktop and one for phones, so the mask id must be unique
@@ -62,7 +62,7 @@ export default function ThemeToggle({ className = '' }: { className?: string }) 
       onClick={toggle}
       aria-label={theme ? label : 'Toggle theme'}
       title={theme ? label : undefined}
-      className={`theme-toggle min-w-[44px] min-h-[44px] flex items-center justify-center text-white/80 hover:text-white transition-colors focus-ring-light rounded-md ${className}`}
+      className={`theme-toggle min-w-[44px] min-h-[44px] flex items-center justify-center text-white/80 hover:text-white transition-colors focus-ring-light rounded-md ${showLabel ? 'gap-2.5 px-2.5' : ''} ${className}`}
     >
       <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" aria-hidden="true">
         <mask id={maskId}>
@@ -75,6 +75,13 @@ export default function ThemeToggle({ className = '' }: { className?: string }) 
           <path d="M12 1.75v1.5M12 20.75v1.5M1.75 12h1.5M20.75 12h1.5M4.75 4.75l1.06 1.06M18.19 18.19l1.06 1.06M4.75 19.25l1.06-1.06M18.19 5.81l1.06-1.06" />
         </g>
       </svg>
+      {/* Picked by CSS like the icon, so it is right before hydration */}
+      {showLabel && (
+        <span className="text-sm font-medium uppercase tracking-wider" aria-hidden="true">
+          <span className="dark:hidden">Dark mode</span>
+          <span className="hidden dark:inline">Light mode</span>
+        </span>
+      )}
     </button>
   )
 }

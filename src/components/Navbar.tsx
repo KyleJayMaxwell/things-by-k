@@ -112,9 +112,6 @@ export default function Navbar() {
             {navLink('/about', 'About')}
           </nav>
 
-          {/* Phones: the theme toggle sits beside the menu button (the right side is full) */}
-          <ThemeToggle className="sm:hidden order-last" />
-
           {/* Mobile hamburger */}
           <button
             className="sm:hidden min-w-[44px] min-h-[44px] flex items-center justify-center text-white/80 hover:text-white transition-colors focus-ring-light rounded-md"
@@ -183,6 +180,8 @@ export default function Navbar() {
             <div key={link.href}>{navLink(link.href, link.href === '/shop' ? 'Shop All' : link.label, { exact: link.href === '/shop' })}</div>
           ))}
           {navLink('/about', 'About')}
+          {/* Phones: the theme toggle lives in the menu, so the top bar stays uncluttered */}
+          <ThemeToggle showLabel className="-ml-2.5 self-start" />
         </nav>
       </div>
     </header>
