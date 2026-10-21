@@ -39,7 +39,7 @@ export default async function OrdersPage() {
       ) : !orders || orders.length === 0 ? (
         <div className="text-center py-20">
           <p className="text-text-secondary mb-6">You haven’t placed any orders yet.</p>
-          <Link href="/shop" className="inline-flex items-center px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors font-medium">
+          <Link href="/shop" className="inline-flex items-center px-6 py-3 bg-primary text-on-primary rounded-lg hover:bg-primary-hover transition-colors font-medium">
             Start Shopping
           </Link>
         </div>

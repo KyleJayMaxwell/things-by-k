@@ -24,7 +24,7 @@ export default function LoadError({ message, onRetry, className = 'py-20' }: {
         type="button"
         onClick={() => (onRetry ? onRetry() : startRetry(() => router.refresh()))}
         disabled={retrying}
-        className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-hover transition-colors disabled:opacity-50"
+        className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-on-primary text-sm font-medium rounded-lg hover:bg-primary-hover transition-colors disabled:opacity-50"
       >
         {retrying && <Spinner />}
         Try again

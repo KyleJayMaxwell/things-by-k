@@ -23,7 +23,7 @@ export default function StatusTabs({ tabs, pathname, params }: { tabs: StatusTab
           aria-current={tab.active ? 'page' : undefined}
           className={`whitespace-nowrap px-3 py-2 -mb-px text-sm border-b-2 transition-colors ${
             tab.active
-              ? 'border-neutral-900 text-text-primary font-medium'
+              ? 'border-primary text-text-primary font-medium'
               : 'border-transparent text-text-secondary hover:text-text-primary'
           }`}
         >

@@ -50,7 +50,7 @@ export default function ProductDetail({ product, breadcrumbs }: ProductDetailPro
         {/* Image Gallery */}
         <div className="space-y-4">
           {/* Main image — key causes remount for crossfade on image switch */}
-          <div className="aspect-square relative rounded-xl overflow-hidden bg-gray-50 border border-border">
+          <div className="aspect-square relative rounded-xl overflow-hidden bg-primary-light border border-border">
             <div key={selectedImage} className="animate-fade-in absolute inset-0">
               {product.images[selectedImage] ? (
                 <button
@@ -68,7 +68,7 @@ export default function ProductDetail({ product, breadcrumbs }: ProductDetailPro
                     priority
                     sizes="(max-width: 1024px) 100vw, 50vw"
                   />
-                  <span className="absolute bottom-3 right-3 w-9 h-9 rounded-full bg-white/90 border border-border text-text-primary flex items-center justify-center shadow-sm opacity-80 group-hover:opacity-100 transition-opacity">
+                  <span className="absolute bottom-3 right-3 w-9 h-9 rounded-full bg-surface/90 border border-border text-text-primary flex items-center justify-center shadow-sm opacity-80 group-hover:opacity-100 transition-opacity">
                     <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                       <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
                       <path d="M8 5.5a.75.75 0 01.75.75v1h1a.75.75 0 010 1.5h-1v1a.75.75 0 01-1.5 0v-1h-1a.75.75 0 010-1.5h1v-1A.75.75 0 018 5.5z" />
@@ -82,7 +82,7 @@ export default function ProductDetail({ product, breadcrumbs }: ProductDetailPro
               )}
             </div>
             {isSoldOut && (
-              <div className="absolute top-4 left-4 bg-white text-text-secondary text-sm font-medium px-3 py-1 rounded-full border border-border z-10">
+              <div className="absolute top-4 left-4 bg-surface text-text-secondary text-sm font-medium px-3 py-1 rounded-full border border-border z-10">
                 Sold Out
               </div>
             )}
@@ -156,7 +156,7 @@ export default function ProductDetail({ product, breadcrumbs }: ProductDetailPro
                     className={`text-left p-4 rounded-xl border transition-colors focus-ring ${
                       handwritten === option.value
                         ? 'border-primary bg-primary-light'
-                        : 'border-border bg-white hover:border-primary/40'
+                        : 'border-border bg-surface hover:border-primary/40'
                     }`}
                   >
                     <span className="flex items-baseline justify-between gap-2">
@@ -179,7 +179,7 @@ export default function ProductDetail({ product, breadcrumbs }: ProductDetailPro
                     onChange={e => setMessage(e.target.value.slice(0, HANDWRITTEN_MESSAGE_MAX))}
                     rows={6}
                     placeholder={'Sending it to someone? Write your message, like "Dear Sam, wish you were here for the fog..."\n\nSending it to yourself? Give me a little inspiration (a favorite place, a memory, something you need to hear) and I\'ll write you a surprise.\n\nOr leave it blank and I\'ll freestyle it.'}
-                    className="w-full px-3 py-2.5 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors bg-white"
+                    className="w-full px-3 py-2.5 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors bg-surface"
                   />
                   <p className="mt-1.5 flex justify-between text-xs text-text-secondary">
                     <span>It’s mailed to the shipping address you enter at checkout. Send a pick-me-up to a friend, or treat yourself to something fun in the mailbox instead of bills.</span>

@@ -163,25 +163,25 @@ export default function AdminPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
 
         {/* Revenue over time */}
-        <div className="lg:col-span-2 bg-white border border-border rounded-xl p-5">
+        <div className="lg:col-span-2 bg-surface border border-border rounded-xl p-5">
           <h2 className="font-medium text-text-primary mb-4">Revenue</h2>
           {revenueByDay.length === 0 ? (
             <EmptyChart />
           ) : (
             <ResponsiveContainer width="100%" height={200}>
               <LineChart data={revenueByDay} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#6B7280' }} tickLine={false} axisLine={false} />
-                <YAxis tick={{ fontSize: 11, fill: '#6B7280' }} tickLine={false} axisLine={false} tickFormatter={v => `$${v}`} />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgb(var(--c-border))" />
+                <XAxis dataKey="date" tick={{ fontSize: 11, fill: 'rgb(var(--c-text-secondary))' }} tickLine={false} axisLine={false} />
+                <YAxis tick={{ fontSize: 11, fill: 'rgb(var(--c-text-secondary))' }} tickLine={false} axisLine={false} tickFormatter={v => `$${v}`} />
                 <Tooltip formatter={(v) => [`$${(Number(v) || 0).toFixed(2)}`, 'Revenue']} contentStyle={tooltipStyle} />
-                <Line type="monotone" dataKey="revenue" stroke="#171717" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="revenue" stroke="rgb(var(--c-primary))" strokeWidth={2} dot={false} />
               </LineChart>
             </ResponsiveContainer>
           )}
         </div>
 
         {/* Orders by status */}
-        <div className="bg-white border border-border rounded-xl p-5">
+        <div className="bg-surface border border-border rounded-xl p-5">
           <h2 className="font-medium text-text-primary mb-4">By Status</h2>
           {statusData.length === 0 ? (
             <EmptyChart />
@@ -205,7 +205,7 @@ export default function AdminPage() {
                 <Legend
                   iconType="circle"
                   iconSize={8}
-                  formatter={(value) => <span style={{ fontSize: 11, color: '#6B7280' }}>{value}</span>}
+                  formatter={(value) => <span style={{ fontSize: 11, color: 'rgb(var(--c-text-secondary))' }}>{value}</span>}
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -217,38 +217,38 @@ export default function AdminPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
 
         {/* Daily order volume */}
-        <div className="bg-white border border-border rounded-xl p-5">
+        <div className="bg-surface border border-border rounded-xl p-5">
           <h2 className="font-medium text-text-primary mb-4">{byMonth ? 'Monthly Orders' : 'Daily Orders'}</h2>
           {volumeByDay.length === 0 ? (
             <EmptyChart />
           ) : (
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={volumeByDay} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
-                <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#6B7280' }} tickLine={false} axisLine={false} />
-                <YAxis tick={{ fontSize: 11, fill: '#6B7280' }} tickLine={false} axisLine={false} allowDecimals={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgb(var(--c-border))" vertical={false} />
+                <XAxis dataKey="date" tick={{ fontSize: 11, fill: 'rgb(var(--c-text-secondary))' }} tickLine={false} axisLine={false} />
+                <YAxis tick={{ fontSize: 11, fill: 'rgb(var(--c-text-secondary))' }} tickLine={false} axisLine={false} allowDecimals={false} />
                 <Tooltip formatter={(v) => [(Number(v) || 0).toFixed(2), 'Orders']} contentStyle={tooltipStyle} />
-                <Bar dataKey="orders" fill="#171717" radius={[3, 3, 0, 0]} />
+                <Bar dataKey="orders" fill="rgb(var(--c-primary))" radius={[3, 3, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           )}
         </div>
 
         {/* Sales by product */}
-        <div className="bg-white border border-border rounded-xl p-5">
+        <div className="bg-surface border border-border rounded-xl p-5">
           <h2 className="font-medium text-text-primary mb-4">Sales by Product</h2>
           {salesByProduct.length === 0 ? (
             <EmptyChart />
           ) : (
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={salesByProduct} layout="vertical" margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" horizontal={false} />
-                <XAxis type="number" tick={{ fontSize: 11, fill: '#6B7280' }} tickLine={false} axisLine={false} allowDecimals={false} />
-                <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: '#6B7280' }} tickLine={false} axisLine={false} width={90} />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgb(var(--c-border))" horizontal={false} />
+                <XAxis type="number" tick={{ fontSize: 11, fill: 'rgb(var(--c-text-secondary))' }} tickLine={false} axisLine={false} allowDecimals={false} />
+                <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: 'rgb(var(--c-text-secondary))' }} tickLine={false} axisLine={false} width={90} />
                 <Tooltip formatter={(v) => [(Number(v) || 0).toFixed(2), 'Units sold']} contentStyle={tooltipStyle} />
-                <Bar dataKey="units" fill="#E5E5E5" radius={[0, 3, 3, 0]}>
+                <Bar dataKey="units" fill="rgb(var(--c-muted))" radius={[0, 3, 3, 0]}>
                   {salesByProduct.map((_, i) => (
-                    <Cell key={i} fill={i === 0 ? '#171717' : '#E5E5E5'} />
+                    <Cell key={i} fill={i === 0 ? 'rgb(var(--c-primary))' : 'rgb(var(--c-muted))'} />
                   ))}
                 </Bar>
               </BarChart>
@@ -261,7 +261,7 @@ export default function AdminPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         {/* Recent orders */}
-        <div className="lg:col-span-2 bg-white border border-border rounded-xl overflow-hidden">
+        <div className="lg:col-span-2 bg-surface border border-border rounded-xl overflow-hidden">
           <div className="flex items-center justify-between px-5 py-4 border-b border-border">
             <h2 className="font-medium text-text-primary">Recent Orders</h2>
             <Link href="/admin/orders" className="text-xs text-primary hover:text-primary-hover transition-colors">
@@ -276,7 +276,7 @@ export default function AdminPage() {
                 <Link
                   key={order.id}
                   href={`/admin/orders/${order.id}`}
-                  className="flex items-center justify-between px-5 py-3.5 hover:bg-gray-50 transition-colors group"
+                  className="flex items-center justify-between px-5 py-3.5 hover:bg-primary-light transition-colors group"
                 >
                   <div>
                     <p className="text-sm font-medium text-text-primary group-hover:text-primary transition-colors">
@@ -295,7 +295,7 @@ export default function AdminPage() {
         </div>
 
         {/* Low stock */}
-        <div className="bg-white border border-border rounded-xl overflow-hidden">
+        <div className="bg-surface border border-border rounded-xl overflow-hidden">
           <div className="flex items-center justify-between px-5 py-4 border-b border-border">
             <h2 className="font-medium text-text-primary">Low Stock</h2>
             <Link href="/admin/products" className="text-xs text-primary hover:text-primary-hover transition-colors">
@@ -310,7 +310,7 @@ export default function AdminPage() {
                 <Link
                   key={product.id}
                   href={`/admin/products/${product.id}`}
-                  className="flex items-center justify-between px-5 py-3.5 hover:bg-gray-50 transition-colors group"
+                  className="flex items-center justify-between px-5 py-3.5 hover:bg-primary-light transition-colors group"
                 >
                   <p className="text-sm text-text-primary group-hover:text-primary transition-colors truncate pr-4">
                     {product.name}
@@ -328,8 +328,11 @@ export default function AdminPage() {
   )
 }
 
+// Theme colors come from the CSS variables in globals.css so the charts follow light/dark
 const tooltipStyle = {
-  border: '1px solid #E5E7EB',
+  background: 'rgb(var(--c-surface))',
+  color: 'rgb(var(--c-text-primary))',
+  border: '1px solid rgb(var(--c-border))',
   borderRadius: '8px',
   fontSize: '12px',
   boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)',
@@ -337,7 +340,7 @@ const tooltipStyle = {
 
 function StatCard({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
   return (
-    <div className="bg-white border border-border rounded-xl px-5 py-4">
+    <div className="bg-surface border border-border rounded-xl px-5 py-4">
       <p className="text-xs text-text-secondary uppercase tracking-widest mb-1">{label}</p>
       <p className={`text-2xl font-semibold ${highlight ? 'text-warning' : 'text-text-primary'}`}>{value}</p>
     </div>

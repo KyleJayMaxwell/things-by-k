@@ -17,7 +17,7 @@ export default function DayFilter({ today }: { today: string }) {
         max={today}
         onChange={e => setParams({ day: e.target.value || null })}
         aria-label="Order date"
-        className="py-1.5 px-3 text-sm bg-white border border-border rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-neutral-900/10"
+        className="py-1.5 px-3 text-sm bg-surface border border-border rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/10"
       />
       {day !== today && (
         <button

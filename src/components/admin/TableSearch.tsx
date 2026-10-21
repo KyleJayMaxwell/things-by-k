@@ -41,7 +41,7 @@ export default function TableSearch({ placeholder }: { placeholder: string }) {
         onChange={e => setValue(e.target.value)}
         placeholder={placeholder}
         aria-label={placeholder}
-        className="w-full pl-3 pr-9 py-2 text-sm bg-white border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-400"
+        className="w-full pl-3 pr-9 py-2 text-sm bg-surface border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-text-secondary"
       />
       {pending && (
         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary">

@@ -50,14 +50,14 @@ export default function ProductListing({
           name="q"
           defaultValue={params.q}
           placeholder={searchPlaceholder}
-          className="flex-1 min-w-0 px-3 py-2 border border-border rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+          className="flex-1 min-w-0 px-3 py-2 border border-border rounded-lg bg-surface text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
         />
         {params.type && <input type="hidden" name="type" value={params.type} />}
         {params.location && <input type="hidden" name="location" value={params.location} />}
         {params.orientation && <input type="hidden" name="orientation" value={params.orientation} />}
         {params.sort !== 'newest' && <input type="hidden" name="sort" value={params.sort} />}
         {params.per !== DEFAULT_PAGE_SIZE && <input type="hidden" name="per" value={params.per} />}
-        <button type="submit" className="px-4 py-2 bg-neutral-900 text-white text-sm font-medium rounded-lg hover:bg-neutral-800 transition-colors focus-ring">
+        <button type="submit" className="px-4 py-2 bg-primary text-on-primary text-sm font-medium rounded-lg hover:bg-primary-hover transition-colors focus-ring">
           Search
         </button>
       </form>
@@ -163,8 +163,8 @@ function Chip({ href, active, children }: { href: string; active: boolean; child
       aria-current={active ? 'true' : undefined}
       className={`px-3 py-1 rounded-full border text-sm transition-colors focus-ring ${
         active
-          ? 'bg-neutral-900 border-neutral-900 text-white'
-          : 'bg-white border-border text-text-primary hover:border-neutral-400'
+          ? 'bg-primary border-primary text-on-primary'
+          : 'bg-surface border-border text-text-primary hover:border-text-secondary'
       }`}
     >
       {children}
@@ -182,7 +182,7 @@ function Pagination({ page, totalPages, hrefFor }: { page: number; totalPages: n
   const linkClass = 'min-w-9 h-9 px-2 inline-flex items-center justify-center rounded-lg text-sm transition-colors focus-ring'
   return (
     <nav aria-label="Pagination" className="mt-10 flex flex-wrap items-center justify-center gap-1">
-      {page > 1 && <Link href={hrefFor(page - 1)} className={`${linkClass} text-text-primary hover:bg-neutral-100`}>‹ Prev</Link>}
+      {page > 1 && <Link href={hrefFor(page - 1)} className={`${linkClass} text-text-primary hover:bg-primary-light`}>‹ Prev</Link>}
       {pages.map((p, i) =>
         p === 'gap' ? (
           <span key={`gap-${i}`} className="px-1 text-text-secondary">…</span>
@@ -191,13 +191,13 @@ function Pagination({ page, totalPages, hrefFor }: { page: number; totalPages: n
             key={p}
             href={hrefFor(p)}
             aria-current={p === page ? 'page' : undefined}
-            className={`${linkClass} ${p === page ? 'bg-neutral-900 text-white' : 'text-text-primary hover:bg-neutral-100'}`}
+            className={`${linkClass} ${p === page ? 'bg-primary text-on-primary' : 'text-text-primary hover:bg-primary-light'}`}
           >
             {p}
           </Link>
         )
       )}
-      {page < totalPages && <Link href={hrefFor(page + 1)} className={`${linkClass} text-text-primary hover:bg-neutral-100`}>Next ›</Link>}
+      {page < totalPages && <Link href={hrefFor(page + 1)} className={`${linkClass} text-text-primary hover:bg-primary-light`}>Next ›</Link>}
     </nav>
   )
 }

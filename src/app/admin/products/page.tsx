@@ -72,7 +72,7 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
           </a>
           <Link
             href="/admin/products/new"
-            className="px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-hover transition-colors"
+            className="px-4 py-2 bg-primary text-on-primary text-sm font-medium rounded-lg hover:bg-primary-hover transition-colors"
           >
             + Add Product
           </Link>
@@ -110,7 +110,7 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
         </div>
       </div>
 
-      <div className="bg-white border border-border rounded-xl overflow-hidden">
+      <div className="bg-surface border border-border rounded-xl overflow-hidden">
         {page.error ? (
           <p role="alert" className="text-sm text-error px-6 py-12 text-center">Couldn’t load products: {page.error.message}</p>
         ) : total === 0 && !filtered ? (

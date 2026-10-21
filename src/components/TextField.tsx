@@ -6,7 +6,7 @@
 import { useState } from 'react'
 
 export const inputClass =
-  'w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 transition-colors bg-white'
+  'w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 transition-colors bg-surface'
 
 export function inputBorder(showError: boolean) {
   return showError

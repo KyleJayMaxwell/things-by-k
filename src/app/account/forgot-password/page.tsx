@@ -44,13 +44,13 @@ export default function ForgotPasswordPage() {
         </p>
 
         {sent ? (
-          <div role="status" className="p-4 bg-emerald-50 border border-emerald-200 rounded-lg text-sm text-success">
+          <div role="status" className="p-4 bg-emerald-50 border border-emerald-200 dark:bg-emerald-950/40 dark:border-emerald-900 rounded-lg text-sm text-success">
             If there’s an account for {email.trim()}, a reset link is on its way. Check your inbox (and spam folder).
           </div>
         ) : (
           <form onSubmit={handleSubmit} noValidate className="space-y-4">
             {error && (
-              <div role="alert" className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-error">
+              <div role="alert" className="p-3 bg-red-50 border border-red-200 dark:bg-red-950/40 dark:border-red-900 rounded-lg text-sm text-error">
                 {error}
               </div>
             )}

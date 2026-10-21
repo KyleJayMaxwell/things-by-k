@@ -44,7 +44,7 @@ export default function Pagination({ page, perPage, total, pageSizes, pathname, 
       {last > 1 && (
         <nav aria-label="Pagination" className="flex items-center gap-1">
           {page > 1 ? (
-            <Link href={href(page - 1)} scroll={false} prefetch={false} className={`${linkClass} text-text-secondary hover:bg-gray-100`}>
+            <Link href={href(page - 1)} scroll={false} prefetch={false} className={`${linkClass} text-text-secondary hover:bg-primary-light`}>
               ← Prev
             </Link>
           ) : (
@@ -60,14 +60,14 @@ export default function Pagination({ page, perPage, total, pageSizes, pathname, 
                 scroll={false}
                 prefetch={false}
                 aria-current={n === page ? 'page' : undefined}
-                className={`${linkClass} ${n === page ? 'bg-neutral-900 text-white' : 'text-text-primary hover:bg-gray-100'}`}
+                className={`${linkClass} ${n === page ? 'bg-primary text-on-primary' : 'text-text-primary hover:bg-primary-light'}`}
               >
                 {n}
               </Link>
             )
           )}
           {page < last ? (
-            <Link href={href(page + 1)} scroll={false} prefetch={false} className={`${linkClass} text-text-secondary hover:bg-gray-100`}>
+            <Link href={href(page + 1)} scroll={false} prefetch={false} className={`${linkClass} text-text-secondary hover:bg-primary-light`}>
               Next →
             </Link>
           ) : (

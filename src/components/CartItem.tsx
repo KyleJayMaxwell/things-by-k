@@ -37,7 +37,7 @@ export default function CartItem({ item }: CartItemProps) {
     >
       {/* Thumbnail */}
       <Link href={productHref(product)} className="flex-shrink-0">
-        <div className="w-20 h-20 sm:w-24 sm:h-24 relative rounded-lg overflow-hidden bg-gray-50 border border-border">
+        <div className="w-20 h-20 sm:w-24 sm:h-24 relative rounded-lg overflow-hidden bg-primary-light border border-border">
           {product.images[0] ? (
             <FadeImage
               src={product.images[0]}
@@ -47,7 +47,7 @@ export default function CartItem({ item }: CartItemProps) {
               sizes="96px"
             />
           ) : (
-            <div className="w-full h-full bg-gray-100" />
+            <div className="w-full h-full bg-primary-light" />
           )}
         </div>
       </Link>

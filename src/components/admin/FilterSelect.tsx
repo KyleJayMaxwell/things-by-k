@@ -19,7 +19,7 @@ export default function FilterSelect({ param, label, options }: FilterSelectProp
       value={searchParams.get(param) ?? ''}
       onChange={e => setParams({ [param]: e.target.value || null })}
       aria-label={label}
-      className="py-2 pl-3 pr-8 text-sm bg-white border border-border rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-neutral-900/10"
+      className="py-2 pl-3 pr-8 text-sm bg-surface border border-border rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/10"
     >
       <option value="">{label}</option>
       {options.map(option => (

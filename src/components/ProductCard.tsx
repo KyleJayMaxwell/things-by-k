@@ -21,7 +21,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       className="group flex flex-col h-full bg-surface rounded-xl overflow-hidden border border-border hover:border-primary/30 hover:shadow-lg hover:-translate-y-1 transition-[transform,box-shadow,border-color] duration-200"
     >
       {/* Image */}
-      <div className="aspect-square relative overflow-hidden bg-gray-50">
+      <div className="aspect-square relative overflow-hidden bg-primary-light">
         {mainImage ? (
           <FadeImage
             src={mainImage}
@@ -36,8 +36,8 @@ export default function ProductCard({ product }: ProductCardProps) {
           </div>
         )}
         {product.stock === 0 && (
-          <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
-            <span className="text-sm font-medium text-text-secondary bg-white px-3 py-1 rounded-full border border-border">
+          <div className="absolute inset-0 bg-surface/60 flex items-center justify-center">
+            <span className="text-sm font-medium text-text-secondary bg-surface px-3 py-1 rounded-full border border-border">
               Sold Out
             </span>
           </div>

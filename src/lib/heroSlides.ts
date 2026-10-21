@@ -31,7 +31,6 @@ export const heroSlides: HeroSlide[] = [
     alt: 'Golden Gate Bridge tower in the fog',
     // Anchor near the top so the tower isn't cropped off on wide screens
     position: '20% 15%',
-    heading: 'Designed by K',
     buttons: [{ label: 'About Things by K', href: '/about' }],
   },
 ]

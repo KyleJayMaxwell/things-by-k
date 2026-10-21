@@ -130,7 +130,7 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
         <DayFilter today={shopToday()} />
       </div>
 
-      <div className="bg-white border border-border rounded-xl overflow-hidden">
+      <div className="bg-surface border border-border rounded-xl overflow-hidden">
         {page.error ? (
           <p role="alert" className="text-sm text-error px-6 py-12 text-center">Couldn’t load orders: {page.error.message}</p>
         ) : total === 0 && !filtered ? (
