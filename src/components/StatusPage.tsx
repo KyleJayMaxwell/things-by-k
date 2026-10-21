@@ -19,9 +19,9 @@ interface StatusPageProps {
 export default function StatusPage({ eyebrow, title, message, action }: StatusPageProps) {
   return (
     <div className="max-w-xl mx-auto px-4 sm:px-6 py-20 sm:py-28 flex flex-col items-center text-center animate-fade-up">
-      {/* The site icon: the K already optically centered in a black circle */}
+      {/* The site icon: the K already optically centered in a black circle; inverted to white with a black K in dark mode */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/icon.svg" alt="" aria-hidden="true" className="w-28 h-28 rounded-full shadow-lg shadow-black/20 dark:ring-1 dark:ring-border mb-8" />
+      <img src="/icon.svg" alt="" aria-hidden="true" className="w-28 h-28 rounded-full shadow-lg shadow-black/20 dark:invert mb-8" />
       <p className="text-xs font-semibold tracking-[0.2em] uppercase text-text-secondary mb-3">{eyebrow}</p>
       <h1 className="text-3xl font-semibold text-text-primary mb-3">{title}</h1>
       <div className="text-text-secondary mb-10 max-w-md">{message}</div>
