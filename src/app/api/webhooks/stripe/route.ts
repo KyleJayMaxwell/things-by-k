@@ -58,20 +58,30 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
     .maybeSingle()
   if (existingOrder) return
 
-  // Fetch line items from Stripe
-  const lineItems = await stripe.checkout.sessions.listLineItems(session.id, {
-    expand: ['data.price.product'],
-  })
+  // Fetch every line item from Stripe (the API returns 10 per page by default)
+  const lineItems = await stripe.checkout.sessions
+    .listLineItems(session.id, { expand: ['data.price.product'], limit: 100 })
+    .autoPagingToArray({ limit: 1000 })
 
-  // Generate order number
-  const { data: orderNumberData } = await supabase
-    .rpc('generate_order_number')
-  const orderNumber = orderNumberData as string
+  const items = lineItems.map(item => {
+    const stripeProduct = item.price?.product as Stripe.Product
+    const productId = stripeProduct?.metadata?.product_id
+    // Every line checkout creates carries a product id. Fail loudly (Stripe
+    // retries and shows the error) rather than save an order missing an item.
+    if (!productId) throw new Error(`Line item ${item.id} on ${session.id} has no product_id`)
+    return {
+      product_id: productId,
+      product_name: stripeProduct.name,
+      price: item.price?.unit_amount ?? 0,
+      quantity: item.quantity ?? 1,
+      handwritten_message: stripeProduct.metadata?.message
+        || (stripeProduct.metadata?.handwritten === 'true' ? 'No note given: freestyle it' : null),
+    }
+  })
 
   // Re-fetch the session so shipping_details is fully populated
   // (the webhook payload can arrive before Stripe has settled all fields)
   const fullSession = await stripe.checkout.sessions.retrieve(session.id)
-  const userId = session.metadata?.user_id || null
   const shippingDetails = fullSession.shipping_details
   const address = shippingDetails?.address
   const customerEmail = fullSession.customer_details?.email ?? ''
@@ -86,78 +96,36 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
     country: address?.country ?? '',
   }
 
-  // Insert order
-  const { data: order, error: orderError } = await supabase
-    .from('orders')
-    .insert({
-      order_number: orderNumber,
-      user_id: userId || null,
+  // Order, items and stock are saved in one transaction (supabase/create-order.sql),
+  // so a failure leaves nothing behind and Stripe's retry starts clean
+  const { data, error } = await supabase.rpc('create_order', {
+    p_order: {
+      user_id: session.metadata?.user_id ?? '',
       email: customerEmail,
       stripe_session_id: session.id,
       stripe_payment_intent: session.payment_intent as string,
-      status: 'processing',
       subtotal: fullSession.amount_subtotal ?? 0,
       shipping_cost: fullSession.shipping_cost?.amount_total ?? 0,
       total: fullSession.amount_total ?? 0,
       shipping_address: shippingAddress,
-    })
-    .select()
-    .single()
-
-  if (orderError || !order) {
-    throw new Error(`Failed to insert order: ${orderError?.message}`)
+    },
+    p_items: items,
+  })
+  if (error || !data) {
+    throw new Error(`Failed to create order: ${error?.message}`)
   }
 
-  // Insert order items, decrement stock, and collect items for email
-  const emailItems: { name: string; quantity: number; price: number }[] = []
-
-  for (const item of lineItems.data) {
-    const stripeProduct = item.price?.product as Stripe.Product
-    const productId = stripeProduct?.metadata?.product_id
-
-    if (!productId) continue
-
-    // Insert order item
-    const { data: orderItem } = await supabase.from('order_items').insert({
-      order_id: order.id,
-      product_id: productId,
-      product_name: stripeProduct.name,
-      price: item.price?.unit_amount ?? 0,
-      quantity: item.quantity ?? 1,
-    }).select('id').single()
-
-    // Save the note for a handwritten card. Kept separate from the insert so a
-    // missing column (handwritten-option.sql not run yet) can't drop the item.
-    const message = stripeProduct.metadata?.message
-      || (stripeProduct.metadata?.handwritten === 'true' ? 'No note given: freestyle it' : null)
-    if (orderItem && message) {
-      const { error: messageError } = await supabase
-        .from('order_items')
-        .update({ handwritten_message: message })
-        .eq('id', orderItem.id)
-      if (messageError) console.error('Failed to save handwritten message:', messageError.message)
-    }
-
-    // Decrement stock
-    await supabase.rpc('decrement_stock', {
-      p_product_id: productId,
-      p_quantity: item.quantity ?? 1,
-    })
-
-    emailItems.push({
-      name: stripeProduct.name,
-      quantity: item.quantity ?? 1,
-      price: item.price?.unit_amount ?? 0,
-    })
-  }
+  const order = data as { order_number: string; created: boolean }
+  // Another delivery of this event saved the order first and sent the email
+  if (!order.created) return
 
   // Send order confirmation email — non-fatal if it fails
   if (customerEmail) {
     try {
       await sendOrderConfirmation({
         to: customerEmail,
-        orderNumber,
-        items: emailItems,
+        orderNumber: order.order_number,
+        items: items.map(({ product_name, quantity, price }) => ({ name: product_name, quantity, price })),
         subtotal: fullSession.amount_subtotal ?? 0,
         shippingCost: fullSession.shipping_cost?.amount_total ?? 0,
         total: fullSession.amount_total ?? 0,

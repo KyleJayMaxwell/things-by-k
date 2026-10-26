@@ -4,7 +4,7 @@
 // and resets every time it starts. Any email and password signs in.
 
 import http from 'node:http'
-import { createHash } from 'node:crypto'
+import { createHash, randomUUID } from 'node:crypto'
 import { readFile } from 'node:fs/promises'
 import { buildData } from './data.mjs'
 
@@ -243,6 +243,26 @@ async function handleRest(req, res, url) {
 function handleRpc(res, fn, args) {
   if (fn === 'generate_order_number') {
     return send(res, 200, `TBK-${String(nextOrderNumber++).padStart(5, '0')}`)
+  }
+  if (fn === 'create_order') {
+    const { p_order: o, p_items: items } = args
+    const existing = db.orders.find(order => order.stripe_session_id === o.stripe_session_id)
+    if (existing) return send(res, 200, { id: existing.id, order_number: existing.order_number, created: false })
+    const order = {
+      id: randomUUID(), order_number: `TBK-${String(nextOrderNumber++).padStart(5, '0')}`,
+      user_id: o.user_id || null, email: o.email, stripe_session_id: o.stripe_session_id,
+      stripe_payment_intent: o.stripe_payment_intent, status: 'processing',
+      subtotal: o.subtotal, shipping_cost: o.shipping_cost, total: o.total, shipping_address: o.shipping_address,
+      carrier: null, tracking_number: null, shipped_at: null, refunded_at: null, refund_amount: null,
+      created_at: new Date().toISOString(),
+    }
+    db.orders.push(order)
+    for (const item of items) {
+      db.order_items.push({ id: randomUUID(), order_id: order.id, ...item, handwritten_message: item.handwritten_message || null })
+      const product = db.products.find(p => p.id === item.product_id)
+      if (product) product.stock = Math.max(0, product.stock - item.quantity)
+    }
+    return send(res, 200, { id: order.id, order_number: order.order_number, created: true })
   }
   if (fn === 'decrement_stock') {
     const product = db.products.find(p => p.id === args.p_product_id)
