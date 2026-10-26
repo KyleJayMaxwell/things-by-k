@@ -23,6 +23,16 @@
             "timeout": 30
           }
         ]
+      },
+      {
+        "matcher": "Bash|mcp__.*create_pull_request",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/check-pr-review.mjs",
+            "timeout": 30
+          }
+        ]
       }
     ]
   }
