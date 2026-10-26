@@ -70,6 +70,8 @@ supabase/lock-down-functions.sql # only the webhook can run decrement_stock + ge
 supabase/order-tracking.sql  # carrier + tracking number columns on orders
 supabase/refunds.sql         # "refunded" order status + refund columns
 supabase/admin-policies.sql  # lets the admin account manage products, images and orders
+supabase/handwritten-option.sql # handwritten postcard price + note columns
+supabase/create-order.sql    # webhook saves order, items and stock in one transaction
 supabase/seed.sql            # MVP postcard product
 ```
 
