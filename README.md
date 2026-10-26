@@ -66,6 +66,7 @@ Run these SQL files in order in your Supabase project's SQL Editor:
 supabase/schema.sql          # tables, triggers, RLS policies
 supabase/storage.sql         # product-images storage bucket
 supabase/decrement-stock.sql # stock decrement function
+supabase/lock-down-functions.sql # only the webhook can run decrement_stock + generate_order_number
 supabase/order-tracking.sql  # carrier + tracking number columns on orders
 supabase/refunds.sql         # "refunded" order status + refund columns
 supabase/admin-policies.sql  # lets the admin account manage products, images and orders

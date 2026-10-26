@@ -1,7 +1,7 @@
 -- ─────────────────────────────────────────────
 -- Things by K — Stock Decrement Function
 -- Add this to Supabase Dashboard → SQL Editor
--- Run AFTER schema.sql
+-- Run AFTER schema.sql, then run lock-down-functions.sql
 -- ─────────────────────────────────────────────
 
 -- Called by the Stripe webhook after a successful purchase
