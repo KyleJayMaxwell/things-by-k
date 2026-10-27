@@ -7,7 +7,7 @@ const DETAILS = `It's an original photograph by Things by K, printed on thick pr
 
 • 18pt paper, thick, sturdy and built to survive the mail
 • Silky smooth matte finish with no shine or glare, so it's easy to write on and display
-• Add the handwritten option to have your note written by hand and mailed as a real postcard`
+• Add the handwritten option to have your note written by hand`
 
 const STOCK_LINE = 'An original photograph on thick, glare-free 18pt postcard stock.'
 

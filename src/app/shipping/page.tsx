@@ -16,7 +16,7 @@ const SECTIONS: { question: string; answer: React.ReactNode }[] = [
       <>
         <p>
           Every handwritten card is written by hand on the postcard you picked, then stamped and
-          sent through USPS like a real postcard, no envelope.
+          sent through USPS with no envelope.
         </p>
         <p>When you order one, the note box can go a few ways:</p>
         <ul className="list-disc pl-5 space-y-1.5">
@@ -35,7 +35,7 @@ const SECTIONS: { question: string; answer: React.ReactNode }[] = [
           </li>
         </ul>
         <p>
-          Something fun in the mailbox instead of bills. That&apos;s the whole idea, and it keeps
+          Something fun in the mailbox. That&apos;s the whole idea, and it keeps
           snail mail, the post office and small creatives going.
         </p>
       </>
@@ -65,7 +65,7 @@ const SECTIONS: { question: string; answer: React.ReactNode }[] = [
     answer: (
       <>
         <p>
-          Handwritten postcards travel on their own as real postcards:{' '}
+          Handwritten postcards travel on their own:{' '}
           {formatPrice(HANDWRITTEN_POSTCARD_RATES.domestic)} each in the US and{' '}
           {formatPrice(HANDWRITTEN_POSTCARD_RATES.international)} each internationally.
         </p>
@@ -113,7 +113,7 @@ const SECTIONS: { question: string; answer: React.ReactNode }[] = [
     answer: (
       <p>
         Things by K doesn&apos;t accept returns. Postcards are easily damaged on the way back, so
-        instead anything that&apos;s lost or arrives damaged is replaced, as above.
+        instead anything that&apos;s lost or arrives damaged is replaced.
       </p>
     ),
   },
