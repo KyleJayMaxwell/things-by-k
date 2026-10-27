@@ -121,7 +121,7 @@ export default function CartPage() {
               </div>
               <p className="text-xs text-text-secondary">
                 {shipping.label}
-                {handwrittenCards > 0 && '. Handwritten cards are stamped and mailed on their own, like a real postcard.'}
+                {handwrittenCards > 0 && '. Handwritten cards are stamped and mailed on their own.'}
               </p>
               <div className="border-t border-border pt-3 flex justify-between font-semibold text-base">
                 <span className="text-text-primary">Total</span>
