@@ -30,8 +30,8 @@ const SECTIONS: { question: string; answer: React.ReactNode }[] = [
             written with it in mind.
           </li>
           <li>
-            <span className="text-text-primary">Leave it blank.</span> You get a freestyle note,
-            written in the shop&apos;s own thoughts and style.
+            <span className="text-text-primary">Leave it blank.</span> You get a freestyle note in
+            the shop&apos;s own words and style.
           </li>
         </ul>
         <p>
