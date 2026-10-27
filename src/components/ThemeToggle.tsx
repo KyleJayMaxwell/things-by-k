@@ -1,7 +1,8 @@
 'use client'
 
 // src/components/ThemeToggle.tsx
-// Sun/moon button in the nav. The icon is drawn by CSS from the .dark class on <html>
+// Sun/moon button in the nav. The icon and label show the current theme (sun + "Light mode",
+// moon + "Dark mode"). The icon is drawn by CSS from the .dark class on <html>
 // (see .theme-toggle in globals.css), so it is right on first paint with no hydration flash.
 
 import { useId, useSyncExternalStore } from 'react'
@@ -54,7 +55,8 @@ export default function ThemeToggle({ className = '', showLabel = false }: { cla
     }
   }
 
-  const label = theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'
+  // Leads with the visible label (the current mode), then says what a press does
+  const label = theme === 'dark' ? 'Dark mode, switch to light mode' : 'Light mode, switch to dark mode'
 
   return (
     <button
@@ -78,8 +80,8 @@ export default function ThemeToggle({ className = '', showLabel = false }: { cla
       {/* Picked by CSS like the icon, so it is right before hydration */}
       {showLabel && (
         <span className="text-sm font-medium uppercase tracking-wider" aria-hidden="true">
-          <span className="dark:hidden">Dark mode</span>
-          <span className="hidden dark:inline">Light mode</span>
+          <span className="dark:hidden">Light mode</span>
+          <span className="hidden dark:inline">Dark mode</span>
         </span>
       )}
     </button>
