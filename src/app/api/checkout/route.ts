@@ -8,6 +8,7 @@ import { createServiceClient } from '@/lib/supabase/server'
 import { createClient } from '@/lib/supabase/server'
 import { HANDWRITTEN_MESSAGE_MAX } from '@/lib/cart'
 import { shippingQuote, INTERNATIONAL_COUNTRIES, type Destination } from '@/lib/shipping'
+import { SALES_TAX_ENABLED } from '@/lib/tax'
 
 interface CheckoutItem {
   productId: string
@@ -124,6 +125,7 @@ export async function POST(request: NextRequest) {
               metadata: { product_id: product.id, handwritten: 'true', message },
             },
             unit_amount: product.price + (product.handwritten_price ?? 0),
+            tax_behavior: 'exclusive',
           },
           quantity: item.quantity,
         }
@@ -140,6 +142,7 @@ export async function POST(request: NextRequest) {
             metadata: { product_id: product.id },
           },
           unit_amount: product.price, // already in cents
+          tax_behavior: 'exclusive',
         },
         quantity: item.quantity,
       }
@@ -153,6 +156,8 @@ export async function POST(request: NextRequest) {
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       line_items: lineItems,
+      // Tax codes come from the presets in Stripe's Tax settings (General - Tangible Goods, Shipping)
+      automatic_tax: { enabled: SALES_TAX_ENABLED },
       shipping_address_collection: {
         allowed_countries: destination === 'domestic' ? ['US'] : [...INTERNATIONAL_COUNTRIES],
       },
@@ -162,6 +167,7 @@ export async function POST(request: NextRequest) {
             type: 'fixed_amount',
             fixed_amount: { amount: shipping.amount, currency: 'usd' },
             display_name: shipping.label,
+            tax_behavior: 'exclusive',
           },
         },
       ],

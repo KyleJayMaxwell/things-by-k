@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
     createServiceClient()
       .from('orders')
       .select(
-        'order_number, created_at, status, email, shipping_address, subtotal, shipping_cost, total, refund_amount, carrier, tracking_number, shipped_at, order_items(product_name, quantity, handwritten_message)'
+        'order_number, created_at, status, email, shipping_address, subtotal, shipping_cost, tax, total, refund_amount, carrier, tracking_number, shipped_at, order_items(product_name, quantity, handwritten_message)'
       ),
     p
   )
@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
   const csv = toCsv(
     [
       'Order', 'Date (Pacific)', 'Status', 'Customer', 'Email', 'City', 'State', 'Country', 'Items', 'Handwritten',
-      'Subtotal', 'Shipping', 'Total', 'Refunded', 'Carrier', 'Tracking', 'Shipped (Pacific)',
+      'Subtotal', 'Shipping', 'Sales tax', 'Total', 'Refunded', 'Carrier', 'Tracking', 'Shipped (Pacific)',
     ],
     (data ?? []).map(order => {
       const items: { product_name: string; quantity: number; handwritten_message: string | null }[] = order.order_items ?? []
@@ -58,6 +58,7 @@ export async function GET(request: NextRequest) {
         items.some(item => item.handwritten_message) ? 'Yes' : '',
         dollars(order.subtotal),
         dollars(order.shipping_cost),
+        dollars(order.tax),
         dollars(order.total),
         dollars(order.refund_amount),
         order.carrier ?? '',

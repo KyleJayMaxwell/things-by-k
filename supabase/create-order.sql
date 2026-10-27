@@ -1,8 +1,8 @@
 -- ─────────────────────────────────────────────
 -- Things by K — Create Order Function
 -- Supabase Dashboard → SQL Editor
--- Run AFTER schema.sql, decrement-stock.sql, refunds.sql and
--- handwritten-option.sql (safe to run more than once)
+-- Run AFTER schema.sql, decrement-stock.sql, refunds.sql,
+-- handwritten-option.sql and sales-tax.sql (safe to run more than once)
 --
 -- The Stripe webhook saves a paid order with this one call. The order, every
 -- item and the stock changes happen in one transaction, so an order can never
@@ -31,7 +31,7 @@ begin
 
   insert into public.orders (
     order_number, user_id, email, stripe_session_id, stripe_payment_intent,
-    status, subtotal, shipping_cost, total, shipping_address
+    status, subtotal, shipping_cost, tax, total, shipping_address
   ) values (
     public.generate_order_number(),
     nullif(p_order->>'user_id', '')::uuid,
@@ -41,6 +41,7 @@ begin
     'processing',
     (p_order->>'subtotal')::integer,
     (p_order->>'shipping_cost')::integer,
+    coalesce((p_order->>'tax')::integer, 0),
     (p_order->>'total')::integer,
     p_order->'shipping_address'
   )

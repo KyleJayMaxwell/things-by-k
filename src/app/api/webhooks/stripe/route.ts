@@ -85,6 +85,9 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
   const shippingDetails = fullSession.shipping_details
   const address = shippingDetails?.address
   const customerEmail = fullSession.customer_details?.email ?? ''
+  // Shipping before tax, so subtotal + shipping + tax adds up to the total
+  const shippingCost = fullSession.shipping_cost?.amount_subtotal ?? 0
+  const tax = fullSession.total_details?.amount_tax ?? 0
 
   const shippingAddress = {
     name: shippingDetails?.name ?? '',
@@ -105,7 +108,8 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
       stripe_session_id: session.id,
       stripe_payment_intent: session.payment_intent as string,
       subtotal: fullSession.amount_subtotal ?? 0,
-      shipping_cost: fullSession.shipping_cost?.amount_total ?? 0,
+      shipping_cost: shippingCost,
+      tax,
       total: fullSession.amount_total ?? 0,
       shipping_address: shippingAddress,
     },
@@ -127,7 +131,8 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
         orderNumber: order.order_number,
         items: items.map(({ product_name, quantity, price }) => ({ name: product_name, quantity, price })),
         subtotal: fullSession.amount_subtotal ?? 0,
-        shippingCost: fullSession.shipping_cost?.amount_total ?? 0,
+        shippingCost,
+        tax,
         total: fullSession.amount_total ?? 0,
         shippingAddress,
       })

@@ -49,7 +49,8 @@ export interface Order {
   stripe_payment_intent: string
   status: OrderStatus
   subtotal: number       // in cents
-  shipping_cost: number  // in cents
+  shipping_cost: number  // in cents, before tax
+  tax: number            // sales tax in cents
   total: number          // in cents
   shipping_address: ShippingAddress
   carrier: 'usps' | 'ups' | 'fedex' | 'other' | null
