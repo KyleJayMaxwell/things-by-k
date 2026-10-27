@@ -15,6 +15,9 @@ import { HANDWRITTEN_MESSAGE_MAX, offersHandwritten } from '@/lib/cart'
 import { HANDWRITTEN_POSTCARD_RATES } from '@/lib/shipping'
 import Breadcrumbs, { type Crumb } from '@/components/Breadcrumbs'
 
+// Every postcard is printed at the standard US postcard size
+const POSTCARD_SIZE = '4 × 6 in (10.2 × 15.2 cm)'
+
 interface ProductDetailProps {
   product: Product
   breadcrumbs: Crumb[]
@@ -222,7 +225,7 @@ export default function ProductDetail({ product, breadcrumbs }: ProductDetailPro
             </Button>
           </div>
 
-          {/* Long description, plus a print crop note on every postcard */}
+          {/* Long description, plus the size and a print crop note on every postcard */}
           {(product.long_description || isPostcard) && (
             <div className="mt-10 pt-8 border-t border-border">
               <h2 className="text-sm font-semibold text-text-primary uppercase tracking-wider mb-4">
@@ -234,7 +237,12 @@ export default function ProductDetail({ product, breadcrumbs }: ProductDetailPro
                 </div>
               )}
               {isPostcard && (
-                <p className={`text-xs text-text-secondary leading-relaxed ${product.long_description ? 'mt-4' : ''}`}>
+                <p className={`text-sm text-text-secondary ${product.long_description ? 'mt-4' : ''}`}>
+                  <span className="font-medium text-text-primary">Size:</span> {POSTCARD_SIZE}
+                </p>
+              )}
+              {isPostcard && (
+                <p className="mt-4 text-xs text-text-secondary leading-relaxed">
                   A note on cropping: each card is trimmed to size after printing, so the edges may be cropped slightly differently than the photos shown here.
                 </p>
               )}
