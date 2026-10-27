@@ -57,5 +57,5 @@ export function untrackedMailNote(destination: Destination): string {
   const weeks = DELIVERY_WEEKS[destination]
   const where = destination === 'domestic' ? 'Mail within the US' : 'International mail'
   return `It went out by regular mail without tracking. ${where} usually arrives within ${weeks} weeks. ` +
-    `If it hasn't reached you ${weeks} weeks from this email, just reply and I'll send another one out.`
+    `If it hasn't reached you ${weeks} weeks from this email, just reply for a free replacement.`
 }

@@ -10,13 +10,13 @@ export const metadata: Metadata = {
 
 const SECTIONS: { heading: string; body: React.ReactNode }[] = [
   {
-    heading: 'What I collect',
+    heading: 'What the shop collects',
     body: (
       <>
         <p>Only what&apos;s needed to get your order to you:</p>
         <ul className="list-disc pl-5 space-y-1.5">
           <li>Your name, email and shipping address.</li>
-          <li>What you ordered, and any note you asked me to handwrite.</li>
+          <li>What you ordered, and any note you asked to have handwritten.</li>
           <li>If you make an account: your email, first name and your order history.</li>
         </ul>
       </>
@@ -27,7 +27,7 @@ const SECTIONS: { heading: string; body: React.ReactNode }[] = [
     body: (
       <p>
         Checkout is handled by Stripe. Your card details go straight to Stripe and never touch this
-        site, and I never see or store them.
+        site, and Things by K never sees or stores them.
       </p>
     ),
   },
@@ -35,7 +35,7 @@ const SECTIONS: { heading: string; body: React.ReactNode }[] = [
     heading: 'Who it’s shared with',
     body: (
       <>
-        <p>I never sell your information. It&apos;s only shared with the services that run the shop:</p>
+        <p>Things by K never sells your information. It&apos;s only shared with the services that run the shop:</p>
         <ul className="list-disc pl-5 space-y-1.5">
           <li>Stripe, to take payment.</li>
           <li>Supabase, which stores orders and accounts.</li>
@@ -59,16 +59,16 @@ const SECTIONS: { heading: string; body: React.ReactNode }[] = [
     heading: 'Your choices',
     body: (
       <p>
-        You can check out as a guest without an account. To see, change or delete what I have about
-        you, email{' '}
+        You can check out as a guest without an account. To see, change or delete what the shop has
+        about you, email{' '}
         <a
           href={`mailto:${CONTACT_EMAIL}`}
           className="text-text-primary underline underline-offset-4 hover:text-botan transition-colors"
         >
           {CONTACT_EMAIL}
         </a>{' '}
-        and I&apos;ll take care of it. I keep order records only as long as I need them for my
-        business and taxes.
+        and it&apos;ll be taken care of. Order records are kept only as long as they&apos;re needed
+        for business and taxes.
       </p>
     ),
   },

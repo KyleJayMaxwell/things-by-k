@@ -35,7 +35,7 @@ export default async function OrdersPage() {
       </div>
 
       {error ? (
-        <LoadError message="We couldn’t load your orders just now. Please try again." />
+        <LoadError message="Your orders couldn’t load just now. Please try again." />
       ) : !orders || orders.length === 0 ? (
         <div className="text-center py-20">
           <p className="text-text-secondary mb-6">You haven’t placed any orders yet.</p>

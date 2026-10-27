@@ -71,7 +71,7 @@ function SuccessContent() {
       </div>
 
       <h1 className="text-3xl font-semibold text-text-primary mb-2">Thank you for your order!</h1>
-      <p className="text-text-secondary mb-10">We’ll get it packed up and on its way soon.</p>
+      <p className="text-text-secondary mb-10">It’ll be packed up and on its way soon.</p>
 
       {loading ? (
         <div role="status" className="inline-flex items-center gap-2 text-text-secondary">

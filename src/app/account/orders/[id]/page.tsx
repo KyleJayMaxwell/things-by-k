@@ -37,7 +37,7 @@ export default async function OrderDetailPage({ params }: Props) {
     .single()
 
   // PGRST116 means no such row; any other error is a failed load, not a missing order
-  if (error && error.code !== 'PGRST116') return <LoadError message="We couldn’t load this order just now. Please try again." />
+  if (error && error.code !== 'PGRST116') return <LoadError message="This order couldn’t load just now. Please try again." />
   if (!order) notFound()
 
   const address = order.shipping_address

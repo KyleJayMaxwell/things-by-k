@@ -179,7 +179,7 @@ function orderConfirmationHtml(p: TemplateParams): string {
                 <tr>
                   <td style="text-align:center;padding-bottom:32px;">
                     <p style="margin:0;font-size:14px;color:#6B6A80;">
-                      Thanks for your order. We'll get it packed up and on its way soon.
+                      Thanks for your order. It'll be packed up and on its way soon.
                     </p>
                   </td>
                 </tr>
@@ -238,7 +238,7 @@ function orderConfirmationHtml(p: TemplateParams): string {
           <tr>
             <td style="padding:28px 0 0;text-align:center;">
               <p style="margin:0;font-size:12px;color:#6B6A80;">
-                Questions? Reply to this email or reach us at
+                Questions? Reply to this email or reach Things by K at
                 <a href="mailto:hello@things-by-k.com" style="color:#171717;">hello@things-by-k.com</a>
               </p>
               <p style="margin:8px 0 0;font-size:12px;color:#6B6A80;">
@@ -266,7 +266,7 @@ function orderConfirmationText(p: TemplateParams & { to: string }): string {
 
 Order number: ${p.orderNumber}
 
-Thanks for your order! We'll get it packed up and on its way soon.
+Thanks for your order! It'll be packed up and on its way soon.
 
 ITEMS
 ${itemLines}
@@ -278,7 +278,7 @@ Total:     ${formatPrice(p.total)}
 SHIPPING TO
 ${p.addressLines}
 
-Questions? Reply to this email or reach us at hello@things-by-k.com
+Questions? Reply to this email or reach Things by K at hello@things-by-k.com
 
 © ${new Date().getFullYear()} Things by K
 `
@@ -445,7 +445,7 @@ ${trackingBlock}
           <tr>
             <td style="padding:28px 0 0;text-align:center;">
               <p style="margin:0;font-size:12px;color:#6B6A80;">
-                Questions? Reply to this email or reach us at
+                Questions? Reply to this email or reach Things by K at
                 <a href="mailto:hello@things-by-k.com" style="color:#171717;">hello@things-by-k.com</a>
               </p>
               <p style="margin:8px 0 0;font-size:12px;color:#6B6A80;">
@@ -477,7 +477,7 @@ ${trackingLines}
 IN THIS PACKAGE
 ${itemLines}
 
-Questions? Reply to this email or reach us at hello@things-by-k.com
+Questions? Reply to this email or reach Things by K at hello@things-by-k.com
 
 © ${new Date().getFullYear()} Things by K
 `
@@ -509,7 +509,7 @@ ${greeting}
 
 ${body}
 
-Questions? Reply to this email or reach us at hello@things-by-k.com
+Questions? Reply to this email or reach Things by K at hello@things-by-k.com
 
 © ${new Date().getFullYear()} Things by K
 `,
@@ -562,7 +562,7 @@ function refundNoticeHtml(p: { orderNumber: string; greeting: string; body: stri
           <tr>
             <td style="padding:28px 0 0;text-align:center;">
               <p style="margin:0;font-size:12px;color:#6B6A80;">
-                Questions? Reply to this email or reach us at
+                Questions? Reply to this email or reach Things by K at
                 <a href="mailto:hello@things-by-k.com" style="color:#171717;">hello@things-by-k.com</a>
               </p>
               <p style="margin:8px 0 0;font-size:12px;color:#6B6A80;">

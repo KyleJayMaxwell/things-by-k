@@ -15,23 +15,23 @@ const SECTIONS: { question: string; answer: React.ReactNode }[] = [
     answer: (
       <>
         <p>
-          Every handwritten card is written by me, by hand, on the postcard you picked. I stamp it
-          and send it through USPS like a real postcard, no envelope.
+          Every handwritten card is written by hand on the postcard you picked, then stamped and
+          sent through USPS like a real postcard, no envelope.
         </p>
         <p>When you order one, the note box can go a few ways:</p>
         <ul className="list-disc pl-5 space-y-1.5">
           <li>
             <span className="text-text-primary">A gift for someone.</span> Write your message and
-            enter their address at checkout. I&apos;ll copy your note onto the card for them.
+            enter their address at checkout. Your note is copied onto the card for them.
           </li>
           <li>
-            <span className="text-text-primary">A surprise for yourself.</span> Give me a little
-            inspiration (a favorite place, a memory, something you need to hear) and I&apos;ll
-            write you something with it in mind.
+            <span className="text-text-primary">A surprise for yourself.</span> Share a little
+            inspiration (a favorite place, a memory, something you need to hear) and your note is
+            written with it in mind.
           </li>
           <li>
-            <span className="text-text-primary">Leave it blank.</span> I&apos;ll freestyle it in my
-            own thoughts and style.
+            <span className="text-text-primary">Leave it blank.</span> You get a freestyle note,
+            written in the shop&apos;s own thoughts and style.
           </li>
         </ul>
         <p>
@@ -42,11 +42,11 @@ const SECTIONS: { question: string; answer: React.ReactNode }[] = [
     ),
   },
   {
-    question: 'Are there notes you won’t write?',
+    question: 'Are there notes the shop won’t write?',
     answer: (
       <p>
-        Yes. If a note&apos;s subject or wording isn&apos;t something I&apos;m comfortable writing,
-        I&apos;ll let you know and refund that card in full.
+        Yes. If a note&apos;s subject or wording isn&apos;t something Things by K is comfortable
+        writing, you&apos;ll get an email and a full refund for that card.
       </p>
     ),
   },
@@ -54,7 +54,7 @@ const SECTIONS: { question: string; answer: React.ReactNode }[] = [
     question: 'When will my order ship?',
     answer: (
       <p>
-        I mail every order within one business week. An order placed on a Monday goes out by the
+        Every order is mailed within one business week. An order placed on a Monday goes out by the
         following Monday. Weekend orders count from the next business day, and holidays don&apos;t
         count.
       </p>
@@ -83,7 +83,7 @@ const SECTIONS: { question: string; answer: React.ReactNode }[] = [
         Once it&apos;s in the mail it&apos;s in the postal service&apos;s hands, so timing depends on
         where it&apos;s going. Most mail within the US arrives within {DELIVERY_WEEKS.domestic} weeks,
         and international mail within {DELIVERY_WEEKS.international} weeks. Postcards don&apos;t have
-        tracking. You&apos;ll get an email from me when your order ships.
+        tracking. You&apos;ll get an email when your order ships.
       </p>
     ),
   },
@@ -91,9 +91,9 @@ const SECTIONS: { question: string; answer: React.ReactNode }[] = [
     question: 'What if it gets lost?',
     answer: (
       <p>
-        If it hasn&apos;t arrived {DELIVERY_WEEKS.domestic} weeks after my shipping email (US), or{' '}
-        {DELIVERY_WEEKS.international} weeks (international), just reply to that email and I&apos;ll
-        send a replacement for free.
+        If it hasn&apos;t arrived {DELIVERY_WEEKS.domestic} weeks after the shipping email (US), or{' '}
+        {DELIVERY_WEEKS.international} weeks (international), just reply to that email for a free
+        replacement.
       </p>
     ),
   },
@@ -101,8 +101,8 @@ const SECTIONS: { question: string; answer: React.ReactNode }[] = [
     question: 'What if it arrives damaged?',
     answer: (
       <p>
-        If a blank postcard or anything else I ship in an envelope or box arrives damaged, send me a
-        photo within 3 months of your purchase and, depending on the damage, I&apos;ll replace it for
+        If a blank postcard or anything else shipped in an envelope or box arrives damaged, email a
+        photo within 3 months of your purchase and, depending on the damage, it&apos;s replaced for
         free. Handwritten postcards travel through the mail on their own, so a little wear from
         handling is part of the charm and isn&apos;t covered.
       </p>
@@ -112,8 +112,8 @@ const SECTIONS: { question: string; answer: React.ReactNode }[] = [
     question: 'Can I return something?',
     answer: (
       <p>
-        I don&apos;t accept returns. Postcards are easily damaged on the way back, so instead I
-        replace anything that&apos;s lost or arrives damaged, as above.
+        Things by K doesn&apos;t accept returns. Postcards are easily damaged on the way back, so
+        instead anything that&apos;s lost or arrives damaged is replaced, as above.
       </p>
     ),
   },
@@ -151,10 +151,10 @@ export default function ShippingPage() {
 
       <div className="mt-12 space-y-4 text-text-primary leading-relaxed">
         <p>
-          I appreciate your support and the time you spent looking. Even if you aren&apos;t buying
-          anything, it means a lot that you thought of me.
+          Thank you for your support and the time you spent looking. Even if you aren&apos;t buying
+          anything, it means a lot that you stopped by.
         </p>
-        <p>– K</p>
+        <p>– Things by K</p>
       </div>
     </div>
   )

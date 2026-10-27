@@ -40,7 +40,7 @@ export default function ForgotPasswordPage() {
       <div className="w-full max-w-md">
         <h1 className="text-2xl font-semibold text-text-primary text-center mb-2">Forgot your password?</h1>
         <p className="text-sm text-text-secondary text-center mb-8">
-          Enter your email and we’ll send you a link to choose a new one.
+          Enter your email to get a link for choosing a new one.
         </p>
 
         {sent ? (

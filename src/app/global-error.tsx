@@ -13,7 +13,7 @@ export default function GlobalError({ reset }: { error: Error & { digest?: strin
         <StatusPage
           eyebrow="Something went wrong"
           title="That didn’t load"
-          message="It’s on our end, not yours. Please try again in a moment."
+          message="The problem is on the shop’s end, not yours. Please try again in a moment."
           action={<button type="button" onClick={reset} className={statusButtonClass}>Try again</button>}
         />
       </body>
