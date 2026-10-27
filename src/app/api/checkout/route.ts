@@ -156,7 +156,8 @@ export async function POST(request: NextRequest) {
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       line_items: lineItems,
-      // Tax codes come from the presets in Stripe's Tax settings (General - Tangible Goods, Shipping)
+      // Tax codes come from the presets in Stripe's Tax settings: General - Tangible Goods for
+      // items, Nontaxable for shipping (the shop charges tax on products only)
       automatic_tax: { enabled: SALES_TAX_ENABLED },
       shipping_address_collection: {
         allowed_countries: destination === 'domestic' ? ['US'] : [...INTERNATIONAL_COUNTRIES],
