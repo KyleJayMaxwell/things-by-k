@@ -105,7 +105,7 @@ function LoginForm() {
     } else {
       setError(null)
       setNeedsConfirmation(false)
-      setSuccess(`We sent a new confirmation link to ${signInEmail.trim()}.`)
+      setSuccess(`A new confirmation link was sent to ${signInEmail.trim()}.`)
     }
   }
 
@@ -132,7 +132,7 @@ function LoginForm() {
         // Supabase answers this way, without an error, when the email already has an account
         setError(authErrorMessage('already registered'))
       } else {
-        setSuccess(`Account created! We sent a confirmation link to ${email}. Click it, then sign in.`)
+        setSuccess(`Account created! A confirmation link was sent to ${email}. Click it, then sign in.`)
         setRegisterPassword('')
         setRegisterConfirm('')
       }

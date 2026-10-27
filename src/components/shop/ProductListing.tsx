@@ -118,7 +118,7 @@ export default function ProductListing({
 
       {/* Grid */}
       {failed ? (
-        <LoadError message="We couldn’t load products just now. Please try again." />
+        <LoadError message="Products couldn’t load just now. Please try again." />
       ) : products.length === 0 ? (
         <FadeIn>
           <div className="text-center py-20 text-text-secondary">

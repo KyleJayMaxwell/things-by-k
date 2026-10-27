@@ -23,9 +23,9 @@ const SECTIONS: { heading: string; body: React.ReactNode }[] = [
           number.
         </p>
         <p>
-          I may cancel an order and give you a full refund if an item sells out, a price was listed
-          by mistake, or I can&apos;t fill the order for another reason. If that happens, I&apos;ll
-          email you.
+          Things by K may cancel an order and give you a full refund if an item sells out, a price
+          was listed by mistake, or the order can&apos;t be filled for another reason. If that
+          happens, you&apos;ll get an email.
         </p>
       </>
     ),
@@ -34,9 +34,9 @@ const SECTIONS: { heading: string; body: React.ReactNode }[] = [
     heading: 'Handwritten notes',
     body: (
       <p>
-        If you order a handwritten postcard, you&apos;re responsible for what you ask me to write and
-        who you send it to. I may decline a note I&apos;m not comfortable writing, such as one
-        that&apos;s hateful, threatening or harassing. If I do, I&apos;ll refund that item in full.
+        If you order a handwritten postcard, you&apos;re responsible for what you ask to have written
+        and who you send it to. Things by K may decline a note it isn&apos;t comfortable writing,
+        such as one that&apos;s hateful, threatening or harassing, and refund that item in full.
         Every note is written by hand, so the handwriting and layout will vary a little from card
         to card.
       </p>
@@ -53,17 +53,17 @@ const SECTIONS: { heading: string; body: React.ReactNode }[] = [
         </p>
         <ul className="list-disc pl-5 space-y-1.5">
           <li>
-            <span className="text-text-primary">Returns:</span> I don&apos;t accept returns.
+            <span className="text-text-primary">Returns:</span> Things by K doesn&apos;t accept returns.
           </li>
           <li>
             <span className="text-text-primary">Lost mail:</span> If your order hasn&apos;t arrived
             after {DELIVERY_WEEKS.domestic} weeks in the US or {DELIVERY_WEEKS.international} weeks
-            internationally, email me and I&apos;ll send it again for free.
+            internationally, email the shop and it&apos;s sent again for free.
           </li>
           <li>
             <span className="text-text-primary">Damaged items:</span> If a blank postcard or anything
-            else I ship in an envelope or box arrives damaged, email me a photo within 3 months and
-            I&apos;ll send a free replacement. Handwritten postcards travel through the mail on their
+            else shipped in an envelope or box arrives damaged, email the shop a photo within 3
+            months for a free replacement. Handwritten postcards travel through the mail on their
             own with no envelope, so wear from handling is part of the charm and isn&apos;t covered.
           </li>
           <li>
@@ -83,8 +83,8 @@ const SECTIONS: { heading: string; body: React.ReactNode }[] = [
     body: (
       <p>
         You can check out as a guest, so you never need an account to order. If you make one, keep
-        your login private, since you&apos;re responsible for orders placed with it. I may close an
-        account that&apos;s being misused. To delete your account, email me.
+        your login private, since you&apos;re responsible for orders placed with it. Things by K may
+        close an account that&apos;s being misused. To delete your account, email the shop.
       </p>
     ),
   },
@@ -93,8 +93,8 @@ const SECTIONS: { heading: string; body: React.ReactNode }[] = [
     body: (
       <p>
         You need to be 18 or older to order, or have a parent or guardian place the order for you.
-        This site isn&apos;t meant for children under 13, and I don&apos;t knowingly collect their
-        information.
+        This site isn&apos;t meant for children under 13, and Things by K doesn&apos;t knowingly
+        collect their information.
       </p>
     ),
   },
@@ -113,10 +113,10 @@ const SECTIONS: { heading: string; body: React.ReactNode }[] = [
     heading: 'Limits',
     body: (
       <p>
-        I work hard to keep the site accurate and running, but it&apos;s provided as is, and there
-        may be the occasional typo or outage. As far as the law allows, Things by K isn&apos;t liable
-        for indirect losses. My total responsibility for any order is limited to what you paid for
-        it. Nothing here takes away rights you have under consumer protection law.
+        Things by K works hard to keep the site accurate and running, but it&apos;s provided as is,
+        and there may be the occasional typo or outage. As far as the law allows, the shop isn&apos;t
+        liable for indirect losses. Its total responsibility for any order is limited to what you
+        paid for it. Nothing here takes away rights you have under consumer protection law.
       </p>
     ),
   },
@@ -128,7 +128,7 @@ const SECTIONS: { heading: string; body: React.ReactNode }[] = [
     heading: 'Changes',
     body: (
       <p>
-        I may update these terms as the shop grows. The date at the top of this page shows the last
+        These terms may be updated as the shop grows. The date at the top of this page shows the last
         change, and the terms in effect when you placed your order apply to that order.
       </p>
     ),

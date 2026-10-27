@@ -7,7 +7,7 @@ const DETAILS = `It's an original photograph by Things by K, printed on thick pr
 
 • 18pt paper, thick, sturdy and built to survive the mail
 • Silky smooth matte finish with no shine or glare, so it's easy to write on and display
-• Add the handwritten option and I'll write your note and mail it as a real postcard`
+• Add the handwritten option to have your note written by hand and mailed as a real postcard`
 
 const STOCK_LINE = 'An original photograph on thick, glare-free 18pt postcard stock.'
 
@@ -98,8 +98,8 @@ export function buildData(imageBase) {
     locations: [],
     orientation: null,
     stock: 80,
-    description: 'Let me pick a postcard for you from anywhere in the shop. ' + STOCK_LINE,
-    long_description: `Can't decide? I'll choose one for you. Leave a note with a place or mood you love and I'll keep it in mind.\n\n${DETAILS}`,
+    description: 'A postcard picked for you from anywhere in the shop. ' + STOCK_LINE,
+    long_description: `Can't decide? Things by K will choose one for you. Leave a note with a place or mood you love and it'll be kept in mind.\n\n${DETAILS}`,
   }))
   // A hidden draft, so the admin Active/Hidden filters have something to show
   products.push(product(18, 'golden-gate-fog', {

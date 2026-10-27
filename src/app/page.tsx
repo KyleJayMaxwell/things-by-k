@@ -38,7 +38,7 @@ export default async function HomePage() {
         </FadeIn>
 
         {productsError ? (
-          <LoadError message="We couldn’t load products just now. Please try again." className="py-16" />
+          <LoadError message="Products couldn’t load just now. Please try again." className="py-16" />
         ) : featured.length === 0 ? (
           <FadeIn>
             <div className="text-center py-16 text-text-secondary">

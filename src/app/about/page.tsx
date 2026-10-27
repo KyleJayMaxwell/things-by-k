@@ -28,7 +28,7 @@ export default function AboutPage() {
           <p className="text-text-secondary leading-relaxed">
             <span className="font-medium text-text-primary">Things by K</span> is a small
             shop of original designs. Each piece starts as an idea worth slowing down for
-            and is made in small runs, and every order is packed and shipped by me.
+            and is made in small runs, and every order is packed and shipped with care.
           </p>
 
           <div className="mt-8 md:mt-10">

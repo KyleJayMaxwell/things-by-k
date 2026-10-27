@@ -180,6 +180,6 @@ export async function POST(request: NextRequest) {
     }
     // Stripe and database errors can be technical, so the customer gets a plain message
     console.error('Checkout error:', error)
-    return NextResponse.json({ error: 'We couldn’t start checkout. Please try again in a moment.' }, { status: 500 })
+    return NextResponse.json({ error: 'Checkout couldn’t start. Please try again in a moment.' }, { status: 500 })
   }
 }

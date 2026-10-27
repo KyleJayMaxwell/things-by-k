@@ -17,7 +17,7 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
       title="That didn’t load"
       message={
         <>
-          It’s on our end, not yours. Try again, and if it keeps happening email{' '}
+          The problem is on the shop’s end, not yours. Try again, and if it keeps happening email{' '}
           <a href="mailto:hello@things-by-k.com" className="text-text-primary underline underline-offset-2 whitespace-nowrap">hello@things-by-k.com</a>.
         </>
       }
