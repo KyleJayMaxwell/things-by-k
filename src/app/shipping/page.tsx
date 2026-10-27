@@ -113,7 +113,7 @@ const SECTIONS: { question: string; answer: React.ReactNode }[] = [
     answer: (
       <p>
         Things by K doesn&apos;t accept returns. Postcards are easily damaged on the way back, so
-        instead anything that&apos;s lost or arrives damaged is replaced, as above.
+        instead anything that&apos;s lost or arrives damaged is replaced.
       </p>
     ),
   },
