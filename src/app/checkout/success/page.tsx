@@ -22,6 +22,7 @@ interface OrderDetails {
   lineItems?: { name: string; quantity: number; amount: number }[]
   amountSubtotal?: number
   shippingCost?: number
+  amountTax?: number
   amountTotal?: number
 }
 
@@ -118,6 +119,12 @@ function SuccessContent() {
                 <div className="flex justify-between">
                   <span className="text-text-secondary">Shipping</span>
                   <span>{formatPrice(order.shippingCost)}</span>
+                </div>
+              )}
+              {!!order.amountTax && (
+                <div className="flex justify-between">
+                  <span className="text-text-secondary">Sales tax</span>
+                  <span>{formatPrice(order.amountTax)}</span>
                 </div>
               )}
               <div className="flex justify-between font-semibold text-base pt-1">

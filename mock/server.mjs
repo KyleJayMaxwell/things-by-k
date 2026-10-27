@@ -252,7 +252,7 @@ function handleRpc(res, fn, args) {
       id: randomUUID(), order_number: `TBK-${String(nextOrderNumber++).padStart(5, '0')}`,
       user_id: o.user_id || null, email: o.email, stripe_session_id: o.stripe_session_id,
       stripe_payment_intent: o.stripe_payment_intent, status: 'processing',
-      subtotal: o.subtotal, shipping_cost: o.shipping_cost, total: o.total, shipping_address: o.shipping_address,
+      subtotal: o.subtotal, shipping_cost: o.shipping_cost, tax: o.tax ?? 0, total: o.total, shipping_address: o.shipping_address,
       carrier: null, tracking_number: null, shipped_at: null, refunded_at: null, refund_amount: null,
       created_at: new Date().toISOString(),
     }

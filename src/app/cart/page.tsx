@@ -11,6 +11,7 @@ import Link from 'next/link'
 import { formatPrice } from '@/lib/format'
 import { cartLineKey } from '@/lib/cart'
 import { shippingQuote, type Destination } from '@/lib/shipping'
+import { SALES_TAX_ENABLED } from '@/lib/tax'
 
 export default function CartPage() {
   const { items, subtotal } = useCart()
@@ -127,6 +128,9 @@ export default function CartPage() {
                 <span className="text-text-primary">Total</span>
                 <span className="text-text-primary">{formatPrice(total)}</span>
               </div>
+              {SALES_TAX_ENABLED && destination === 'domestic' && (
+                <p className="text-xs text-text-secondary">Sales tax, where it applies, is added at checkout.</p>
+              )}
             </div>
 
             <Button

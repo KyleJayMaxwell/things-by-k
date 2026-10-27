@@ -52,10 +52,11 @@ export async function GET(
       lineItems: session.line_items?.data.map(item => ({
         name: (item.price?.product as { name: string })?.name,
         quantity: item.quantity,
-        amount: item.amount_total,
+        amount: item.amount_subtotal,
       })),
       amountSubtotal: session.amount_subtotal,
-      shippingCost: session.shipping_cost?.amount_total,
+      shippingCost: session.shipping_cost?.amount_subtotal,
+      amountTax: session.total_details?.amount_tax,
       amountTotal: session.amount_total,
     }, { headers: NO_STORE })
   } catch (err) {

@@ -46,6 +46,7 @@ interface SendOrderConfirmationParams {
   items: OrderItem[]
   subtotal: number      // cents
   shippingCost: number  // cents
+  tax: number           // cents
   total: number         // cents
   shippingAddress: ShippingAddress
 }
@@ -61,6 +62,7 @@ export async function sendOrderConfirmation(params: SendOrderConfirmationParams)
     items,
     subtotal,
     shippingCost,
+    tax,
     total,
     shippingAddress,
   } = params
@@ -85,6 +87,7 @@ export async function sendOrderConfirmation(params: SendOrderConfirmationParams)
       items,
       subtotal,
       shippingCost,
+      tax,
       total,
       addressLines,
     }),
@@ -93,6 +96,7 @@ export async function sendOrderConfirmation(params: SendOrderConfirmationParams)
       items,
       subtotal,
       shippingCost,
+      tax,
       total,
       addressLines,
       to,
@@ -114,6 +118,7 @@ interface TemplateParams {
   items: OrderItem[]
   subtotal: number
   shippingCost: number
+  tax: number
   total: number
   addressLines: string
   to?: string
@@ -217,6 +222,10 @@ function orderConfirmationHtml(p: TemplateParams): string {
                   <td style="padding:4px 0;font-size:14px;color:#6B6A80;">Shipping</td>
                   <td style="padding:4px 0;font-size:14px;color:#1A1A2E;text-align:right;">${formatPrice(p.shippingCost)}</td>
                 </tr>
+                ${p.tax > 0 ? `<tr>
+                  <td style="padding:4px 0;font-size:14px;color:#6B6A80;">Sales tax</td>
+                  <td style="padding:4px 0;font-size:14px;color:#1A1A2E;text-align:right;">${formatPrice(p.tax)}</td>
+                </tr>` : ''}
                 <tr>
                   <td style="padding:12px 0 0;font-size:16px;font-weight:600;color:#1A1A2E;">Total</td>
                   <td style="padding:12px 0 0;font-size:16px;font-weight:600;color:#1A1A2E;text-align:right;">${formatPrice(p.total)}</td>
@@ -273,7 +282,7 @@ ${itemLines}
 
 Subtotal:  ${formatPrice(p.subtotal)}
 Shipping:  ${formatPrice(p.shippingCost)}
-Total:     ${formatPrice(p.total)}
+${p.tax > 0 ? `Sales tax: ${formatPrice(p.tax)}\n` : ''}Total:     ${formatPrice(p.total)}
 
 SHIPPING TO
 ${p.addressLines}

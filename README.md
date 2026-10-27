@@ -52,6 +52,7 @@ SUPABASE_SERVICE_ROLE_KEY=your-service-role-key-here
 
 STRIPE_SECRET_KEY=sk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
+NEXT_PUBLIC_SALES_TAX_ENABLED=false
 
 RESEND_API_KEY=re_...
 
@@ -71,6 +72,7 @@ supabase/order-tracking.sql  # carrier + tracking number columns on orders
 supabase/refunds.sql         # "refunded" order status + refund columns
 supabase/admin-policies.sql  # lets the admin account manage products, images and orders
 supabase/handwritten-option.sql # handwritten postcard price + note columns
+supabase/sales-tax.sql       # sales tax column on orders
 supabase/create-order.sql    # webhook saves order, items and stock in one transaction
 supabase/seed.sql            # MVP postcard product
 ```

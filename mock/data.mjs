@@ -170,6 +170,7 @@ export function buildData(imageBase) {
       status,
       subtotal,
       shipping_cost,
+      tax: 0,
       total,
       shipping_address,
       carrier,

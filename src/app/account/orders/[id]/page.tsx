@@ -111,6 +111,12 @@ export default async function OrderDetailPage({ params }: Props) {
               <span className="text-text-secondary">Shipping</span>
               <span>{formatPrice(order.shipping_cost)}</span>
             </div>
+            {order.tax > 0 && (
+              <div className="flex justify-between">
+                <span className="text-text-secondary">Sales tax</span>
+                <span>{formatPrice(order.tax)}</span>
+              </div>
+            )}
             <div className="flex justify-between font-semibold text-base pt-2 border-t border-border mt-2">
               <span>Total</span>
               <span>{formatPrice(order.total)}</span>

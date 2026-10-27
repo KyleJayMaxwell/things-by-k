@@ -21,6 +21,7 @@ interface OverviewOrder {
   order_number: string
   email: string
   total: number
+  tax: number
   status: OrderStatus
   created_at: string
   order_items: { product_name: string; quantity: number }[]
@@ -65,7 +66,7 @@ export default function AdminPage() {
       const { start, end } = rangeBounds(range)
       let ordersQuery = supabase
         .from('orders')
-        .select('id, order_number, email, total, status, created_at, order_items(product_name, quantity)')
+        .select('id, order_number, email, total, tax, status, created_at, order_items(product_name, quantity)')
         .gte('created_at', start.toISOString())
         .order('created_at', { ascending: true })
       if (end) ordersQuery = ordersQuery.lt('created_at', end.toISOString())
@@ -92,8 +93,10 @@ export default function AdminPage() {
 
   // Refunded orders don't count toward revenue or units sold
   const paidOrders = orders.filter(o => o.status !== 'refunded')
+  // Sales tax belongs to the state, so it isn't revenue
+  const revenue = (o: OverviewOrder) => o.total - o.tax
 
-  const revenueByDay = totalsByPeriod(paidOrders, byMonth, o => o.total)
+  const revenueByDay = totalsByPeriod(paidOrders, byMonth, revenue)
     .map(([date, cents]) => ({ date, revenue: cents / 100 }))
 
   const volumeByDay = totalsByPeriod(orders, byMonth, () => 1)
@@ -113,7 +116,7 @@ export default function AdminPage() {
     .map(([name, units]) => ({ name: name.length > 20 ? name.slice(0, 18) + '…' : name, units }))
 
   // Summary stats
-  const totalRevenue = paidOrders.reduce((sum, o) => sum + o.total, 0)
+  const totalRevenue = paidOrders.reduce((sum, o) => sum + revenue(o), 0)
   const processingCount = orders.filter(o => o.status === 'processing').length
   const lowStock = products.filter(p => p.is_active && p.stock <= 5)
   const recentOrders = [...orders].reverse().slice(0, 5)
