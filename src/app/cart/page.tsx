@@ -2,7 +2,7 @@
 
 // src/app/cart/page.tsx
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useCart } from '@/context/CartContext'
 import CartItem from '@/components/CartItem'
 import Button, { buttonClasses } from '@/components/Button'
@@ -12,12 +12,19 @@ import { formatPrice } from '@/lib/format'
 import { cartLineKey } from '@/lib/cart'
 import { shippingQuote, type Destination } from '@/lib/shipping'
 import { SALES_TAX_ENABLED } from '@/lib/tax'
+import { createClient } from '@/lib/supabase/client'
 
 export default function CartPage() {
   const { items, subtotal } = useCart()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [destination, setDestination] = useState<Destination>('domestic')
+  // null until known, so the sign-in prompt doesn't flash for signed-in customers
+  const [signedIn, setSignedIn] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    createClient().auth.getSession().then(({ data }) => setSignedIn(!!data.session))
+  }, [])
 
   const handwrittenCards = items.filter(i => i.handwritten).reduce((sum, i) => sum + i.quantity, 0)
   const packagedItems = items.filter(i => !i.handwritten).reduce((sum, i) => sum + i.quantity, 0)
@@ -147,6 +154,16 @@ export default function CartPage() {
 
             {error && (
               <p role="alert" className="mt-3 text-sm text-error text-center">{error}</p>
+            )}
+
+            {signedIn === false && (
+              <p className="mt-4 text-sm text-text-secondary text-center">
+                Have an account?{' '}
+                <Link href="/account/login?redirectTo=/cart" className="text-text-primary underline underline-offset-2 hover:text-botan transition-colors focus-ring rounded">
+                  Sign in
+                </Link>{' '}
+                to track this order in your account.
+              </p>
             )}
 
             <Link
