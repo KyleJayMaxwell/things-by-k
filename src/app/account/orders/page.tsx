@@ -15,7 +15,7 @@ export default async function OrdersPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) redirect('/account/login')
+  if (!user) redirect('/account/login?redirectTo=/account/orders')
 
   await claimGuestOrders(user)
 

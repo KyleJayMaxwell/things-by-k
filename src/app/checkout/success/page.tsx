@@ -9,6 +9,7 @@ import { useCart } from '@/context/CartContext'
 import { buttonClasses } from '@/components/Button'
 import Spinner from '@/components/Spinner'
 import { formatPrice } from '@/lib/format'
+import { useSignedIn } from '@/lib/useAuth'
 
 interface OrderDetails {
   orderNumber?: string | null
@@ -30,6 +31,7 @@ const MAX_ORDER_NUMBER_CHECKS = 6
 
 function SuccessContent() {
   const searchParams = useSearchParams()
+  const signedIn = useSignedIn()
   const sessionId = searchParams.get('session_id')
   const { clearCart } = useCart()
   const [order, setOrder] = useState<OrderDetails | null>(null)
@@ -147,10 +149,25 @@ function SuccessContent() {
         <p className="text-text-secondary">Your order details are in your confirmation email.</p>
       ) : null}
 
+      {/* Guest orders aren't saved to an account, so guests get an invite instead of View Orders */}
+      {signedIn === false && (
+        <div className="mt-10 bg-surface border border-border rounded-xl p-6 text-center">
+          <h2 className="font-semibold text-text-primary">Keep track of future orders</h2>
+          <p className="mt-1 text-sm text-text-secondary">
+            With an account, orders and tracking all live in one place. Sign up takes a few seconds with Google or email.
+          </p>
+          <Link href="/account/login?tab=register&redirectTo=/account/orders" className={`mt-4 ${buttonClasses({ variant: 'secondary', size: 'md' })}`}>
+            Create an account
+          </Link>
+        </div>
+      )}
+
       <div className="mt-10 flex flex-col sm:flex-row gap-3 justify-center">
-        <Link href="/account/orders" className={buttonClasses({ variant: 'secondary', size: 'lg' })}>
-          View Orders
-        </Link>
+        {signedIn && (
+          <Link href="/account/orders" className={buttonClasses({ variant: 'secondary', size: 'lg' })}>
+            View Orders
+          </Link>
+        )}
         <Link href="/shop" className={buttonClasses({ size: 'lg' })}>
           Continue Shopping
         </Link>

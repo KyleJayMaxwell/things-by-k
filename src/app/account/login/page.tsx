@@ -28,7 +28,7 @@ function LoginForm() {
   const searchParams = useSearchParams()
   const redirectTo = safeRedirectPath(searchParams.get('redirectTo'), '/account')
 
-  const [tab, setTab] = useState<Tab>('signin')
+  const [tab, setTab] = useState<Tab>(searchParams.get('tab') === 'register' ? 'register' : 'signin')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(
     LINK_ERRORS[searchParams.get('error') ?? ''] ?? null

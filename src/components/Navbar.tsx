@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState, useEffect, useRef } from 'react'
 import CartIcon from './icons/CartIcon'
-import AccountIcon from './icons/AccountIcon'
+import AccountMenu from './AccountMenu'
 import ThemeToggle from './ThemeToggle'
 import { useCart } from '@/context/CartContext'
 import { SHOP_SECTIONS } from '@/lib/shopSections'
@@ -213,14 +213,7 @@ export default function Navbar() {
             </span>
           </Link>
 
-          {/* Account */}
-          <Link
-            href="/account"
-            className="min-w-[44px] min-h-[44px] flex items-center justify-center text-white/80 hover:text-white transition-colors focus-ring-light rounded-md"
-          >
-            <AccountIcon className="w-5 h-5" />
-            <span className="sr-only">Account</span>
-          </Link>
+          <AccountMenu />
         </div>
       </div>
 

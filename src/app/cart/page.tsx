@@ -2,7 +2,7 @@
 
 // src/app/cart/page.tsx
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useCart } from '@/context/CartContext'
 import CartItem from '@/components/CartItem'
 import Button, { buttonClasses } from '@/components/Button'
@@ -12,19 +12,14 @@ import { formatPrice } from '@/lib/format'
 import { cartLineKey } from '@/lib/cart'
 import { shippingQuote, type Destination } from '@/lib/shipping'
 import { SALES_TAX_ENABLED } from '@/lib/tax'
-import { createClient } from '@/lib/supabase/client'
+import { useSignedIn } from '@/lib/useAuth'
 
 export default function CartPage() {
   const { items, subtotal } = useCart()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [destination, setDestination] = useState<Destination>('domestic')
-  // null until known, so the sign-in prompt doesn't flash for signed-in customers
-  const [signedIn, setSignedIn] = useState<boolean | null>(null)
-
-  useEffect(() => {
-    createClient().auth.getSession().then(({ data }) => setSignedIn(!!data.session))
-  }, [])
+  const signedIn = useSignedIn()
 
   const handwrittenCards = items.filter(i => i.handwritten).reduce((sum, i) => sum + i.quantity, 0)
   const packagedItems = items.filter(i => !i.handwritten).reduce((sum, i) => sum + i.quantity, 0)
