@@ -6,6 +6,7 @@ import { Resend } from 'resend'
 import { CARRIER_NAMES, trackingUrl, type Carrier } from '@/lib/tracking'
 import { untrackedMailNote, type Destination } from '@/lib/shipping'
 import { formatPrice } from '@/lib/format'
+import { CONTACT_EMAIL, LOCATION } from '@/lib/site'
 
 let client: Resend | null = null
 
@@ -86,10 +87,10 @@ ${body}
             <td style="padding:20px 36px 28px;border-top:1px solid #ECEAE8;">
               <p style="margin:0 0 8px;font-size:12px;line-height:1.6;color:#6E6A6A;">
                 Questions? Reply to this email or reach Things by K at
-                <a href="mailto:hello@things-by-k.com" style="color:#6E6A6A;text-decoration:underline;">hello@things-by-k.com</a>.
+                <a href="mailto:${CONTACT_EMAIL}" style="color:#6E6A6A;text-decoration:underline;">${CONTACT_EMAIL}</a>.
               </p>
               <p style="margin:0;font-size:12px;line-height:1.6;color:#6E6A6A;">
-                Things by K &middot; San Francisco, California &middot;
+                Things by K &middot; ${LOCATION} &middot;
                 <a href="${SITE_URL}" style="color:#6E6A6A;text-decoration:underline;">things-by-k.com</a>
               </p>
             </td>
