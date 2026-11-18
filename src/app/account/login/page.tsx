@@ -136,9 +136,9 @@ function LoginForm() {
         },
       })
       if (error) setError(authErrorMessage(error.message))
-      else setSuccess(`Check your inbox. We sent a sign-in link to ${email}.`)
+      else setSuccess(`Check your inbox. A sign-in link is on its way to ${email}.`)
     } catch (err) {
-      setError(authErrorMessage(errorMessage(err, 'We couldn’t send the link. Please try again.')))
+      setError(authErrorMessage(errorMessage(err, 'The link couldn’t be sent. Please try again.')))
     }
     setSendingLink(false)
   }
@@ -309,7 +309,7 @@ function LoginForm() {
               Email me a sign-in link
             </Button>
             <p className="text-xs text-text-secondary text-center -mt-1">
-              No password needed. We’ll email you a link that signs you in.
+              No password needed. A link that signs you in arrives by email.
             </p>
 
             <Link
