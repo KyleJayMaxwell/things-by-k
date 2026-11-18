@@ -51,7 +51,60 @@ interface SendOrderConfirmationParams {
   shippingAddress: ShippingAddress
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// ── Shared layout ─────────────────────────────────────────────────────────────
+// Same look as the Supabase sign-in emails: purple header with the wordmark image
+// (email apps can't load the Old London font), white card, footer. Site palette colors.
+
+const SITE_URL = 'https://www.things-by-k.com'
+
+function emailLayout(title: string, body: string): string {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${title}</title>
+</head>
+<body style="margin:0;padding:0;background:#F4F3F1;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F4F3F1;padding:32px 12px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#FFFFFF;border-radius:12px;overflow:hidden;">
+          <tr>
+            <td align="center" style="background:#5F4489;padding:22px 24px 18px;border-bottom:2px solid #935B66;">
+              <a href="${SITE_URL}" style="text-decoration:none;color:#FFFFFF;">
+                <img src="${SITE_URL}/email/wordmark.png" width="200" alt="Things by K" style="display:block;width:200px;height:auto;border:0;color:#FFFFFF;font-family:Georgia,serif;font-size:26px;">
+              </a>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:40px 36px 36px;">
+${body}
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:20px 36px 28px;border-top:1px solid #ECEAE8;">
+              <p style="margin:0 0 8px;font-size:12px;line-height:1.6;color:#6E6A6A;">
+                Questions? Reply to this email or reach Things by K at
+                <a href="mailto:hello@things-by-k.com" style="color:#6E6A6A;text-decoration:underline;">hello@things-by-k.com</a>.
+              </p>
+              <p style="margin:0;font-size:12px;line-height:1.6;color:#6E6A6A;">
+                Things by K &middot; San Francisco, California &middot;
+                <a href="${SITE_URL}" style="color:#6E6A6A;text-decoration:underline;">things-by-k.com</a>
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`
+}
+
+function escapeHtml(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+}
 
 // ── Order Confirmation ────────────────────────────────────────────────────────
 
@@ -129,61 +182,37 @@ function orderConfirmationHtml(p: TemplateParams): string {
     .map(
       (item) => `
       <tr>
-        <td style="padding:10px 0;border-bottom:1px solid #E4E0EF;color:#1A1A2E;font-size:14px;">
-          ${item.name} &times; ${item.quantity}
+        <td style="padding:10px 0;border-bottom:1px solid #ECEAE8;color:#171717;font-size:14px;">
+          ${escapeHtml(item.name)} &times; ${item.quantity}
         </td>
-        <td style="padding:10px 0;border-bottom:1px solid #E4E0EF;color:#1A1A2E;font-size:14px;text-align:right;">
+        <td style="padding:10px 0;border-bottom:1px solid #ECEAE8;color:#171717;font-size:14px;text-align:right;">
           ${formatPrice(item.price * item.quantity)}
         </td>
       </tr>`
     )
     .join('')
 
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Order Confirmed — ${p.orderNumber}</title>
-</head>
-<body style="margin:0;padding:0;background:#FAF9FC;font-family:system-ui,-apple-system,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#FAF9FC;padding:40px 0;">
-    <tr>
-      <td align="center">
-        <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">
-
-          <!-- Header -->
-          <tr>
-            <td style="padding:0 0 32px 0;text-align:center;">
-              <p style="margin:0;font-size:22px;font-weight:600;color:#171717;letter-spacing:-0.3px;">
-                Things by K
-              </p>
-            </td>
-          </tr>
-
-          <!-- Card -->
-          <tr>
-            <td style="background:#FFFFFF;border:1px solid #E4E0EF;border-radius:12px;padding:40px;">
+  return emailLayout(`Order Confirmed — ${p.orderNumber}`, `
 
               <!-- Checkmark -->
               <table width="100%" cellpadding="0" cellspacing="0">
                 <tr>
                   <td style="text-align:center;padding-bottom:24px;">
-                    <div style="display:inline-block;width:52px;height:52px;background:#ECFDF5;border-radius:50%;line-height:52px;text-align:center;font-size:24px;">
+                    <div style="display:inline-block;width:52px;height:52px;background:#F4F3F1;color:#171717;border-radius:50%;line-height:52px;text-align:center;font-size:24px;">
                       ✓
                     </div>
                   </td>
                 </tr>
                 <tr>
                   <td style="text-align:center;padding-bottom:8px;">
-                    <h1 style="margin:0;font-size:22px;font-weight:600;color:#1A1A2E;">
+                    <h1 style="margin:0;font-size:22px;font-weight:600;color:#171717;">
                       Order confirmed!
                     </h1>
                   </td>
                 </tr>
                 <tr>
                   <td style="text-align:center;padding-bottom:32px;">
-                    <p style="margin:0;font-size:14px;color:#6B6A80;">
+                    <p style="margin:0;font-size:14px;color:#6E6A6A;">
                       Thanks for your order. It'll be packed up and on its way soon.
                     </p>
                   </td>
@@ -191,7 +220,7 @@ function orderConfirmationHtml(p: TemplateParams): string {
               </table>
 
               <!-- Order number -->
-              <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5F5F5;border-radius:8px;margin-bottom:28px;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="background:#F4F3F1;border-radius:8px;margin-bottom:28px;">
                 <tr>
                   <td style="padding:12px 16px;">
                     <p style="margin:0;font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#171717;font-weight:600;">
@@ -205,7 +234,7 @@ function orderConfirmationHtml(p: TemplateParams): string {
               </table>
 
               <!-- Items -->
-              <p style="margin:0 0 12px;font-size:12px;text-transform:uppercase;letter-spacing:0.08em;color:#6B6A80;font-weight:600;">
+              <p style="margin:0 0 12px;font-size:12px;text-transform:uppercase;letter-spacing:0.08em;color:#6E6A6A;font-weight:600;">
                 Items
               </p>
               <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">
@@ -213,55 +242,31 @@ function orderConfirmationHtml(p: TemplateParams): string {
               </table>
 
               <!-- Totals -->
-              <table width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid #E4E0EF;padding-top:16px;margin-bottom:28px;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid #ECEAE8;padding-top:16px;margin-bottom:28px;">
                 <tr>
-                  <td style="padding:4px 0;font-size:14px;color:#6B6A80;">Subtotal</td>
-                  <td style="padding:4px 0;font-size:14px;color:#1A1A2E;text-align:right;">${formatPrice(p.subtotal)}</td>
+                  <td style="padding:4px 0;font-size:14px;color:#6E6A6A;">Subtotal</td>
+                  <td style="padding:4px 0;font-size:14px;color:#171717;text-align:right;">${formatPrice(p.subtotal)}</td>
                 </tr>
                 <tr>
-                  <td style="padding:4px 0;font-size:14px;color:#6B6A80;">Shipping</td>
-                  <td style="padding:4px 0;font-size:14px;color:#1A1A2E;text-align:right;">${formatPrice(p.shippingCost)}</td>
+                  <td style="padding:4px 0;font-size:14px;color:#6E6A6A;">Shipping</td>
+                  <td style="padding:4px 0;font-size:14px;color:#171717;text-align:right;">${formatPrice(p.shippingCost)}</td>
                 </tr>
                 ${p.tax > 0 ? `<tr>
-                  <td style="padding:4px 0;font-size:14px;color:#6B6A80;">Sales tax</td>
-                  <td style="padding:4px 0;font-size:14px;color:#1A1A2E;text-align:right;">${formatPrice(p.tax)}</td>
+                  <td style="padding:4px 0;font-size:14px;color:#6E6A6A;">Sales tax</td>
+                  <td style="padding:4px 0;font-size:14px;color:#171717;text-align:right;">${formatPrice(p.tax)}</td>
                 </tr>` : ''}
                 <tr>
-                  <td style="padding:12px 0 0;font-size:16px;font-weight:600;color:#1A1A2E;">Total</td>
-                  <td style="padding:12px 0 0;font-size:16px;font-weight:600;color:#1A1A2E;text-align:right;">${formatPrice(p.total)}</td>
+                  <td style="padding:12px 0 0;font-size:16px;font-weight:600;color:#171717;">Total</td>
+                  <td style="padding:12px 0 0;font-size:16px;font-weight:600;color:#171717;text-align:right;">${formatPrice(p.total)}</td>
                 </tr>
               </table>
 
               <!-- Shipping address -->
-              <p style="margin:0 0 8px;font-size:12px;text-transform:uppercase;letter-spacing:0.08em;color:#6B6A80;font-weight:600;">
+              <p style="margin:0 0 8px;font-size:12px;text-transform:uppercase;letter-spacing:0.08em;color:#6E6A6A;font-weight:600;">
                 Shipping to
               </p>
-              <p style="margin:0;font-size:14px;color:#1A1A2E;white-space:pre-line;line-height:1.6;">
-                ${p.addressLines}
-              </p>
-
-            </td>
-          </tr>
-
-          <!-- Footer -->
-          <tr>
-            <td style="padding:28px 0 0;text-align:center;">
-              <p style="margin:0;font-size:12px;color:#6B6A80;">
-                Questions? Reply to this email or reach Things by K at
-                <a href="mailto:hello@things-by-k.com" style="color:#171717;">hello@things-by-k.com</a>
-              </p>
-              <p style="margin:8px 0 0;font-size:12px;color:#6B6A80;">
-                © ${new Date().getFullYear()} Things by K
-              </p>
-            </td>
-          </tr>
-
-        </table>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>`
+              <p style="margin:0;font-size:14px;color:#171717;white-space:pre-line;line-height:1.6;">${escapeHtml(p.addressLines)}</p>
+`)
 }
 
 // ── Plain-text fallback ───────────────────────────────────────────────────────
@@ -302,10 +307,6 @@ interface SendShippingUpdateParams {
   carrier?: Carrier | null
   trackingNumber?: string | null
   destination: Destination
-}
-
-function escapeHtml(s: string): string {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 }
 
 export async function sendShippingUpdate(params: SendShippingUpdateParams) {
@@ -354,7 +355,7 @@ function shippingUpdateHtml(p: ShippingTemplateParams): string {
     .map(
       (item) => `
       <tr>
-        <td style="padding:10px 0;border-bottom:1px solid #E4E0EF;color:#1A1A2E;font-size:14px;">
+        <td style="padding:10px 0;border-bottom:1px solid #ECEAE8;color:#171717;font-size:14px;">
           ${escapeHtml(item.name)} &times; ${item.quantity}
         </td>
       </tr>`
@@ -363,7 +364,7 @@ function shippingUpdateHtml(p: ShippingTemplateParams): string {
 
   const trackingBlock = p.tracking
     ? `
-              <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5F5F5;border-radius:8px;margin-bottom:28px;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="background:#F4F3F1;border-radius:8px;margin-bottom:28px;">
                 <tr>
                   <td style="padding:12px 16px;">
                     <p style="margin:0;font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#171717;font-weight:600;">
@@ -387,7 +388,7 @@ function shippingUpdateHtml(p: ShippingTemplateParams): string {
               </table>` : ''}`
     : p.untrackedNote
     ? `
-              <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5F5F5;border-radius:8px;margin-bottom:28px;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="background:#F4F3F1;border-radius:8px;margin-bottom:28px;">
                 <tr>
                   <td style="padding:14px 16px;font-size:14px;line-height:1.6;color:#171717;">
                     ${escapeHtml(p.untrackedNote)}
@@ -396,43 +397,19 @@ function shippingUpdateHtml(p: ShippingTemplateParams): string {
               </table>`
     : ''
 
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Your order has shipped — ${p.orderNumber}</title>
-</head>
-<body style="margin:0;padding:0;background:#FAF9FC;font-family:system-ui,-apple-system,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#FAF9FC;padding:40px 0;">
-    <tr>
-      <td align="center">
-        <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">
-
-          <!-- Header -->
-          <tr>
-            <td style="padding:0 0 32px 0;text-align:center;">
-              <p style="margin:0;font-size:22px;font-weight:600;color:#171717;letter-spacing:-0.3px;">
-                Things by K
-              </p>
-            </td>
-          </tr>
-
-          <!-- Card -->
-          <tr>
-            <td style="background:#FFFFFF;border:1px solid #E4E0EF;border-radius:12px;padding:40px;">
+  return emailLayout(`Your order has shipped — ${p.orderNumber}`, `
 
               <table width="100%" cellpadding="0" cellspacing="0">
                 <tr>
                   <td style="text-align:center;padding-bottom:8px;">
-                    <h1 style="margin:0;font-size:22px;font-weight:600;color:#1A1A2E;">
+                    <h1 style="margin:0;font-size:22px;font-weight:600;color:#171717;">
                       ${escapeHtml(p.greeting)}
                     </h1>
                   </td>
                 </tr>
                 <tr>
                   <td style="text-align:center;padding-bottom:32px;">
-                    <p style="margin:0;font-size:14px;color:#6B6A80;">
+                    <p style="margin:0;font-size:14px;color:#6E6A6A;">
                       Your order ${p.orderNumber} is packed up and on its way.
                     </p>
                   </td>
@@ -440,35 +417,13 @@ function shippingUpdateHtml(p: ShippingTemplateParams): string {
               </table>
 ${trackingBlock}
               <!-- Items -->
-              <p style="margin:0 0 12px;font-size:12px;text-transform:uppercase;letter-spacing:0.08em;color:#6B6A80;font-weight:600;">
+              <p style="margin:0 0 12px;font-size:12px;text-transform:uppercase;letter-spacing:0.08em;color:#6E6A6A;font-weight:600;">
                 In this package
               </p>
               <table width="100%" cellpadding="0" cellspacing="0">
                 ${itemRows}
               </table>
-
-            </td>
-          </tr>
-
-          <!-- Footer -->
-          <tr>
-            <td style="padding:28px 0 0;text-align:center;">
-              <p style="margin:0;font-size:12px;color:#6B6A80;">
-                Questions? Reply to this email or reach Things by K at
-                <a href="mailto:hello@things-by-k.com" style="color:#171717;">hello@things-by-k.com</a>
-              </p>
-              <p style="margin:8px 0 0;font-size:12px;color:#6B6A80;">
-                © ${new Date().getFullYear()} Things by K
-              </p>
-            </td>
-          </tr>
-
-        </table>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>`
+`)
 }
 
 function shippingUpdateText(p: ShippingTemplateParams): string {
@@ -533,57 +488,11 @@ Questions? Reply to this email or reach Things by K at hello@things-by-k.com
 }
 
 function refundNoticeHtml(p: { orderNumber: string; greeting: string; body: string }): string {
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Your refund is on its way — ${escapeHtml(p.orderNumber)}</title>
-</head>
-<body style="margin:0;padding:0;background:#FAF9FC;font-family:system-ui,-apple-system,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#FAF9FC;padding:40px 0;">
-    <tr>
-      <td align="center">
-        <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">
-
-          <!-- Header -->
-          <tr>
-            <td style="padding:0 0 32px 0;text-align:center;">
-              <p style="margin:0;font-size:22px;font-weight:600;color:#171717;letter-spacing:-0.3px;">
-                Things by K
-              </p>
-            </td>
-          </tr>
-
-          <!-- Card -->
-          <tr>
-            <td style="background:#FFFFFF;border:1px solid #E4E0EF;border-radius:12px;padding:40px;">
-              <h1 style="margin:0 0 16px;font-size:22px;font-weight:600;color:#1A1A2E;">
+  return emailLayout(`Your refund is on its way — ${escapeHtml(p.orderNumber)}`, `
+              <h1 style="margin:0 0 16px;font-size:22px;font-weight:600;color:#171717;">
                 ${escapeHtml(p.greeting)}
               </h1>
-              <p style="margin:0;font-size:14px;line-height:1.6;color:#1A1A2E;">
+              <p style="margin:0;font-size:14px;line-height:1.6;color:#171717;">
                 ${escapeHtml(p.body)}
-              </p>
-            </td>
-          </tr>
-
-          <!-- Footer -->
-          <tr>
-            <td style="padding:28px 0 0;text-align:center;">
-              <p style="margin:0;font-size:12px;color:#6B6A80;">
-                Questions? Reply to this email or reach Things by K at
-                <a href="mailto:hello@things-by-k.com" style="color:#171717;">hello@things-by-k.com</a>
-              </p>
-              <p style="margin:8px 0 0;font-size:12px;color:#6B6A80;">
-                © ${new Date().getFullYear()} Things by K
-              </p>
-            </td>
-          </tr>
-
-        </table>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>`
+              </p>`)
 }
