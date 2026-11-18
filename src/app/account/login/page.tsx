@@ -2,7 +2,7 @@
 
 // src/app/account/login/page.tsx
 
-import { useState, Suspense } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
@@ -51,6 +51,13 @@ function LoginForm() {
   const [sendingLink, setSendingLink] = useState(false)
 
   const supabase = createClient()
+
+  // Pressing Back on Google's page can restore this page with the button still spinning
+  useEffect(() => {
+    const reset = () => setGoogleLoading(false)
+    window.addEventListener('pageshow', reset)
+    return () => window.removeEventListener('pageshow', reset)
+  }, [])
 
   const emailError = (email: string) => (isValidEmail(email) ? null : 'Enter a valid email, like you@example.com.')
 
@@ -132,7 +139,8 @@ function LoginForm() {
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`,
+          // The Magic Link email template appends &token_hash=...&type=email to this
+        emailRedirectTo: `${window.location.origin}/auth/confirm?next=${encodeURIComponent(redirectTo)}`,
         },
       })
       if (error) setError(authErrorMessage(error.message))
@@ -213,6 +221,7 @@ function LoginForm() {
           </span>
           Continue with Google
         </Button>
+        <AgreeToTerms action="continuing with Google" className="mt-2" />
 
         <div className="flex items-center gap-3 my-6 text-xs text-text-secondary">
           <span className="flex-1 h-px bg-border" />
@@ -308,9 +317,7 @@ function LoginForm() {
             >
               Email me a sign-in link
             </Button>
-            <p className="text-xs text-text-secondary text-center -mt-1">
-              No password needed. A link that signs you in arrives by email.
-            </p>
+            <AgreeToTerms action="getting a sign-in link" className="-mt-1" />
 
             <Link
               href="/account/forgot-password"

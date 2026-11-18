@@ -1,5 +1,5 @@
 // src/app/auth/callback/route.ts
-// Landing spot for Supabase email links (confirm sign-up, reset password, magic link)
+// Landing spot for Supabase email links (confirm sign-up, reset password)
 // and for Google sign-in. Trades the one-time code for a session, then continues on.
 
 import { NextRequest, NextResponse } from 'next/server'
