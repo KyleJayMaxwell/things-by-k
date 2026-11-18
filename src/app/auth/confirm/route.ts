@@ -1,10 +1,11 @@
 // src/app/auth/confirm/route.ts
-// Landing spot for Supabase email links (confirm sign-up, reset password).
+// Landing spot for Supabase email links (confirm sign-up, reset password, magic link).
 // Uses the token in the link itself, so it works even when the email is opened
 // in a different browser or device than the one used to sign up.
 // The Supabase email templates point here:
 //   {{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email&next=/account
 //   {{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/account/reset-password
+//   {{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=email   (magic link: RedirectTo is /auth/confirm?next=...)
 
 import { NextRequest, NextResponse } from 'next/server'
 import type { EmailOtpType } from '@supabase/supabase-js'
